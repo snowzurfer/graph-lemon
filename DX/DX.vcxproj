@@ -102,6 +102,7 @@
     <ClCompile Include="OrthoMesh.cpp" />
     <ClCompile Include="PlaneMesh.cpp" />
     <ClCompile Include="PointMesh.cpp" />
+    <ClCompile Include="QuadMesh.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="SphereMesh.cpp" />
     <ClCompile Include="System.cpp" />
@@ -126,6 +127,7 @@
     <ClInclude Include="OrthoMesh.h" />
     <ClInclude Include="PlaneMesh.h" />
     <ClInclude Include="PointMesh.h" />
+    <ClInclude Include="QuadMesh.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="SphereMesh.h" />
     <ClInclude Include="System.h" />

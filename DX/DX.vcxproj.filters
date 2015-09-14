@@ -99,6 +99,9 @@
     <ClCompile Include="PointMesh.cpp">
       <Filter>Source Files\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="QuadMesh.cpp">
+      <Filter>Source Files\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -165,6 +168,9 @@
       <Filter>Source Files\System</Filter>
     </ClInclude>
     <ClInclude Include="PointMesh.h">
+      <Filter>Source Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadMesh.h">
       <Filter>Source Files\Geometry</Filter>
     </ClInclude>
   </ItemGroup>

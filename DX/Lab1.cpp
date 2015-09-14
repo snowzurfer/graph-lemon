@@ -5,7 +5,7 @@
 Lab1::Lab1(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in)
 {
 	// Create Mesh object
-	m_Mesh = new TriangleMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
+	m_Mesh = new QuadMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
 	m_ColourShader = new ColourShader(m_Direct3D->GetDevice(), hwnd);
 
