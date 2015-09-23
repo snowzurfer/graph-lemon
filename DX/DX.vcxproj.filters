@@ -196,10 +196,10 @@
     <FxCompile Include="..\shaders\colour_vs.hlsl">
       <Filter>Source Files\Shaders\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="texture_ps.hlsl">
+    <FxCompile Include="..\shaders\texture_ps.hlsl">
       <Filter>Source Files\Shaders\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="texture_vs.hlsl">
+    <FxCompile Include="..\shaders\texture_vs.hlsl">
       <Filter>Source Files\Shaders\shaders</Filter>
     </FxCompile>
   </ItemGroup>
