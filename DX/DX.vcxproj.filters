@@ -105,6 +105,9 @@
     <ClCompile Include="TextureShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="Lab2.cpp">
+      <Filter>Source Files\Applications</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="TextureShader.h">
       <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Lab2.h">
+      <Filter>Source Files\Applications</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

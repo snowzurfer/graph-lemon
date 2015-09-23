@@ -96,6 +96,7 @@
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Lab1.cpp" />
+    <ClCompile Include="Lab2.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="D3D.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Lab1.h" />
+    <ClInclude Include="Lab2.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OrthoMesh.h" />

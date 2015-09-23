@@ -7,7 +7,7 @@ Lab2::Lab2(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
 	// Create Mesh object
 	m_Mesh = new QuadMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
-	m_ColourShader = new ColourShader(m_Direct3D->GetDevice(), hwnd);
+	m_Shader = new TextureShader(m_Direct3D->GetDevice(), hwnd);
 
 }
 
@@ -24,10 +24,10 @@ Lab2::~Lab2()
 		m_Mesh = 0;
 	}
 
-	if (m_ColourShader)
+	if (m_Shader)
 	{
-		delete m_ColourShader;
-		m_ColourShader = 0;
+		delete m_Shader;
+		m_Shader = 0;
 	}
 }
 
@@ -70,9 +70,9 @@ bool Lab2::Render()
 	// Send geometry data (from mesh)
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
-	m_ColourShader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
+	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
 	// Render object (combination of mesh geometry and shader process
-	m_ColourShader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
+	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();

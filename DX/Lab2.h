@@ -6,7 +6,7 @@
 #include "baseapplication.h"
 
 #include "QuadMesh.h"
-#include "ColourShader.h"
+#include "TextureShader.h"
 
 class Lab2 : public BaseApplication
 {
@@ -21,7 +21,7 @@ private:
 	bool Render();
 
 private:
-	ColourShader* m_ColourShader;
+	TextureShader* m_Shader;
 	QuadMesh* m_Mesh;
 
 };
