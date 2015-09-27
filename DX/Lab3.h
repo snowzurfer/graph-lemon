@@ -7,6 +7,7 @@
 
 #include "SphereMesh.h"
 #include "LightShader.h"
+#include "Light.h"
 
 class Lab3 : public BaseApplication
 {
@@ -23,6 +24,7 @@ private:
 private:
 	LightShader* m_Shader;
 	SphereMesh* m_Mesh;
+  Light *m_Light;
 
 };
 

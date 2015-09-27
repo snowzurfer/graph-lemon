@@ -8,6 +8,10 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
 
 	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd);
 
+  m_Light = new Light();
+  // Set the light values
+  m_Light->SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+  m_Light->SetDirection(0.5f, -0.5f, 0.f);
 }
 
 
@@ -28,6 +32,11 @@ Lab3::~Lab3()
 		delete m_Shader;
 		m_Shader = 0;
 	}
+
+  if (m_Light) {
+    delete m_Light;
+    m_Light = nullptr;
+  }
 }
 
 
@@ -69,7 +78,8 @@ bool Lab3::Render()
 	// Send geometry data (from mesh)
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
-	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, m_Mesh->GetTexture());
+	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, 
+    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), m_Light);
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 
