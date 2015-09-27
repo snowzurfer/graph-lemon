@@ -7,6 +7,7 @@ SamplerState SampleType : register(s0);
 cbuffer LightBuffer : register(cb0)
 {
     float4 diffuseColour;
+    float4 ambientColour;
     float3 lightDirection;
     float padding;
 };
@@ -31,14 +32,24 @@ float4 main(InputType input) : SV_TARGET
 	// Invert the light direction for calculations.
     lightDir = -lightDirection;
 
+  // Set the ambient illumination
+  colour = ambientColour;
+
     // Calculate the amount of light on this pixel.
     lightIntensity = saturate(dot(input.normal, lightDir));
 
-	// Determine the final amount of diffuse color based on the diffuse color combined with the light intensity.
-    colour = saturate(diffuseColour * lightIntensity);
+  // Check intensity of diffuse light
+  if (lightIntensity > 0) {
+    // Calculate its value and add it to final colour
+    colour += saturate(diffuseColour * lightIntensity);
 
-    // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
-    colour = colour * textureColour;
+    // Clamp the final lighting-based colour
+    colour = saturate(colour);
+  }
+
+
+  // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
+  colour = colour * textureColour;
 
 	return colour;
 }

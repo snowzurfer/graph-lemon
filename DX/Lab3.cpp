@@ -11,6 +11,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   m_Light = new Light();
   // Set the light values
   m_Light->SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+  m_Light->SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
   m_Light->SetDirection(0.5f, -0.5f, 0.f);
 }
 
