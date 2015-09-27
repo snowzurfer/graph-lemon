@@ -5,8 +5,8 @@
 // Includes
 #include "baseapplication.h"
 
-#include "QuadMesh.h"
-#include "TextureShader.h"
+#include "SphereMesh.h"
+#include "LightShader.h"
 
 class Lab3 : public BaseApplication
 {
@@ -21,8 +21,8 @@ private:
 	bool Render();
 
 private:
-	TextureShader* m_Shader;
-	QuadMesh* m_Mesh;
+	LightShader* m_Shader;
+	SphereMesh* m_Mesh;
 
 };
 

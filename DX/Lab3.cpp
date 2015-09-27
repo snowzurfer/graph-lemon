@@ -4,9 +4,9 @@
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in)
 {
 	// Create Mesh object
-	m_Mesh = new QuadMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
+	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
-	m_Shader = new TextureShader(m_Direct3D->GetDevice(), hwnd);
+	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd);
 
 }
 
