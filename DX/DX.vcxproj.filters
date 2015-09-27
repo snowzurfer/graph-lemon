@@ -108,6 +108,9 @@
     <ClCompile Include="Lab2.cpp">
       <Filter>Source Files\Applications</Filter>
     </ClCompile>
+    <ClCompile Include="Lab3.cpp">
+      <Filter>Source Files\Applications</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -183,6 +186,9 @@
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Lab2.h">
+      <Filter>Source Files\Applications</Filter>
+    </ClInclude>
+    <ClInclude Include="Lab3.h">
       <Filter>Source Files\Applications</Filter>
     </ClInclude>
   </ItemGroup>
