@@ -21,6 +21,9 @@ private:
 		XMFLOAT3 direction;
     float specularPower;
     XMFLOAT4 specularColour;
+    XMFLOAT3 attenuation;
+    float range;
+    XMFLOAT4 position;
 	};
 
   struct CamBufferType {

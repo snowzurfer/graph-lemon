@@ -15,6 +15,9 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   m_Light->SetDirection(0.f, -1.f, 0.f);
   m_Light->SetSpecularColour(1.f, 1.f, 1.f, 1.f);
   m_Light->SetSpecularPower(25.f);
+  m_Light->SetPosition(0.f, 5.f, 0.f, 0.f);
+  m_Light->SetAttenuation(2.f, 0.f, 0.f);
+  m_Light->SetRange(45.f);
 }
 
 

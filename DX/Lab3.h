@@ -6,6 +6,7 @@
 #include "baseapplication.h"
 
 #include "SphereMesh.h"
+#include "PlaneMesh.h"
 #include "LightShader.h"
 #include "Light.h"
 
@@ -24,6 +25,7 @@ private:
 private:
 	LightShader* m_Shader;
 	SphereMesh* m_Mesh;
+  PlaneMesh *m_PlaneMesh;
   Light *m_Light;
 
 };

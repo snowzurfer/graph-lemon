@@ -154,6 +154,9 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr->direction = light->GetDirection();
   lightPtr->specularColour = light->GetSpecularColour();
   lightPtr->specularPower = light->GetSpecularPower();
+  lightPtr->attenuation = light->GetAttenuation();
+  lightPtr->range = light->GetRange();
+  lightPtr->position = light->GetPosition4();
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
