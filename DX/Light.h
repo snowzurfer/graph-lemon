@@ -38,6 +38,7 @@ public:
 	XMFLOAT4 GetSpecularColour();
 	float GetSpecularPower();
 	XMFLOAT3 GetPosition();
+  XMVECTOR GetPosVector();
 	XMMATRIX GetViewMatrix();
 	XMMATRIX GetProjectionMatrix();
 

@@ -106,3 +106,7 @@ XMMATRIX Light::GetProjectionMatrix()
 {
 	return m_projectionMatrix;
 }
+
+XMVECTOR Light::GetPosVector() {
+  return m_position;
+}
