@@ -31,6 +31,8 @@ public:
 	void SetPosition(float, float, float);
   void SetPosition(float, float, float, float);
 	void SetLookAt(float, float, float);
+  void SetAttenuation(float, float, float);
+  void SetRange(float);
 
 	// Getters
 	XMFLOAT4 GetAmbientColour();
@@ -38,11 +40,13 @@ public:
 	XMFLOAT3 GetDirection();
 	XMFLOAT4 GetSpecularColour();
 	float GetSpecularPower();
-	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetPosition3();
+  XMFLOAT4 GetPosition4();
   XMVECTOR GetPosVector();
 	XMMATRIX GetViewMatrix();
 	XMMATRIX GetProjectionMatrix();
-
+  XMFLOAT3 GetAttenuation();
+  float GetRange();
 
 protected:
 	XMFLOAT4 m_ambientColour;
@@ -53,7 +57,10 @@ protected:
 	XMVECTOR m_position;
 	XMMATRIX m_viewMatrix;
 	XMMATRIX m_projectionMatrix;
-	XMVECTOR m_lookAt; 
+	XMVECTOR m_lookAt;
+  XMFLOAT3 m_attenuation;
+  float m_range;
+  
 };
 
 #endif

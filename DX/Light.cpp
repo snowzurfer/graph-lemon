@@ -63,6 +63,14 @@ void Light::SetPosition(float x, float y, float z, float w) {
   m_position = XMVectorSet(x, y, z, w);
 }
 
+void Light::SetAttenuation(float x, float y, float z) {
+  m_attenuation = XMFLOAT3(x, y, z);
+}
+
+void Light::SetRange(float x) {
+  m_range = x;
+}
+
 XMFLOAT4 Light::GetAmbientColour()
 {
 	return m_ambientColour;
@@ -90,9 +98,15 @@ float Light::GetSpecularPower()
 	return m_specularPower;
 }
 
-XMFLOAT3 Light::GetPosition()
+XMFLOAT3 Light::GetPosition3()
 {
 	XMFLOAT3 temp(XMVectorGetX(m_position), XMVectorGetY(m_position), XMVectorGetZ(m_position));
+	return temp;
+}
+
+XMFLOAT4 Light::GetPosition4() {
+	XMFLOAT4 temp(XMVectorGetX(m_position), XMVectorGetY(m_position), 
+    XMVectorGetZ(m_position), XMVectorGetW(m_position));
 	return temp;
 }
 
@@ -113,4 +127,12 @@ XMMATRIX Light::GetProjectionMatrix()
 
 XMVECTOR Light::GetPosVector() {
   return m_position;
+}
+
+XMFLOAT3 Light::GetAttenuation() {
+  return m_attenuation;
+}
+
+float Light::GetRange() {
+  return m_range;
 }
