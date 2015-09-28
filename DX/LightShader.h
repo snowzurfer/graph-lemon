@@ -5,6 +5,7 @@
 
 #include "BaseShader.h"
 #include "light.h"
+#include "Camera.h"
 
 using namespace std;
 using namespace DirectX;
@@ -18,15 +19,21 @@ private:
 		XMFLOAT4 diffuse;
     XMFLOAT4 ambient;
 		XMFLOAT3 direction;
-		float padding;
+    float specularPower;
+    XMFLOAT4 specularColour;
 	};
+
+  struct CamBufferType {
+    XMFLOAT3 camPos;
+    float padding;
+  };
 
 public:
 
 	LightShader(ID3D11Device* device, HWND hwnd);
 	~LightShader();
 
-	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, Light* light);
+	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, Light* light, Camera *cam);
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:
@@ -36,6 +43,7 @@ private:
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11SamplerState* m_sampleState;
 	ID3D11Buffer* m_lightBuffer;
+	ID3D11Buffer* m_camBuffer;
 };
 
 #endif

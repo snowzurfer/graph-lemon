@@ -8,6 +8,11 @@ cbuffer MatrixBuffer : register(cb0)
     matrix projectionMatrix;
 };
 
+cbuffer CamBuffer : register(cb1) {
+  float3 camPos;
+  float padding;
+};
+
 struct InputType
 {
     float4 position : POSITION;
@@ -20,6 +25,8 @@ struct OutputType
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
+    // How does the suffix modify the type?
+    float3 viewDir: TEXCOORD1;
 };
 
 OutputType main(InputType input)
@@ -28,6 +35,13 @@ OutputType main(InputType input)
     
     // Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
+
+    // Calculate the position of the vertex in world coordinates
+    float4 vertWorldPos = mul(input.position, worldMatrix);
+
+    // Determine the viewing direction based on the position of the camera and
+    // the world position of the vertex, and then normalise it
+    output.viewDir = normalize(camPos.xyz - vertWorldPos.xyz);
 
     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

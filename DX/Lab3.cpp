@@ -12,7 +12,9 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   // Set the light values
   m_Light->SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
   m_Light->SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
-  m_Light->SetDirection(0.5f, -0.5f, 0.f);
+  m_Light->SetDirection(0.f, -1.f, 0.f);
+  m_Light->SetSpecularColour(1.f, 1.f, 1.f, 1.f);
+  m_Light->SetSpecularPower(25.f);
 }
 
 
@@ -80,7 +82,7 @@ bool Lab3::Render()
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
 	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, 
-    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), m_Light);
+    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), m_Light, m_Camera);
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 

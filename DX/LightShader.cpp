@@ -48,6 +48,7 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC camBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -95,15 +96,26 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	m_device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
 
+	// Setup cam buffer
+	camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	camBufferDesc.ByteWidth = sizeof(CamBufferType);
+	camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	camBufferDesc.MiscFlags = 0;
+	camBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	m_device->CreateBuffer(&camBufferDesc, NULL, &m_camBuffer);
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, Light* light)
+void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, Light* light, Camera *cam) 
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
 	LightBufferType* lightPtr;
+	CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	XMMATRIX tworld, tview, tproj;
 
@@ -140,12 +152,21 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr->diffuse = light->GetDiffuseColour();
   lightPtr->ambient = light->GetAmbientColour();
 	lightPtr->direction = light->GetDirection();
-	lightPtr->padding = 0.0f;
+  lightPtr->specularColour = light->GetSpecularColour();
+  lightPtr->specularPower = light->GetSpecularPower();
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
-	// Set shader texture resource in the pixel shader.
+  // Send camera data to vertex shader
+	deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	camPtr = (CamBufferType*)mappedResource.pData;
+  camPtr->camPos = cam->GetPosition();
+	deviceContext->Unmap(m_camBuffer, 0);
+	bufferNumber = 1;
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
+	
+  // Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
