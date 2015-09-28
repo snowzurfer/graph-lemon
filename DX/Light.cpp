@@ -59,6 +59,10 @@ void Light::SetPosition(float x, float y, float z)
 	m_position = XMVectorSet(x, y, z, 1.0f);
 }
 
+void Light::SetPosition(float x, float y, float z, float w) {
+  m_position = XMVectorSet(x, y, z, w);
+}
+
 XMFLOAT4 Light::GetAmbientColour()
 {
 	return m_ambientColour;

@@ -29,6 +29,7 @@ public:
 	void SetSpecularColour(float, float, float, float);
 	void SetSpecularPower(float);
 	void SetPosition(float, float, float);
+  void SetPosition(float, float, float, float);
 	void SetLookAt(float, float, float);
 
 	// Getters
