@@ -4,9 +4,6 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
-  const int allora = 0;
-  int const allora_2 = 1;
-
 	System* m_System;
 		
 	// Create the system object.
