@@ -1,6 +1,8 @@
 // texture.cpp
 #include "texture.h"
 
+std::map<std::wstring, ID3D11ShaderResourceView *> Texture::textures_;
+
 Texture::Texture(ID3D11Device* device, WCHAR* filename)
 {
 	HRESULT result;
@@ -16,6 +18,20 @@ Texture::Texture(ID3D11Device* device, WCHAR* filename)
 		// change default texture
 		filename = L"../res/DefaultDiffuse.png";
 	}
+
+  // Set its name
+  file_name_ = filename;
+
+  // Check if this texture has already been loaded
+  std::map<std::wstring, ID3D11ShaderResourceView *>::const_iterator it = textures_.find(filename);
+  // If the texture already exists 
+  if (it != textures_.end()) {
+    // Point this one's ptr to the one just found
+    m_texture = it->second;
+
+    return;
+  }
+
 
 	// check file extension for correct loading function.
 	std::wstring fn(filename);
@@ -47,10 +63,20 @@ Texture::Texture(ID3D11Device* device, WCHAR* filename)
 	{
 		MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
 	}
+
+  // Add texture to the map
+  textures_[fn] = m_texture;
 }
 
 Texture::~Texture()
 {
+  // NOTE
+  // Should check if a texture is being used by more than once and delete only
+  // when the last one has to be deleted; this would require a more 
+  // sophisticated approach, which will be implemented in the future.
+  // So far, when a texture is deleted, its correspondant resource is also
+  // released.
+
 	// Release the texture resource.
 	if (m_texture)
 	{
