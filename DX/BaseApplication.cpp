@@ -1,7 +1,7 @@
 // BaseApplication.cpp
 // Base application functionality for inheritnace.
 #include "BaseApplication.h"
-
+#include "Texture.h"
 
 BaseApplication::BaseApplication(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in)
 {
@@ -42,6 +42,9 @@ BaseApplication::~BaseApplication()
 		delete m_Camera;
 		m_Camera = 0;
 	}
+
+  // Release the textures manager
+  Texture::ResetInst();
 
 	// Release the Direct3D object.
 	if (m_Direct3D)

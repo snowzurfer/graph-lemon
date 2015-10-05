@@ -8,27 +8,46 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include "Model.h"
 
 using namespace DirectX;
 
 class Texture
 {
 public:
-	Texture(ID3D11Device* device, WCHAR* filename);
-	~Texture();
+  // Retrieve instance of singleton
+  static Texture *Inst();
 
-	ID3D11ShaderResourceView* GetTexture();
+  // Resets singleton to not having an instance
+  static void ResetInst();
+
+  // Load a texture in memory
+  void LoadTexture(ID3D11Device* device, WCHAR* filename);
+  
+  // Delete a texture from memory
+  void FreeTexture(const std::wstring &tx_name);
+
+  // Retrieve a texture from its name
+  ID3D11ShaderResourceView *GetTexture(const std::wstring &tx_name);
+
+  // Disable ctors
+  Texture(const Texture &) = delete;
+  Texture &operator=(const Texture &) = delete;
 
 private:
-	bool does_file_exist(const WCHAR *fileName);
 
-	ID3D11ShaderResourceView* m_texture;
-
-  // The filename of the texture, used for the map
-  std::wstring file_name_;
+  Texture();
+	
+  bool does_file_exist(const WCHAR *fileName);
 
   // Have textures be loaded only ONCE in memory
-  static std::map<std::wstring, ID3D11ShaderResourceView *> textures_;
+  std::map<std::wstring, ID3D11ShaderResourceView *> textures_;
+
+  // Ptr to single global instance
+  static Texture *single_instance_;
 };
+
+
+void LoadTextures(ID3D11Device *device, Model &model);
 
 #endif
