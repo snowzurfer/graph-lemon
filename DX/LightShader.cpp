@@ -109,7 +109,7 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, Light* light, Camera *cam) 
+void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, std::vector<Light> &lights, Camera *cam) 
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -147,16 +147,19 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 
 	//Additional
 	// Send light data to pixel shader
-	deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	lightPtr = (LightBufferType*)mappedResource.pData;
-	lightPtr->diffuse = light->GetDiffuseColour();
-  lightPtr->ambient = light->GetAmbientColour();
-	lightPtr->direction = light->GetDirection();
-  lightPtr->specularColour = light->GetSpecularColour();
-  lightPtr->specularPower = light->GetSpecularPower();
-  lightPtr->attenuation = light->GetAttenuation();
-  lightPtr->range = light->GetRange();
-  lightPtr->position = light->GetPosition4();
+  deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  lightPtr = (LightBufferType*)mappedResource.pData;
+  for (unsigned int i = 0; i < lights.size(); i++) {
+    lightPtr->diffuse[i] = lights[i].GetDiffuseColour();
+    lightPtr->ambient[i] = lights[i].GetAmbientColour();
+    lightPtr->direction[i] = lights[i].GetDirection();
+    lightPtr->specularColour[i] = lights[i].GetSpecularColour();
+    lightPtr->specularPower[i] = lights[i].GetSpecularPower();
+    lightPtr->attenuation[i] = lights[i].GetAttenuation();
+    lightPtr->range[i] = lights[i].GetRange();
+    lightPtr->position[i] = lights[i].GetPosition4();
+    lightPtr->active[i] = static_cast<unsigned int>(lights[i].active());
+  }
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);

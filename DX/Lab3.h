@@ -9,6 +9,8 @@
 #include "PlaneMesh.h"
 #include "LightShader.h"
 #include "Light.h"
+#include <vector>
+#include "Model.h"
 
 class Lab3 : public BaseApplication
 {
@@ -24,9 +26,10 @@ private:
 
 private:
 	LightShader* m_Shader;
+  Model *model_;
 	SphereMesh* m_Mesh;
   PlaneMesh *m_PlaneMesh;
-  Light *m_Light;
+  std::vector<Light> lights_;
 
 };
 

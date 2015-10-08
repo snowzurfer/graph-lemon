@@ -136,3 +136,11 @@ XMFLOAT3 Light::GetAttenuation() {
 float Light::GetRange() {
   return m_range;
 }
+
+bool Light::active() const {
+  return active_;
+}
+
+void Light::set_active(bool v) {
+  active_ = v;
+}

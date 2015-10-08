@@ -6,24 +6,29 @@
 #include "BaseShader.h"
 #include "light.h"
 #include "Camera.h"
+#include <vector>
 
 using namespace std;
 using namespace DirectX;
 
+const unsigned int kNumLights = 2;
 
 class LightShader : public BaseShader
 {
 private:
 	struct LightBufferType
 	{
-		XMFLOAT4 diffuse;
-    XMFLOAT4 ambient;
-		XMFLOAT3 direction;
-    float specularPower;
-    XMFLOAT4 specularColour;
-    XMFLOAT3 attenuation;
-    float range;
-    XMFLOAT4 position;
+		XMFLOAT4 diffuse[kNumLights];
+    XMFLOAT4 ambient[kNumLights];
+		XMFLOAT3 direction[kNumLights];
+    float specularPower[kNumLights];
+    XMFLOAT4 specularColour[kNumLights];
+    XMFLOAT3 attenuation[kNumLights];
+    float range[kNumLights];
+    XMFLOAT4 position[kNumLights];
+    // Determines which light is active
+    int active[kNumLights];
+    XMFLOAT3 padding[kNumLights];
 	};
 
   struct CamBufferType {
@@ -36,7 +41,9 @@ public:
 	LightShader(ID3D11Device* device, HWND hwnd);
 	~LightShader();
 
-	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, Light* light, Camera *cam);
+  // Sadly have to use by non-const reference paramenters, as the framework
+  // most of the time does not define const accessors for its classes...
+	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, std::vector<Light> &hlights, Camera *cam);
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:

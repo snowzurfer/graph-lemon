@@ -1,6 +1,9 @@
 // Model mesh and load
 // Loads a .obj and creates a mesh object from the data
 #include "model.h"
+#include <locale>
+#include <codecvt>
+#include <string>
 #include "Texture.h"
 
 Model::Model(ID3D11Device* device, WCHAR* model_filename, const std::string &model_name) :
@@ -9,7 +12,7 @@ Model::Model(ID3D11Device* device, WCHAR* model_filename, const std::string &mod
 	//LoadModel(filename);
 
 	// Initialize the vertex and index buffer that hold the geometry for the model.
-	InitBuffers(device);
+	//InitBuffers(device);
 
 	// Load the texture for this model.
 	//LoadTexture(device, textureFilename);
@@ -28,7 +31,7 @@ void Model::Init(ID3D11Device* device, WCHAR* model_filename, const std::string 
 	//LoadTexture(device, textureFilename);
 
   // Load the textures for the materials
-  //LoadTextures_(device);
+  LoadTextures_(device);
 }
 
 Model::~Model()
@@ -40,57 +43,90 @@ Model::~Model()
 	}
 }
 
+// Simple helper function which checks for the presence of a certain
+// pattern in a string and replaces it with another one if it was found.
+// Returns whether the pattern was found and replaced or not.
+bool FindReplace(std::string &str, const std::string &find_pattern,
+  const std::string &rep_pattern) { 
+  size_t index = 0; 
+  index = str.find(find_pattern, index);
+  
+  if (index != std::string::npos) {
+    str.replace(index, rep_pattern.length(), rep_pattern);
+
+    return true;
+  }
+
+  return false;
+}
+
 // To the designed of the API:
 // we are not oriental. No need for wchars. Like, no.
-//void Model::LoadTextures_(ID3D11Device* device) {
-//  for (unsigned int i = 0; i < materials_.size(); ++i) {
-//    std::string path_suffix = "../res/" + model_name_ + "/";
-//  
-//    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-//    std::wstring wide;
-//    WCHAR cstyle_wide[128];
-//
-//    if (materials_[i].ambient_texname != "") {
-//      converter.from_bytes(path_suffix + materials_[i].ambient_texname);
-//      wcscpy_s(cstyle_wide, wide.c_str());
-//      Texture::Inst()->LoadTexture(device, cstyle_wide);
-//    }
-//
-//    if (materials_[i].diffuse_texname != "") {
-//      wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
-//      wcscpy_s(cstyle_wide, wide.c_str());
-//      Texture::Inst()->LoadTexture(device, cstyle_wide);
-//    }
-//
-//    if (materials_[i].specular_texname != "") {
-//      wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
-//      wcscpy_s(cstyle_wide, wide.c_str());
-//      Texture::Inst()->LoadTexture(device, cstyle_wide);
-//    }
-//
-//
-//    std::string specular_highlight_texname; // map_Ns
-//
-//    if (materials_[i].bump_texname != "") {
-//      wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
-//      wcscpy_s(cstyle_wide, wide.c_str());
-//      Texture::Inst()->LoadTexture(device, cstyle_wide);
-//    }
-//
-//    std::string displacement_texname;       // disp
-//
-//    if (materials_[i].alpha_texname != "") {
-//      wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
-//      wcscpy_s(cstyle_wide, wide.c_str());
-//      Texture::Inst()->LoadTexture(device, cstyle_wide);
-//    }
-//
-//  }
-//}
+void Model::LoadTextures_(ID3D11Device* device) {
+  // For each material
+  for (unsigned int i = 0; i < materials_.size(); ++i) {
+    std::string path_suffix = "../res/" + model_name_ + "/";
+  
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wide;
+    WCHAR cstyle_wide[128];
+
+    if (materials_[i].ambient_texname != "") {
+      // Check if the texture name uses // as parenthesis and if so, fix it
+      FindReplace(materials_[i].ambient_texname, "\\", "\/");
+
+      wide = converter.from_bytes(path_suffix + materials_[i].ambient_texname);
+      wcscpy_s(cstyle_wide, wide.c_str());
+      Texture::Inst()->LoadTexture(device, cstyle_wide);
+    }
+
+    if (materials_[i].diffuse_texname != "") {
+      // Check if the texture name uses // as parenthesis and if so, fix it
+      FindReplace(materials_[i].diffuse_texname, "\\", "\/");
+      
+      wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
+      wcscpy_s(cstyle_wide, wide.c_str());
+      Texture::Inst()->LoadTexture(device, cstyle_wide);
+    }
+
+    if (materials_[i].specular_texname != "") {
+      // Check if the texture name uses // as parenthesis and if so, fix it
+      FindReplace(materials_[i].specular_texname, "\\", "\/");
+      
+      wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
+      wcscpy_s(cstyle_wide, wide.c_str());
+      Texture::Inst()->LoadTexture(device, cstyle_wide);
+    }
+
+
+    std::string specular_highlight_texname; // map_Ns
+
+    if (materials_[i].bump_texname != "") {
+      // Check if the texture name uses // as parenthesis and if so, fix it
+      FindReplace(materials_[i].bump_texname, "\\", "\/");
+     
+      wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
+      wcscpy_s(cstyle_wide, wide.c_str());
+      Texture::Inst()->LoadTexture(device, cstyle_wide);
+    }
+
+    std::string displacement_texname;       // disp
+
+    if (materials_[i].alpha_texname != "") {
+      // Check if the texture name uses // as parenthesis and if so, fix it
+      FindReplace(materials_[i].alpha_texname, "\\", "\/");
+      
+      wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
+      wcscpy_s(cstyle_wide, wide.c_str());
+      Texture::Inst()->LoadTexture(device, cstyle_wide);
+    }
+
+  }
+}
 
 
 void Model::InitBuffers(ID3D11Device* device) {
-  for (unsigned int i = 0; i < meshes_.size(); ++i) {
+  for (unsigned int i = 0; i < 1;  ++i) {
     meshes_[i].InitBuffers(device);
   }
 }

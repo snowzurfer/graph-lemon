@@ -34,6 +34,8 @@ public:
   void SetAttenuation(float, float, float);
   void SetRange(float);
 
+  void set_active(bool v);
+
 	// Getters
 	XMFLOAT4 GetAmbientColour();
 	XMFLOAT4 GetDiffuseColour();
@@ -48,6 +50,8 @@ public:
   XMFLOAT3 GetAttenuation();
   float GetRange();
 
+  bool active() const;
+
 protected:
 	XMFLOAT4 m_ambientColour;
 	XMFLOAT4 m_diffuseColour;
@@ -60,7 +64,9 @@ protected:
 	XMVECTOR m_lookAt;
   XMFLOAT3 m_attenuation;
   float m_range;
-  
+ 
+  // Whether the light is active or not
+  bool active_;
 };
 
 #endif

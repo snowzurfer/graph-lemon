@@ -1,23 +1,52 @@
 // Lab3.cpp
 #include "Lab3.h"
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <fstream>
 
-Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in)
-{
+Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
+    BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
+    model_(nullptr) {
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
 	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd);
 
-  m_Light = new Light();
-  // Set the light values
-  m_Light->SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-  m_Light->SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
-  m_Light->SetDirection(0.f, -1.f, 0.f);
-  m_Light->SetSpecularColour(1.f, 1.f, 1.f, 1.f);
-  m_Light->SetSpecularPower(25.f);
-  m_Light->SetPosition(0.f, 5.f, 0.f, 0.f);
-  m_Light->SetAttenuation(2.f, 0.f, 0.f);
-  m_Light->SetRange(45.f);
+  for (unsigned int i = 0; i < kNumLights; i++) {
+    lights_.push_back(Light());
+    // Set the light values
+    lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+    // Set ambient for one light only 
+    if (i == 0) {
+      lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
+    }
+    else {
+      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
+    }
+    lights_[i].SetDirection(0.f, -1.f, 0.f);
+    lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
+    lights_[i].SetSpecularPower(25.f);
+    lights_[i].SetPosition(0.f, 5.f, 0.f, 1.f);
+    lights_[i].SetAttenuation(2.f, 0.f, 0.f);
+    lights_[i].SetRange(45.f);
+    lights_[i].set_active(true);
+  }
+
+  model_ = new Model();
+  // Attempt loading a model 
+  {
+    std::ifstream ifs("../res/sponza/sponza_proc.szg", std::ios::in | std::ios::binary);
+    boost::archive::binary_iarchive bia(ifs);
+    bia >> (*model_);
+  }
+  // Initialise the model
+  model_->Init(m_Direct3D->GetDevice(), L"sponza", "sponza");
+
+
+  //lights_[1].SetPosition(3.f, 5.f, 0.f, 1.f);
 }
 
 
@@ -39,10 +68,15 @@ Lab3::~Lab3()
 		m_Shader = 0;
 	}
 
-  if (m_Light) {
-    delete m_Light;
-    m_Light = nullptr;
+  if (model_ != nullptr) {
+    delete model_;
+    model_ = nullptr;
   }
+
+  //if (m_Light) {
+  //  delete m_Light;
+  //  m_Light = nullptr;
+  //}
 }
 
 
@@ -85,7 +119,7 @@ bool Lab3::Render()
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
 	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, 
-    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), m_Light, m_Camera);
+    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), lights_, m_Camera);
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 

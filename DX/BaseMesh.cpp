@@ -4,7 +4,9 @@
 #include "basemesh.h"
 #include "Texture.h"
 
-BaseMesh::BaseMesh()
+BaseMesh::BaseMesh() :
+m_vertexBuffer(nullptr),
+m_indexBuffer(nullptr)
 {
 }
 
@@ -77,7 +79,7 @@ void BaseMesh::InitBuffers(ID3D11Device *device) {
 
 
     // Load the vertex array and index array with data.
-    for (int i = 0; i < vertices_.size(); i++) {
+    for (unsigned int i = 0; i < vertices_.size(); i++) {
       vertices[i].position = XMFLOAT3(vertices_[i].x, vertices_[i].y, -vertices_[i].z);
       vertices[i].texture = XMFLOAT2(vertices_[i].tu, vertices_[i].tv);
       vertices[i].normal = XMFLOAT3(vertices_[i].nx, vertices_[i].ny, -vertices_[i].nz);
@@ -87,7 +89,7 @@ void BaseMesh::InitBuffers(ID3D11Device *device) {
 
     // Set up the description of the static vertex buffer.
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof(VertexType)* m_vertexCount;
+    vertexBufferDesc.ByteWidth = sizeof(VertexType)* vertices_.size();
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = 0;
     vertexBufferDesc.MiscFlags = 0;
@@ -99,11 +101,14 @@ void BaseMesh::InitBuffers(ID3D11Device *device) {
     vertexData.SysMemSlicePitch = 0;
 
     // Now create the vertex buffer.
-    device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+    HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 
+    if (hr != S_OK) {
+      std::cout << hr << std::endl;
+    }
     // Set up the description of the static index buffer.
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexBufferDesc.ByteWidth = sizeof(unsigned long)* m_indexCount;
+    indexBufferDesc.ByteWidth = sizeof(unsigned long)* indices_.size();
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexBufferDesc.CPUAccessFlags = 0;
     indexBufferDesc.MiscFlags = 0;

@@ -8,8 +8,27 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/serialization.hpp>
 
 using namespace DirectX;
+
+	typedef struct 
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+  
+    friend class boost::serialization::access;
+
+    // Allow serialisation
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+      ar & x & y & z;
+      ar & tu & tv;
+      ar & nx & ny & nz;
+    }
+	} ModelType;
 
 class BaseMesh
 {
@@ -23,12 +42,6 @@ protected:
 	};
 
 
-	struct ModelType
-	{
-		float x, y, z;
-		float tu, tv;
-		float nx, ny, nz;
-	};
 
 public:
 	BaseMesh();
@@ -40,6 +53,17 @@ public:
 
 	virtual void InitBuffers(ID3D11Device*);
 
+  inline void set_mat_id(int id) {
+    mat_id_ = id;
+  }
+
+  inline void set_vertices(const std::vector<ModelType> &val) {
+    vertices_ = val;
+  }
+  
+  inline void set_indices(const std::vector<unsigned int> &val) {
+    indices_ = val;
+  }
 protected:
 	void LoadTexture(ID3D11Device*, WCHAR*);
 

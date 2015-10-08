@@ -38,6 +38,7 @@ public:
 
 
   // Default Ctor
+  Material() {};
   Material(const std::string &mat_name);
 
 private:
@@ -48,14 +49,14 @@ private:
   void serialize(Archive & ar, const unsigned int version) {
     ar & name;
     ar & ambient & diffuse & specular & transmittance & emission;
-    ar & shininess & ior & disssolve & illum;
+    ar & shininess & ior & dissolve & illum;
     ar & ambient_texname &
       diffuse_texname &
       specular_texname &
       specular_highlight_texname &
       bump_texname &
       displacement_texname &
-      alpha_texname    
+      alpha_texname;
   }
 
 //typedef struct {
