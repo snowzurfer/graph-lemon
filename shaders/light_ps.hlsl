@@ -41,7 +41,7 @@ float4 main(InputType input) : SV_TARGET {
   // Ambient contribution
   float4 ambient_final_colour;
   // Total contribution of the lights
-  float4 total_light_contribution;
+  float4 total_light_contribution = { 0.f, 0.f, 0.f, 0.f };
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
   texture_colour = shaderTexture.Sample(SampleType, input.tex);
@@ -118,11 +118,11 @@ float4 main(InputType input) : SV_TARGET {
 
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
-      float4 reflection = reflect(calc_light_dir, float4(input.normal, 0.f));
+      float4 reflection = reflect(calc_light_dir, float4(input.normal, 1.f));
 
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
-      float4 specular = pow(saturate(dot(reflection, input.viewDir)), 
+      float4 specular = pow(saturate(dot(reflection, float4(input.viewDir, 0.f))), 
         lights[i].specular_power);
 
       // Calculate the colour of the specular, diminished by the falloff factor
