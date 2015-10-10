@@ -152,10 +152,10 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
   for (unsigned int i = 0; i < lights.size(); i++) {
     lightPtr->diffuse[i] = lights[i].GetDiffuseColour();
     lightPtr->ambient[i] = lights[i].GetAmbientColour();
-    lightPtr->direction[i] = lights[i].GetDirection();
+    lightPtr->direction[i] = XMFLOAT4(lights[i].GetDirection().x, lights[i].GetDirection().y, lights[i].GetDirection().z, 1.0);
     lightPtr->specularColour[i] = lights[i].GetSpecularColour();
     lightPtr->specularPower[i] = lights[i].GetSpecularPower();
-    lightPtr->attenuation[i] = lights[i].GetAttenuation();
+    lightPtr->attenuation[i] = XMFLOAT4(lights[i].GetAttenuation().x, lights[i].GetAttenuation().y, lights[i].GetAttenuation().z, 1.0);
     lightPtr->range[i] = lights[i].GetRange();
     lightPtr->position[i] = lights[i].GetPosition4();
     lightPtr->active[i] = static_cast<unsigned int>(lights[i].active());

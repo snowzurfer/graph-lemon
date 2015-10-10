@@ -11,7 +11,7 @@
 using namespace std;
 using namespace DirectX;
 
-const unsigned int kNumLights = 2;
+const unsigned int kNumLights = 4;
 
 class LightShader : public BaseShader
 {
@@ -20,15 +20,14 @@ private:
 	{
 		XMFLOAT4 diffuse[kNumLights];
     XMFLOAT4 ambient[kNumLights];
-		XMFLOAT3 direction[kNumLights];
-    float specularPower[kNumLights];
+		XMFLOAT4 direction[kNumLights];
     XMFLOAT4 specularColour[kNumLights];
-    XMFLOAT3 attenuation[kNumLights];
-    float range[kNumLights];
+    XMFLOAT4 attenuation[kNumLights];
     XMFLOAT4 position[kNumLights];
     // Determines which light is active
-    int active[kNumLights];
-    XMFLOAT3 padding[kNumLights];
+    float active[kNumLights];
+    float range[kNumLights];
+    float specularPower[kNumLights];
 	};
 
   struct CamBufferType {
