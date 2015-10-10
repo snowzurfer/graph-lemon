@@ -40,7 +40,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   //model_ = new Model();
   //// Attempt loading a model 
   //{
-  //  std::ifstream ifs("../res/sponza/sponza_proc.szg", std::ios::in | std::ios::binary);
+  //  std::ifstream ifs("../res/sponza/sponza_proc.szg", std::ios::jin | std::ios::binary);
   //  boost::archive::binary_iarchive bia(ifs);
   //  bia >> (*model_);
   //}
@@ -112,6 +112,8 @@ bool Lab3::Render()
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Update();
 
+  // Set per-frame shader paramters
+  m_Shader->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
@@ -121,7 +123,7 @@ bool Lab3::Render()
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
 	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, 
-    viewMatrix, projectionMatrix, m_Mesh->GetTexture(), lights_, m_Camera);
+    viewMatrix, projectionMatrix, m_Mesh->GetTexture());
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 

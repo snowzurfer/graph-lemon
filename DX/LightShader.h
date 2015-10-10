@@ -50,6 +50,10 @@ private:
     float padding;
   };
 
+  struct MaterialBufferType {
+
+  };
+
 public:
 
 	LightShader(ID3D11Device* device, HWND hwnd, unsigned int lights_num);
@@ -57,7 +61,11 @@ public:
 
   // Sadly have to use by non-const reference paramenters, as the framework
   // most of the time does not define const accessors for its classes...
-	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, std::vector<Light> &hlights, Camera *cam);
+	void SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture );
+
+  // Set the parameters which change only once per frame
+  void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &hlights, Camera *cam);
+
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:

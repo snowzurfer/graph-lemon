@@ -111,7 +111,7 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, std::vector<Light> &lights, Camera *cam) 
+void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture) 
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -147,8 +147,19 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	// Now set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-	//Additional
-	// Send light data to pixel shader
+  // Set shader texture resource in the pixel shader.
+	deviceContext->PSSetShaderResources(0, 1, &texture);
+}
+
+void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* data_ptr;
+	LightType* light_ptr;
+	CamBufferType* camPtr;
+	unsigned int bufferNumber;
+	
+  // Send light data to pixel shader
   deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   light_ptr = (LightType*)mappedResource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
@@ -173,12 +184,10 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->Unmap(m_camBuffer, 0);
 	bufferNumber = 1;
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
-	
-  // Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+   
 }
 
-void LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+  void LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the sampler state in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
