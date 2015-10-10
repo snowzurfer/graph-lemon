@@ -51,7 +51,15 @@ private:
   };
 
   struct MaterialBufferType {
-
+    XMFLOAT4 ambient;
+    XMFLOAT4 diffuse;
+    XMFLOAT4 specular;
+    XMFLOAT4 transmittance;
+    XMFLOAT4 emission;
+    float shininess;
+    float ior;      // index of refraction
+    float dissolve; // 1 == opaque; 0 == fully transparent
+    int illum;
   };
 
 public:
