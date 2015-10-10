@@ -116,8 +116,6 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* data_ptr;
-	LightType* light_ptr;
-	CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	XMMATRIX tworld, tview, tproj;
 
@@ -160,15 +158,17 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	unsigned int bufferNumber;
 	
   // Send light data to pixel shader
-  deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   light_ptr = (LightType*)mappedResource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
     light_ptr[i].diffuse = lights[i].GetDiffuseColour();
     light_ptr[i].ambient = lights[i].GetAmbientColour();
-    light_ptr[i].direction = XMFLOAT4(lights[i].GetDirection().x, lights[i].GetDirection().y, lights[i].GetDirection().z, 1.0);
+    light_ptr[i].direction = XMFLOAT4(lights[i].GetDirection().x, 
+      lights[i].GetDirection().y, lights[i].GetDirection().z, 1.0);
     light_ptr[i].specular = lights[i].GetSpecularColour();
     light_ptr[i].specular_power = lights[i].GetSpecularPower();
-    light_ptr[i].attenuation = XMFLOAT4(lights[i].GetAttenuation().x, lights[i].GetAttenuation().y, lights[i].GetAttenuation().z, 1.0);
+    light_ptr[i].attenuation = XMFLOAT4(lights[i].GetAttenuation().x, 
+      lights[i].GetAttenuation().y, lights[i].GetAttenuation().z, 1.0);
     light_ptr[i].range = lights[i].GetRange();
     light_ptr[i].position = lights[i].GetPosition4();
     light_ptr[i].active = static_cast<unsigned int>(lights[i].active());
@@ -178,7 +178,8 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
   // Send camera data to vertex shader
-	deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mappedResource);
 	camPtr = (CamBufferType*)mappedResource.pData;
   camPtr->camPos = cam->GetPosition();
 	deviceContext->Unmap(m_camBuffer, 0);
