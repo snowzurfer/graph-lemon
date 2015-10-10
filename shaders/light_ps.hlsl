@@ -118,15 +118,16 @@ float4 main(InputType input) : SV_TARGET {
 
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
-      float4 reflection = reflect(calc_light_dir, float4(input.normal, 1.f));
+      float3 reflection = reflect(calc_light_dir.xyz, input.normal);
 
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
-      float4 specular = pow(saturate(dot(reflection, float4(input.viewDir, 0.f))), 
+      float specular = pow(saturate(dot(reflection, input.viewDir)), 
         lights[i].specular_power);
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = (specular * lights[i].specular) / falloff;
+      final_spec_contribution *= texture_colour;
      
       // Add specular and diffuse to the total contribution of the light
       total_light_contribution += (final_diff_contribution + final_spec_contribution);
