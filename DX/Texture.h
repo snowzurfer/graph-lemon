@@ -29,6 +29,7 @@ public:
 
   // Retrieve a texture from its name
   ID3D11ShaderResourceView *GetTexture(const std::wstring &tx_name);
+  ID3D11ShaderResourceView *GetTexture(const std::string &tx_name);
 
   // Disable ctors
   Texture(const Texture &) = delete;

@@ -129,6 +129,20 @@ ID3D11ShaderResourceView* Texture::GetTexture(const std::wstring &tx_name)
   return nullptr;
 }
 
+ID3D11ShaderResourceView* Texture::GetTexture(const std::string &tx_name) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::wstring wide = converter.from_bytes(tx_name);
+  
+  std::map<std::wstring,
+    ID3D11ShaderResourceView *>::iterator it = textures_.find(wide);
+
+	if (it != textures_.end()) {
+		return it->second;
+	}
+
+  return nullptr;
+}
+
 bool Texture::does_file_exist(const WCHAR *fname)
 {
 	std::ifstream infile(fname);
