@@ -13,7 +13,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
-	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd);
+	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, kNumLights);
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());

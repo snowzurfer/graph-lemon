@@ -21,13 +21,13 @@ private:
     XMFLOAT4 diffuse;
     XMFLOAT4 ambient;
 		XMFLOAT4 direction;
-    XMFLOAT4 specularColour;
+    XMFLOAT4 specular;
     XMFLOAT4 attenuation;
     XMFLOAT4 position;
     // Determines which light is active
-    float active;
+    unsigned int active;
     float range;
-    float specularPower;
+    float specular_power;
     float padding;
   };
 
@@ -52,7 +52,7 @@ private:
 
 public:
 
-	LightShader(ID3D11Device* device, HWND hwnd);
+	LightShader(ID3D11Device* device, HWND hwnd, unsigned int lights_num);
 	~LightShader();
 
   // Sadly have to use by non-const reference paramenters, as the framework
@@ -61,7 +61,7 @@ public:
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:
-	void InitShader(WCHAR*, WCHAR*);
+	void InitShader(WCHAR*, WCHAR*, unsigned int lights_num);
 
 private:
 	ID3D11Buffer* m_matrixBuffer;

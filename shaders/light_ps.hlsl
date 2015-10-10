@@ -6,17 +6,22 @@ SamplerState SampleType : register(s0);
 
 #define L_NUM 4
 
-cbuffer LightBuffer : register(cb0)
-{
-    float4 l_diffuse[L_NUM];
-    float4 l_ambient[L_NUM];
-    float4 lightDirection[L_NUM];
-    float4 l_specular[L_NUM];
-    float4 lightAttenuation[L_NUM];
-    float4 lightPosition[L_NUM];
-    float lightActive[L_NUM];
-    float lightRange[L_NUM];
-    float l_spec_power[L_NUM];
+struct LightType {
+  float4 diffuse;
+  float4 ambient;
+  float4 direction;
+  float4 specular;
+  float4 attenuation;
+  float4 position;
+  // Determines which light is active
+  uint active;
+  float range;
+  float specular_power;
+  float padding;
+};
+
+cbuffer LightBuffer : register(cb0) {
+  LightType lights[L_NUM];
 };
 
 struct InputType
@@ -28,110 +33,112 @@ struct InputType
     float4 worldPos : TEXCOORD2;
 };
 
-float4 main(InputType input) : SV_TARGET{
+float4 main(InputType input) : SV_TARGET {
   // Colour sampler from the colour map
-  float4 textureColour;
-  // Vector from the light to the fragment
-  float3 calculatedLightDir[L_NUM];
-  // How much the pixel is influenced by light
-  float lightIntensity[L_NUM] = { 0.f, 0.f, 0.f, 0.f};
+  float4 texture_colour;
   // Final colour to be output by the shader
   float4 colour = { 0.f, 0.f, 0.f, 0.f };
-  float4 ambient_colour = { 0.f, 0.f, 0.f, 0.f};
-  // The final contribution of the specular part of the light
-  float4 finalSpec = { 0.f, 0.f, 0.f, 0.f };
-  // Falloff factor for point lights 
-  float falloff[L_NUM] = { 1.f, 1.f, 1.f, 1.f};
+  // Ambient contribution
+  float4 ambient_final_colour;
+  // Total contribution of the lights
+  float4 total_light_contribution;
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-  textureColour = shaderTexture.Sample(SampleType, input.tex);
+  texture_colour = shaderTexture.Sample(SampleType, input.tex);
+
   
-  // For all the lights in the scene
-  for (uint i = 0; i < 1; i++) {
-    // If the light is not active
-    if (lightActive[i] == 0) {
+  // For each light in the scene
+  for (uint i = 0; i < L_NUM; ++i) {
+    // If the light is active
+    if (lights[i].active == 0) {
+      // Skip this light
       continue;
     }
-    
+  
+    // Vector from the light to the fragment
+    float4 calc_light_dir;
+    // How much the pixel is influenced by light
+    float light_intensity = 0.f;
+    // Falloff factor for point lights 
+    float falloff = 1.f;
+    // The final contribution of the specular part of the light
+    float4 final_spec_contribution = { 0.f, 0.f, 0.f, 0.f };
+    // The final contribution of the diffuse part of the light
+    float4 final_diff_contribution = { 0.f, 0.f, 0.f, 0.f };
+
+    // Add ambient contribution
+    ambient_final_colour += texture_colour * lights[i].ambient;
+  
     // Determine the type of light
-    if (lightPosition[i].w > 0.f) { // Directional
+    if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
-      calculatedLightDir[i] = lightDirection[i];
+      calc_light_dir = lights[i].direction;
 
       // Calculate the amount of light on this pixel.
-      lightIntensity[i] = saturate(dot(input.normal, -calculatedLightDir[i]));
+      light_intensity = saturate(dot(float4(input.normal, 0.f), -calc_light_dir));
     }
-    else if (lightPosition[i].w == 0.f) { // Point
+    else if (lights[i].position.w == 0.f) { // Point
       // Calculate the vector from the pixel in world coordinates to 
       // the light
-      float3 lightToPixelVec = lightPosition[i].xyz - input.worldPos.xyz;
+      float4 pixel_to_light_vec = lights[i].position - input.worldPos;
 
       // Store the distance between light and pixel
-      float dist = length(lightToPixelVec);
+      float dist = length(pixel_to_light_vec);
 
       // If the pixel isn't too far away from the light source
-      if (dist <= lightRange[i]) {
+      if (dist <= lights[i].range) {
         // Normalise the light to pixel vector
-        lightToPixelVec = normalize(lightToPixelVec);
+        pixel_to_light_vec = normalize(pixel_to_light_vec);
 
         // Set the calculated light direction; need to invert the direction
-        // as lightToPixelVec goes from pixel to light, but fur the specular
+        // as pixel_to_light_vec goes from pixel to light, but for the specular
         // calculations we need it to be going in the opposite direction
-        calculatedLightDir[i] = -lightToPixelVec;
+        calc_light_dir = -pixel_to_light_vec;
 
         // Calculate the intensity of the point light
-        lightIntensity[i] = saturate(dot(lightToPixelVec, input.normal));
-
+        light_intensity = saturate(dot(pixel_to_light_vec, float4(input.normal, 0.f)));
+        
         // If the light is striking the front of the pixel
-        //if (lightIntensity[i] > 0.f) {
-        //  // Calculate the falloff factor
-        //  falloff[i] = lightAttenuation[i][i] + (lightAttenuation[i][1] * dist) +
-        //    (lightAttenuation[i][2] * (dist * dist));
-        //}
+        if (light_intensity > 0.f) {
+          // Calculate the falloff factor
+          falloff = lights[i].attenuation[0] + (lights[i].attenuation[1] * dist) +
+            (lights[i].attenuation[2] * (dist * dist));
+        }
       }
     }
-
+    
     // If the light is striking the front of the pixel
-    if (lightIntensity[i] > 0.f) {
-      float4 temp_col = saturate(l_diffuse[i] * lightIntensity[i]);
-      
+    if (light_intensity > 0.f) {
+      // Add the diffuse colour contribution
+      final_diff_contribution = saturate(lights[i].diffuse * light_intensity);
+      final_diff_contribution *= texture_colour;
+
       // Calculate the diffuse after the falloff factor
-      //temp_col /= falloff[i];
-
-      // Add light to final colour of the pixel
-      colour += temp_col;
-
-      // Clamp final lighting-based colour
-      colour = saturate(colour);
-
+      final_diff_contribution /= falloff;
 
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
-      //float3 reflection = reflect(calculatedLightDir[i], input.normal);
+      float4 reflection = reflect(calc_light_dir, float4(input.normal, 0.f));
 
-      //// Determine the amount of specular light based on the reflection vector,
-      //// the viewing direction and the specular power
-      //float4 specular = pow(saturate(dot(reflection, input.viewDir)), 
-      //  l_spec_power[i]);
+      // Determine the amount of specular light based on the reflection vector,
+      // the viewing direction and the specular power
+      float4 specular = pow(saturate(dot(reflection, input.viewDir)), 
+        lights[i].specular_power);
 
-      //// Calculate the colour of the specular, diminished by the falloff factor
-      //finalSpec += (specular * l_specular[i]) / falloff[i];
-      //finalSpec = saturate(finalSpec);
-
+      // Calculate the colour of the specular, diminished by the falloff factor
+      final_spec_contribution = (specular * lights[i].specular) / falloff;
+     
+      // Add specular and diffuse to the total contribution of the light
+      total_light_contribution += (final_diff_contribution + final_spec_contribution);
+      total_light_contribution = saturate(total_light_contribution);
     }
 
-    // Set the ambient illumination
-    ambient_colour += l_ambient[i] * textureColour;
-
-
   }
+   
 
-  // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
-  colour = colour * textureColour;
+  // Add the ambient component to the diffuse to obtain the outpu colour
+  colour = saturate(ambient_final_colour + total_light_contribution);
 
-  // Add the specular component to the output colour
-  colour = saturate(colour + finalSpec + ambient_colour);
-	
-  return colour;
+	return colour;
 }
 

@@ -39,7 +39,7 @@ public:
 	virtual void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 protected:
-	virtual void InitShader(WCHAR*, WCHAR*) = 0;
+  void InitShader(WCHAR*, WCHAR*) {};
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
 	void loadVertexShader(WCHAR* filename);
