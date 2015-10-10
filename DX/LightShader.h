@@ -16,6 +16,21 @@ const unsigned int kNumLights = 4;
 class LightShader : public BaseShader
 {
 private:
+
+  struct LightType {
+    XMFLOAT4 diffuse;
+    XMFLOAT4 ambient;
+		XMFLOAT4 direction;
+    XMFLOAT4 specularColour;
+    XMFLOAT4 attenuation;
+    XMFLOAT4 position;
+    // Determines which light is active
+    float active;
+    float range;
+    float specularPower;
+    float padding;
+  };
+
 	struct LightBufferType
 	{
 		XMFLOAT4 diffuse[kNumLights];
