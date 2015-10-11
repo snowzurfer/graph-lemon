@@ -22,7 +22,7 @@ struct LightType {
   float specular_power;
   float spot_cutoff;
   float spot_exponent;
-  float2 padding;
+  float3 padding;
 };
 
 // Represents a material
@@ -96,7 +96,7 @@ float4 main(InputType input) : SV_TARGET {
     float4 final_amb_contribution = lights[i].ambient * texture_colour *
       mat.ambient;
     // The spotlight effect in case the light is spotlight
-    float spotlight_effect = 0.f;
+    float spot_effect = 1.f;
   
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
@@ -134,9 +134,23 @@ float4 main(InputType input) : SV_TARGET {
             (lights[i].attenuation[2] * (dist * dist));
         }
 
-        // Calculate the spotlight effect by taking the unit vector from the
-        // light position and the spotlight's direction
-        spotlight_effect = pow(max(), lights[i].spot_cutoff)
+        // If the light is a spotlight
+        if (lights[i].spot_cutoff != 180.f) {
+          // Calculate the cosine of the angle between the direction of the light
+          // and the vector from the light to the pixel
+          float cos_directions = max(dot(calc_light_dir, lights[i].direction), 0);
+
+          // If the pixel lies within the cone of illumination 
+          if (cos_directions < cos(lights[i].spot_cutoff)) {
+            // Calculate the spotlight effect
+            spot_effect = pow(cos_directions, lights[i].spot_exponent);
+          }
+          // If the pixel doesn't lie within the cone
+          else {
+            spot_effect = 0.f;
+          }
+
+        }
       }
     }
     
@@ -162,7 +176,8 @@ float4 main(InputType input) : SV_TARGET {
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor
       total_light_contribution += ((final_amb_contribution + 
-        final_diff_contribution + final_spec_contribution) / falloff);
+        final_diff_contribution + final_spec_contribution) / falloff
+        * spot_effect);
       total_light_contribution = saturate(total_light_contribution);
 
     }

@@ -29,9 +29,12 @@ private:
     unsigned int active;
     float range;
     float specular_power;
+    // Spot cutoff has 2 ranges/values:
+    // 180.0 = not a spotlight
+    // [0.f, 90.f] = spotlight
     float spot_cutoff;
     float spot_exponent;
-    XMFLOAT2 padding;
+    XMFLOAT3 padding;
   };
 
   struct CamBufferType {
