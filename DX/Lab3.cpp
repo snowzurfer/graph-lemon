@@ -126,6 +126,17 @@ bool Lab3::Render()
   // Create a mock material
   szgrh::Material mock_material;
   mock_material.diffuse_texname = "../res/DefaultDiffuse.png";
+  for (unsigned int i = 0; i < 3; ++i) {
+    mock_material.ambient[i] = 1.f;
+    mock_material.diffuse[i] = 1.f;
+    mock_material.specular[i] = 1.f;
+    mock_material.transmittance[i] = 0.f;
+    mock_material.emission[i] = 0.f;
+  }
+  mock_material.shininess = 7.f;
+  mock_material.ior = 0.f;
+  mock_material.dissolve = 1.f;
+  mock_material.illum = 2;
 
 	// Set shader parameters (matrices and texture)
   m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix,

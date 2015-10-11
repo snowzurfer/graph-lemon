@@ -70,7 +70,7 @@ float4 main(InputType input) : SV_TARGET {
   texture_colour = shaderTexture.Sample(SampleType, input.tex);
 
   // Calculate the global constant ambient contribution
-  ambient_global_colour *= texture_colour;
+  ambient_global_colour *= texture_colour * mat.ambient;
 
   // For each light in the scene
   for (uint i = 0; i < L_NUM; ++i) {
@@ -91,7 +91,8 @@ float4 main(InputType input) : SV_TARGET {
     // The final contribution of the diffuse part of the light
     float4 final_diff_contribution = { 0.f, 0.f, 0.f, 0.f };
     // The final contribution of the ambient part of the light
-    float4 final_amb_contribution = lights[i].ambient * texture_colour;
+    float4 final_amb_contribution = lights[i].ambient * texture_colour *
+      mat.ambient;
   
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
@@ -134,8 +135,8 @@ float4 main(InputType input) : SV_TARGET {
     // If the light is striking the front of the pixel
     if (light_intensity > 0.f) {
       // Add the diffuse colour contribution
-      final_diff_contribution = saturate(lights[i].diffuse * light_intensity);
-      final_diff_contribution *= texture_colour;
+      final_diff_contribution = saturate(lights[i].diffuse * light_intensity *
+        texture_colour * mat.diffuse);
 
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
@@ -144,11 +145,11 @@ float4 main(InputType input) : SV_TARGET {
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
       float specular_intensity = pow(saturate(dot(reflection, input.viewDir)), 
-        lights[i].specular_power);
+        mat.shininess);
 
       // Calculate the colour of the specular, diminished by the falloff factor
-      final_spec_contribution = (specular_intensity * lights[i].specular);
-      final_spec_contribution *= texture_colour;
+      final_spec_contribution = saturate(specular_intensity * 
+        lights[i].specular * mat.specular * texture_colour);
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor

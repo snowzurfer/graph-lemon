@@ -168,15 +168,15 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   mat_buff_ptr = (MaterialBufferType *)mapped_resource.pData;
   // Set its data
   mat_buff_ptr->ambient = XMFLOAT4(mat.ambient[0], mat.ambient[1],
-    mat.ambient[2], 1.f);
+    mat.ambient[2], mat.dissolve);
   mat_buff_ptr->diffuse = XMFLOAT4(mat.diffuse[0], mat.diffuse[1],
-    mat.diffuse[2], 1.f);
+    mat.diffuse[2], mat.dissolve);
   mat_buff_ptr->specular = XMFLOAT4(mat.specular[0], mat.specular[1],
-    mat.specular[2], 1.f);
+    mat.specular[2], mat.dissolve);
   mat_buff_ptr->transmittance = XMFLOAT4(mat.transmittance[0], 
     mat.transmittance[1], mat.transmittance[2], 1.f);
   mat_buff_ptr->emission = XMFLOAT4(mat.emission[0], mat.emission[1],
-    mat.emission[2], 1.f);
+    mat.emission[2], mat.dissolve);
   mat_buff_ptr->shininess = mat.shininess;
   mat_buff_ptr->ior = mat.ior;
   mat_buff_ptr->dissolve = mat.dissolve;
