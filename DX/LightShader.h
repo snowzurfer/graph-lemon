@@ -18,7 +18,7 @@ class LightShader : public BaseShader
 {
 private:
 
-  struct LightType {
+  struct LightBufferType {
     XMFLOAT4 diffuse;
     XMFLOAT4 ambient;
 		XMFLOAT4 direction;

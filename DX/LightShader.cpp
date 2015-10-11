@@ -90,7 +90,7 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
 	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightType) * lights_num;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * lights_num;
 	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	lightBufferDesc.MiscFlags = 0;
@@ -195,13 +195,13 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
-	LightType* light_ptr;
+	LightBufferType* light_ptr;
 	CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	
   // Send light data to pixel shader
   result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
-  light_ptr = (LightType*)mapped_resource.pData;
+  light_ptr = (LightBufferType*)mapped_resource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
     light_ptr[i].diffuse = lights[i].GetDiffuseColour();
     light_ptr[i].ambient = lights[i].GetAmbientColour();
