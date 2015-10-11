@@ -4,8 +4,11 @@
 Texture2D shaderTexture : register(t0);
 SamplerState SampleType : register(s0);
 
+// The maximum number of lights in the scene and also the number
+// of lights which are passed every frame
 #define L_NUM 4
 
+// Represents a single light
 struct LightType {
   float4 diffuse;
   float4 ambient;
@@ -20,9 +23,29 @@ struct LightType {
   float padding;
 };
 
+// Represents a material
+struct MaterialType {
+  float4 ambient;
+  float4 diffuse;
+  float4 specular;
+  float4 transmittance;
+  float4 emission;
+  float shininess;
+  float ior;      // index of refraction
+  float dissolve; // 1 == opaque; 0 == fully transparent
+  int illum;
+};
+
+// Const buffer for lights
 cbuffer LightBuffer : register(cb0) {
   LightType lights[L_NUM];
 };
+
+// Const buffer for the material
+cbuffer MatBuffer : register(cb1) {
+  MaterialType mat;
+};
+
 
 struct InputType
 {
@@ -46,7 +69,6 @@ float4 main(InputType input) : SV_TARGET {
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
   texture_colour = shaderTexture.Sample(SampleType, input.tex);
 
-  
   // For each light in the scene
   for (uint i = 0; i < L_NUM; ++i) {
     // If the light is active
@@ -65,9 +87,8 @@ float4 main(InputType input) : SV_TARGET {
     float4 final_spec_contribution = { 0.f, 0.f, 0.f, 0.f };
     // The final contribution of the diffuse part of the light
     float4 final_diff_contribution = { 0.f, 0.f, 0.f, 0.f };
-
-    // Add ambient contribution
-    ambient_final_colour += texture_colour * lights[i].ambient;
+    // The final contribution of the ambient part of the light
+    float4 final_amb_contribution = lights[i].ambient * texture_colour;
   
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
@@ -113,32 +134,32 @@ float4 main(InputType input) : SV_TARGET {
       final_diff_contribution = saturate(lights[i].diffuse * light_intensity);
       final_diff_contribution *= texture_colour;
 
-      // Calculate the diffuse after the falloff factor
-      final_diff_contribution /= falloff;
-
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
       float3 reflection = reflect(calc_light_dir.xyz, input.normal);
 
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
-      float specular = pow(saturate(dot(reflection, input.viewDir)), 
+      float specular_intensity = pow(saturate(dot(reflection, input.viewDir)), 
         lights[i].specular_power);
 
       // Calculate the colour of the specular, diminished by the falloff factor
-      final_spec_contribution = (specular * lights[i].specular) / falloff;
+      final_spec_contribution = (specular_intensity * lights[i].specular);
       final_spec_contribution *= texture_colour;
      
-      // Add specular and diffuse to the total contribution of the light
-      total_light_contribution += (final_diff_contribution + final_spec_contribution);
+      // Add specular and diffuse to the total contribution of the light also
+      // accounting for the falloff factor
+      total_light_contribution += ((final_amb_contribution + 
+        final_diff_contribution + final_spec_contribution) / falloff);
       total_light_contribution = saturate(total_light_contribution);
+
     }
 
   }
    
 
   // Add the ambient component to the diffuse to obtain the outpu colour
-  colour = saturate(ambient_final_colour + total_light_contribution);
+  colour = saturate(total_light_contribution);
 
 	return colour;
 }

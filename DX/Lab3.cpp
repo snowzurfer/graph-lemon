@@ -6,6 +6,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <fstream>
+#include "Texture.h"
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
     BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
@@ -121,9 +122,14 @@ bool Lab3::Render()
 
 	// Send geometry data (from mesh)
 	m_Mesh->SendData(m_Direct3D->GetDeviceContext());
+  // Create a mock material
+  szgrh::Material mock_material;
+  mock_material.diffuse_texname = "../res/DefaultDiffuse.png";
+
 	// Set shader parameters (matrices and texture)
-	m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix, 
-    viewMatrix, projectionMatrix, m_Mesh->GetTexture());
+  m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix,
+    viewMatrix, projectionMatrix, mock_material);
+
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
 

@@ -1,9 +1,10 @@
 // texture shader.cpp
 #include "lightshader.h"
+#include "Texture.h"
 
 
 LightShader::LightShader(ID3D11Device* device, HWND hwnd, unsigned int lights_num) : 
-  BaseShader(device, hwnd)
+  BaseShader(device, hwnd), material_buf_(nullptr)
 {
 	InitShader(L"../shaders/light_vs.hlsl", L"../shaders/light_ps.hlsl", lights_num);
 }
@@ -108,13 +109,27 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	m_device->CreateBuffer(&camBufferDesc, NULL, &m_camBuffer);
+
+ // // Create the constant buffer for materials
+	D3D11_BUFFER_DESC mat_buff_desc;
+  // Setup material buffer
+  mat_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
+	mat_buff_desc.ByteWidth = sizeof(MaterialBufferType);
+	mat_buff_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	mat_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	mat_buff_desc.MiscFlags = 0;
+	mat_buff_desc.StructureByteStride = 0;
+  // Create the buffer
+  m_device->CreateBuffer(&mat_buff_desc, NULL, &material_buf_);
+
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture) 
-{
+void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+  const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
+  const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
 	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	D3D11_MAPPED_SUBRESOURCE mapped_resource;
 	MatrixBufferType* data_ptr;
 	unsigned int bufferNumber;
 	XMMATRIX tworld, tview, tproj;
@@ -126,10 +141,10 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	tproj = XMMatrixTranspose(projectionMatrix);
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 
 	// Get a pointer to the data in the constant buffer.
-	data_ptr = (MatrixBufferType*)mappedResource.pData;
+	data_ptr = (MatrixBufferType*)mapped_resource.pData;
 
 	// Copy the matrices into the constant buffer.
 	data_ptr->world = tworld;// worldMatrix;
@@ -145,21 +160,48 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	// Now set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
+  // Assign the material data
+  MaterialBufferType *mat_buff_ptr;
+  result = deviceContext->Map(material_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mapped_resource);
+  // Get a ptr to the data in the constant buffer
+  mat_buff_ptr = (MaterialBufferType *)mapped_resource.pData;
+  // Set its data
+  mat_buff_ptr->ambient = XMFLOAT4(mat.ambient[0], mat.ambient[1],
+    mat.ambient[2], 1.f);
+  mat_buff_ptr->diffuse = XMFLOAT4(mat.diffuse[0], mat.diffuse[1],
+    mat.diffuse[2], 1.f);
+  mat_buff_ptr->specular = XMFLOAT4(mat.specular[0], mat.specular[1],
+    mat.specular[2], 1.f);
+  mat_buff_ptr->transmittance = XMFLOAT4(mat.transmittance[0], 
+    mat.transmittance[1], mat.transmittance[2], 1.f);
+  mat_buff_ptr->emission = XMFLOAT4(mat.emission[0], mat.emission[1],
+    mat.emission[2], 1.f);
+  mat_buff_ptr->shininess = mat.shininess;
+  mat_buff_ptr->ior = mat.ior;
+  mat_buff_ptr->dissolve = mat.dissolve;
+  mat_buff_ptr->illum = mat.illum;
+  // Unlock the constant buffer
+  deviceContext->Unmap(material_buf_, 0);
+  // Set the constant buffer index in the pixel shader
+  deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
+
+
+  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
   // Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+  deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
 void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
 	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* data_ptr;
+	D3D11_MAPPED_SUBRESOURCE mapped_resource;
 	LightType* light_ptr;
 	CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	
   // Send light data to pixel shader
-  result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-  light_ptr = (LightType*)mappedResource.pData;
+  result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
+  light_ptr = (LightType*)mapped_resource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
     light_ptr[i].diffuse = lights[i].GetDiffuseColour();
     light_ptr[i].ambient = lights[i].GetAmbientColour();
@@ -179,8 +221,8 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 
   // Send camera data to vertex shader
 	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
-    &mappedResource);
-	camPtr = (CamBufferType*)mappedResource.pData;
+    &mapped_resource);
+	camPtr = (CamBufferType*)mapped_resource.pData;
   camPtr->camPos = cam->GetPosition();
 	deviceContext->Unmap(m_camBuffer, 0);
 	bufferNumber = 1;
