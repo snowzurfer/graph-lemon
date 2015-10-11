@@ -206,7 +206,7 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
     light_ptr[i].diffuse = lights[i].GetDiffuseColour();
     light_ptr[i].ambient = lights[i].GetAmbientColour();
     light_ptr[i].direction = XMFLOAT4(lights[i].GetDirection().x, 
-      lights[i].GetDirection().y, lights[i].GetDirection().z, 1.0);
+      lights[i].GetDirection().y, lights[i].GetDirection().z, 0.f);
     light_ptr[i].specular = lights[i].GetSpecularColour();
     light_ptr[i].specular_power = lights[i].GetSpecularPower();
     light_ptr[i].attenuation = XMFLOAT4(lights[i].GetAttenuation().x, 
@@ -214,6 +214,8 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
     light_ptr[i].range = lights[i].GetRange();
     light_ptr[i].position = lights[i].GetPosition4();
     light_ptr[i].active = static_cast<unsigned int>(lights[i].active());
+    light_ptr[i].spot_cutoff = lights[i].spot_cutoff();
+    light_ptr[i].spot_exponent = lights[i].spot_exponent();
   }
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;

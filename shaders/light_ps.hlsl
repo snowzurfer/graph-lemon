@@ -20,7 +20,9 @@ struct LightType {
   uint active;
   float range;
   float specular_power;
-  float padding;
+  float spot_cutoff;
+  float spot_exponent;
+  float2 padding;
 };
 
 // Represents a material
@@ -93,6 +95,8 @@ float4 main(InputType input) : SV_TARGET {
     // The final contribution of the ambient part of the light
     float4 final_amb_contribution = lights[i].ambient * texture_colour *
       mat.ambient;
+    // The spotlight effect in case the light is spotlight
+    float spotlight_effect = 0.f;
   
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
@@ -129,6 +133,10 @@ float4 main(InputType input) : SV_TARGET {
           falloff = lights[i].attenuation[0] + (lights[i].attenuation[1] * dist) +
             (lights[i].attenuation[2] * (dist * dist));
         }
+
+        // Calculate the spotlight effect by taking the unit vector from the
+        // light position and the spotlight's direction
+        spotlight_effect = pow(max(), lights[i].spot_cutoff)
       }
     }
     

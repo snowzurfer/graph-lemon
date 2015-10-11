@@ -9,6 +9,10 @@ class Light
 {
 
 public:
+  // Ctor
+  Light();
+
+
 	void* operator new(size_t i)
 	{
 		return _mm_malloc(i, 16);
@@ -35,6 +39,8 @@ public:
   void SetRange(float);
 
   void set_active(bool v);
+  void set_spot_cutoff(float v);
+  void set_spot_exponent(float v);
 
 	// Getters
 	XMFLOAT4 GetAmbientColour();
@@ -51,6 +57,8 @@ public:
   float GetRange();
 
   bool active() const;
+  float spot_cutoff() const;
+  float spot_exponent() const;
 
 protected:
 	XMFLOAT4 m_ambientColour;
@@ -67,6 +75,14 @@ protected:
  
   // Whether the light is active or not
   bool active_;
+
+  // The cutoff value for spotlights; set to
+  // 180 by default, meaning by default the light is not a spotlight
+  float spot_cutoff_;
+
+  // The exponent value for spotlights; determine how concentrated
+  // the lightbeam is; by default it's set to 1
+  float spot_exponent_;
 };
 
 #endif

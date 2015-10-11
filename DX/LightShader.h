@@ -29,7 +29,9 @@ private:
     unsigned int active;
     float range;
     float specular_power;
-    float padding;
+    float spot_cutoff;
+    float spot_exponent;
+    XMFLOAT2 padding;
   };
 
   struct CamBufferType {

@@ -3,6 +3,12 @@
 
 #include "light.h"
 
+Light::Light() :
+    spot_cutoff_(180.f),
+    spot_exponent_(1.f) {
+
+}
+
 void Light::GenerateViewMatrix()
 {
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
@@ -141,6 +147,24 @@ bool Light::active() const {
   return active_;
 }
 
+float Light::spot_cutoff() const {
+  return spot_cutoff_;
+}
+
+float Light::spot_exponent() const {
+  return spot_exponent_;
+}
+
+
+
 void Light::set_active(bool v) {
   active_ = v;
+}
+
+void Light::set_spot_cutoff(float v) {
+  spot_cutoff_ = v;
+}
+
+void Light::set_spot_exponent(float v) {
+  spot_exponent_ = v;
 }
