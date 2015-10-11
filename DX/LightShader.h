@@ -32,20 +32,6 @@ private:
     float padding;
   };
 
-	struct LightBufferType
-	{
-		XMFLOAT4 diffuse[kNumLights];
-    XMFLOAT4 ambient[kNumLights];
-		XMFLOAT4 direction[kNumLights];
-    XMFLOAT4 specularColour[kNumLights];
-    XMFLOAT4 attenuation[kNumLights];
-    XMFLOAT4 position[kNumLights];
-    // Determines which light is active
-    float active[kNumLights];
-    float range[kNumLights];
-    float specularPower[kNumLights];
-	};
-
   struct CamBufferType {
     XMFLOAT3 camPos;
     float padding;
