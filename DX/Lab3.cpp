@@ -18,13 +18,14 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());
-    lights_[i].SetPosition(0.f, 5.f, 0.f, 0.f);
+    lights_[i].SetPosition(0.f, 7.f, 0.f, 0.f);
     // Set the light values
     lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
     // Set ambient for one light only 
     if (i == 0) {
-      lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
-      lights_[i].SetPosition(5.f, 0.f, 0.f, 0.f);
+      //lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
+      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
+      lights_[i].SetPosition(3.f, 0.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 0.f, 0.f, 1.f);
     }
     else {
@@ -32,7 +33,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     }
     lights_[i].SetDirection(0.f, -1.f, 0.f);
     lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
-    lights_[i].SetSpecularPower(6.f);
+    lights_[i].SetSpecularPower(7.f);
     lights_[i].SetAttenuation(2.f, 0.f, 0.f);
     lights_[i].SetRange(45.f);
     lights_[i].set_active(true);

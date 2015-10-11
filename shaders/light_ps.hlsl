@@ -61,13 +61,16 @@ float4 main(InputType input) : SV_TARGET {
   float4 texture_colour;
   // Final colour to be output by the shader
   float4 colour = { 0.f, 0.f, 0.f, 0.f };
-  // Ambient contribution
-  float4 ambient_final_colour;
+  // Global, constant ambient contribution
+  float4 ambient_global_colour = {0.2f, 0.2f, 0.2f, 1.f};
   // Total contribution of the lights
   float4 total_light_contribution = { 0.f, 0.f, 0.f, 0.f };
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
   texture_colour = shaderTexture.Sample(SampleType, input.tex);
+
+  // Calculate the global constant ambient contribution
+  ambient_global_colour *= texture_colour;
 
   // For each light in the scene
   for (uint i = 0; i < L_NUM; ++i) {
@@ -159,7 +162,7 @@ float4 main(InputType input) : SV_TARGET {
    
 
   // Add the ambient component to the diffuse to obtain the outpu colour
-  colour = saturate(total_light_contribution);
+  colour = saturate(ambient_global_colour + total_light_contribution);
 
 	return colour;
 }
