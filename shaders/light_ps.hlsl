@@ -141,7 +141,7 @@ float4 main(InputType input) : SV_TARGET {
           float cos_directions = max(dot(calc_light_dir, lights[i].direction), 0);
 
           // If the pixel lies within the cone of illumination 
-          if (cos_directions < cos(lights[i].spot_cutoff)) {
+          if (cos_directions > cos(lights[i].spot_cutoff)) {
             // Calculate the spotlight effect
             spot_effect = pow(cos_directions, lights[i].spot_exponent);
           }
