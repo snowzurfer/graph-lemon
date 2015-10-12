@@ -92,6 +92,7 @@
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="BaseMesh.cpp" />
     <ClCompile Include="BaseShader.cpp" />
+    <ClCompile Include="buffer_resource_manager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColourShader.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
@@ -118,11 +119,13 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TokenStream.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
+    <ClCompile Include="waves_vertex_deform_shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="BaseMesh.h" />
     <ClInclude Include="BaseShader.h" />
+    <ClInclude Include="buffer_resource_manager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="CubeMesh.h" />
@@ -148,6 +151,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TokenStream.h" />
     <ClInclude Include="TriangleMesh.h" />
+    <ClInclude Include="waves_vertex_deform_shaderh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

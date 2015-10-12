@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include <vector>
 #include "Material.h"
+#include "buffer_resource_manager.h"
 
 using namespace std;
 using namespace DirectX;
@@ -56,7 +57,9 @@ private:
 
 public:
 
-	LightShader(ID3D11Device* device, HWND hwnd, unsigned int lights_num);
+	LightShader(ID3D11Device* device, HWND hwnd, 
+    szgrh::ConstBufManager &buf_man, unsigned int lights_num);
+
 	~LightShader();
 
   // Sadly have to use by non-const reference paramenters, as the framework
@@ -71,7 +74,8 @@ public:
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:
-	void InitShader(WCHAR*, WCHAR*, unsigned int lights_num);
+	void InitShader(szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
+    unsigned int lights_num);
 
 private:
 	ID3D11Buffer* m_matrixBuffer;

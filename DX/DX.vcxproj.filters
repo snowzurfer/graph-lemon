@@ -117,6 +117,12 @@
     <ClCompile Include="Material.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
+    <ClCompile Include="waves_vertex_deform_shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer_resource_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -201,6 +207,12 @@
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="waves_vertex_deform_shaderh.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer_resource_manager.h">
       <Filter>Source Files\System</Filter>
     </ClInclude>
   </ItemGroup>

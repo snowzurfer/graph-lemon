@@ -3,10 +3,11 @@
 #include "Texture.h"
 
 
-LightShader::LightShader(ID3D11Device* device, HWND hwnd, unsigned int lights_num) : 
-  BaseShader(device, hwnd), material_buf_(nullptr)
-{
-	InitShader(L"../shaders/light_vs.hlsl", L"../shaders/light_ps.hlsl", lights_num);
+LightShader::LightShader(ID3D11Device* device, HWND hwnd, 
+  szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
+    BaseShader(device, hwnd), material_buf_(nullptr) {
+	InitShader(buf_man, L"../shaders/light_vs.hlsl", 
+    L"../shaders/light_ps.hlsl", lights_num);
 }
 
 
@@ -45,9 +46,8 @@ LightShader::~LightShader()
 }
 
 
-void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename, 
-  unsigned int lights_num)
-{
+void LightShader::InitShader(szgrh::ConstBufManager &buf_man, 
+  WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
@@ -66,7 +66,9 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 	matrixBufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+  m_matrixBuffer = buf_man.CreateD3D11ConstBuffer("mvp_buffer",
+    matrixBufferDesc, m_device);
+  assert(m_matrixBuffer != nullptr);
 
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -96,8 +98,11 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 	lightBufferDesc.MiscFlags = 0;
 	lightBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	m_device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
+	// Create the constant buffer pointer so we can access the vertex shader constant 
+  // buffer from within this class.
+  m_lightBuffer = buf_man.CreateD3D11ConstBuffer("scene_lights_buffer",
+    lightBufferDesc, m_device);
+  assert(m_lightBuffer != nullptr);
 
 	// Setup cam buffer
 	camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -107,10 +112,13 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 	camBufferDesc.MiscFlags = 0;
 	camBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	m_device->CreateBuffer(&camBufferDesc, NULL, &m_camBuffer);
+	// Create the constant buffer pointer so we can access the vertex shader constant 
+  // buffer from within this class.
+  m_camBuffer = buf_man.CreateD3D11ConstBuffer("scene_cam_buffer",
+    camBufferDesc, m_device);
+  assert(m_camBuffer != nullptr);
 
- // // Create the constant buffer for materials
+  // Create the constant buffer for materials
 	D3D11_BUFFER_DESC mat_buff_desc;
   // Setup material buffer
   mat_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -120,7 +128,9 @@ void LightShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename,
 	mat_buff_desc.MiscFlags = 0;
 	mat_buff_desc.StructureByteStride = 0;
   // Create the buffer
-  m_device->CreateBuffer(&mat_buff_desc, NULL, &material_buf_);
+  material_buf_ = buf_man.CreateD3D11ConstBuffer("mat_buffer",
+    mat_buff_desc, m_device);
+  assert(material_buf_ != nullptr);
 
 }
 

@@ -10,15 +10,19 @@
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
     BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
-    model_(nullptr), cube_mesh_(nullptr) {
+    model_(nullptr), cube_mesh_(nullptr),
+    buf_manager_(nullptr) {
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
   // Create a cube mesh
   cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png");
-  
 
-	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, kNumLights);
+  // Create the buffers manager
+  buf_manager_ = new szgrh::ConstBufManager();
+
+	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_, 
+    kNumLights);
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());

@@ -11,6 +11,7 @@
 #include "Light.h"
 #include <vector>
 #include "Model.h"
+#include "buffer_resource_manager.h"
 
 class Lab3 : public BaseApplication
 {
@@ -30,6 +31,7 @@ private:
 	SphereMesh* m_Mesh;
   CubeMesh *cube_mesh_;
   std::vector<Light> lights_;
+  szgrh::ConstBufManager *buf_manager_;
 
 };
 

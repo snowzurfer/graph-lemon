@@ -29,7 +29,6 @@ public:
   // Disable copy ctor and assignment operator
   ConstBufManager(const ConstBufManager &) = delete;
   ConstBufManager &operator=(const ConstBufManager &) = delete;
-  ConstBufManager &operator=(const ConstBufManager &) const = delete;
 
   // Dtor
   ~ConstBufManager();

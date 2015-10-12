@@ -7,6 +7,7 @@
 #include <D3Dcompiler.h>
 #include <DirectXMath.h>
 #include <fstream>
+#include "buffer_resource_manager.h"
 
 using namespace std;
 using namespace DirectX;
@@ -39,7 +40,7 @@ public:
 	virtual void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 protected:
-  void InitShader(WCHAR*, WCHAR*) {};
+  void InitShader(const szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*) {};
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
 	void loadVertexShader(WCHAR* filename);
