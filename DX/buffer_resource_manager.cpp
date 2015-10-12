@@ -10,7 +10,7 @@ ConstBufManager::ConstBufManager() :
 
 ID3D11Buffer *ConstBufManager::CreateD3D11ConstBuffer(const std::string &name,
   const D3D11_BUFFER_DESC &desc,
-  ID3D11Device* device) {
+  ID3D11Device* device) const {
   // If the name passed is faulted
   if (name == "") {
     return nullptr;
