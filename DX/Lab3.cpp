@@ -99,6 +99,10 @@ Lab3::~Lab3()
     cube_mesh_ = nullptr;
   }
 
+  if (buf_manager_ != nullptr) {
+    delete buf_manager_;
+    buf_manager_ = nullptr;
+  }
   //if (m_Light) {
   //  delete m_Light;
   //  m_Light = nullptr;
