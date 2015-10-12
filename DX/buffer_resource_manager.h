@@ -37,7 +37,7 @@ public:
   // Create a buffer as explained at top of header file
   ID3D11Buffer *CreateD3D11ConstBuffer(const std::string &name,
     const D3D11_BUFFER_DESC &desc,
-    ID3D11Device* device) const;
+    ID3D11Device* device);
   
 }; // class ConstBufManager
 
