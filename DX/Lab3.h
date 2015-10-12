@@ -6,7 +6,7 @@
 #include "baseapplication.h"
 
 #include "SphereMesh.h"
-#include "PlaneMesh.h"
+#include "CubeMesh.h"
 #include "LightShader.h"
 #include "Light.h"
 #include <vector>
@@ -28,7 +28,7 @@ private:
 	LightShader* m_Shader;
   Model *model_;
 	SphereMesh* m_Mesh;
-  PlaneMesh *m_PlaneMesh;
+  CubeMesh *cube_mesh_;
   std::vector<Light> lights_;
 
 };

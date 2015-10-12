@@ -10,9 +10,13 @@
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
     BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
-    model_(nullptr) {
+    model_(nullptr), cube_mesh_(nullptr) {
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
+
+  // Create a cube mesh
+  cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png");
+  
 
 	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, kNumLights);
 
@@ -75,6 +79,11 @@ Lab3::~Lab3()
   if (model_ != nullptr) {
     delete model_;
     model_ = nullptr;
+  }
+
+  if (cube_mesh_ != nullptr) {
+    delete cube_mesh_;
+    cube_mesh_ = nullptr;
   }
 
   //if (m_Light) {
@@ -141,9 +150,20 @@ bool Lab3::Render()
 	// Set shader parameters (matrices and texture)
   m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix,
     viewMatrix, projectionMatrix, mock_material);
-
 	// Render object (combination of mesh geometry and shader process
 	m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Mesh->GetIndexCount());
+
+  // Set the tranform for the plane below the sphere
+  XMMATRIX cube_transform = XMMatrixScaling(20.f, 1.f, 20.f) * 
+    XMMatrixTranslation(0.f, -7.f, 0.f);
+	// Send geometry data (from mesh)
+	cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
+	// Set shader parameters (matrices and texture)
+  m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), cube_transform,
+    viewMatrix, projectionMatrix, mock_material);
+	// Render object (combination of mesh geometry and shader process
+	m_Shader->Render(m_Direct3D->GetDeviceContext(), cube_mesh_->GetIndexCount());
+
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();
