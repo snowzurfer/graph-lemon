@@ -29,18 +29,27 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     if (i == 0) {
       //lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
       lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
-      lights_[i].SetPosition(3.f, 0.f, 0.f, 0.f);
-      lights_[i].SetDiffuseColour(1.f, 0.f, 0.f, 1.f);
+      lights_[i].SetPosition(3.f, 1.f, 0.f, 0.f);
+      lights_[i].SetDiffuseColour(0.f, 1.f, 1.f, 1.f);
+      lights_[i].SetDirection(0.f, -1.f, 0.f);
+      lights_[i].set_spot_cutoff(45.f);
+      lights_[i].set_spot_exponent(5.f);
     }
     else {
       lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
     }
+    if (i == 1) {
+      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
+      lights_[i].SetPosition(-3.f, 3.f, -1.f, 0.f);
+      lights_[i].SetDiffuseColour(0.f, 1.f, 0.f, 1.f);
+      lights_[i].SetDirection(0.f, -1.f, 0.f);
+    }
     lights_[i].SetDirection(0.f, -1.f, 0.f);
+    lights_[i].set_active(true);
     lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularPower(7.f);
     lights_[i].SetAttenuation(2.f, 0.f, 0.f);
     lights_[i].SetRange(45.f);
-    lights_[i].set_active(true);
   }
 
   //model_ = new Model();
