@@ -5,8 +5,9 @@
 #include "Texture.h"
 
 BaseMesh::BaseMesh() :
-m_vertexBuffer(nullptr),
-m_indexBuffer(nullptr)
+  transform_(XMMatrixIdentity()),
+  m_vertexBuffer(nullptr),
+  m_indexBuffer(nullptr)
 {
 }
 

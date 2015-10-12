@@ -53,6 +53,14 @@ public:
 
 	virtual void InitBuffers(ID3D11Device*);
 
+  inline const XMMATRIX &transform() const {
+    return transform_;
+  }
+
+  inline void set_transform(const XMMATRIX &v) {
+    transform_ = v;
+  }
+
   inline void set_mat_id(int id) {
     mat_id_ = id;
   }
@@ -67,6 +75,8 @@ public:
 protected:
 	void LoadTexture(ID3D11Device*, WCHAR*);
 
+  // World transformation matrix
+  XMMATRIX transform_;
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 	std::wstring m_Texture;
