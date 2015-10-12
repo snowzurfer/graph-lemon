@@ -1,11 +1,21 @@
 
 #include "buffer_resource_manager.h"
+#include <algorithm>
+
 
 namespace szgrh {
 
 ConstBufManager::ConstBufManager() :
     buffers_() {
+}
 
+ConstBufManager::~ConstBufManager() {
+  // Run through every element and free them
+  std::for_each(buffers_.begin(), buffers_.end(),
+    [&](std::pair<const std::string, ID3D11Buffer *> &n) {
+      n.second->Release();
+      n.second = 0;
+  });
 }
 
 ID3D11Buffer *ConstBufManager::CreateD3D11ConstBuffer(const std::string &name,

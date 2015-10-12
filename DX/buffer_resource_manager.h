@@ -29,9 +29,10 @@ public:
   // Disable copy ctor and assignment operator
   ConstBufManager(const ConstBufManager &) = delete;
   ConstBufManager &operator=(const ConstBufManager &) = delete;
+  ConstBufManager &operator=(const ConstBufManager &) const = delete;
 
   // Dtor
-  ~ConstBufManager() {};
+  ~ConstBufManager();
 
   // Create a buffer as explained at top of header file
   ID3D11Buffer *CreateD3D11ConstBuffer(const std::string &name,
