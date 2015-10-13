@@ -1,17 +1,18 @@
+
 // texture shader.cpp
-#include "lightshader.h"
+#include "waves_vertex_deform_shaderh.h"
 #include "Texture.h"
 
 
-LightShader::LightShader(ID3D11Device* device, HWND hwnd, 
+WavesVertexDeformShader::WavesVertexDeformShader(ID3D11Device* device, HWND hwnd,
   szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
-	InitShader(buf_man, L"../shaders/light_vs.hlsl", 
-    L"../shaders/light_ps.hlsl", lights_num);
+	InitShader(buf_man, L"../shaders/wave_mod_vs.hlsl", 
+    L"../shaders/wave_mod_ps.hlsl", lights_num);
 }
 
 
-LightShader::~LightShader()
+WavesVertexDeformShader::~WavesVertexDeformShader()
 {
 	// Release the sampler state.
 	if (m_sampleState)
@@ -32,7 +33,7 @@ LightShader::~LightShader()
 }
 
 
-void LightShader::InitShader(szgrh::ConstBufManager &buf_man, 
+void WavesVertexDeformShader::InitShader(szgrh::ConstBufManager &buf_man,
   WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -118,10 +119,24 @@ void LightShader::InitShader(szgrh::ConstBufManager &buf_man,
     mat_buff_desc, m_device);
   assert(material_buf_ != nullptr);
 
+  // Create constant buffer for time
+  D3D11_BUFFER_DESC time_buf_desc;
+  // Setup material buffer
+  time_buf_desc.Usage = D3D11_USAGE_DYNAMIC;
+	time_buf_desc.ByteWidth = sizeof(TimeAmpFreqBufferType);
+	time_buf_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	time_buf_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	time_buf_desc.MiscFlags = 0;
+	time_buf_desc.StructureByteStride = 0;
+  // Create the buffer
+  time_buf_ = buf_man.CreateD3D11ConstBuffer("time_buffer",
+    mat_buff_desc, m_device);
+  assert(material_buf_ != nullptr);
+
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+void WavesVertexDeformShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
   const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
   const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
 	HRESULT result;
@@ -182,13 +197,14 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   // Set the constant buffer index in the pixel shader
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
-
   ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
   // Set shader texture resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
-void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
+void WavesVertexDeformShader::SetShaderFrameParameters(
+  ID3D11DeviceContext* deviceContext, 
+  std::vector<Light> &lights, Camera *cam, float time) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
 	LightBufferType* light_ptr;
@@ -226,9 +242,19 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	bufferNumber = 1;
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
    
+  // Assign time data
+  result = deviceContext->Map(time_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mapped_resource);
+  TimeAmpFreqBufferType *time_buff_ptr = (TimeAmpFreqBufferType *)mapped_resource.pData;
+  time_buff_ptr->time = time;
+  time_buff_ptr->amplitude = 1.5f;
+  time_buff_ptr->speed = 10.f;
+  deviceContext->Unmap(time_buf_, 0);
+  deviceContext->VSSetConstantBuffers(2, 1, &time_buf_);
+
 }
 
-  void LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+  void WavesVertexDeformShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the sampler state in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
@@ -236,6 +262,3 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	// Base render function.
 	BaseShader::Render(deviceContext, indexCount);
 }
-
-
-

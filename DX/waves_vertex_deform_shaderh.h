@@ -1,21 +1,21 @@
-// Light shader.h
-// Basic single light shader setup
-#ifndef _LIGHTSHADER_H_
-#define _LIGHTSHADER_H_
+// Waves vertex deforming shader
+// Simple shader which deforms the geometry using a combination of sin and cos
+// waves
+#ifndef _WAVES_VERTEX_DEFORM_SHADER_H
+#define _WAVES_VERTEX_DEFORM_SHADER_H
 
 #include "BaseShader.h"
 #include "light.h"
 #include "Camera.h"
 #include <vector>
 #include "Material.h"
-#include "buffer_resource_manager.h"
 
 using namespace std;
 using namespace DirectX;
 
-const unsigned int kNumLights = 4;
+//const unsigned int kNumLights = 4;
 
-class LightShader : public BaseShader
+class WavesVertexDeformShader : public BaseShader
 {
 private:
 
@@ -55,12 +55,20 @@ private:
     int illum;
   };
 
+  // Buffer which contains time, amplitude and frequency to be used 
+  // to displace the vertices using a sine function
+  struct TimeAmpFreqBufferType {
+    float time;
+    float amplitude;
+    float speed;
+    float padding;
+  };
+
 public:
 
-	LightShader(ID3D11Device* device, HWND hwnd, 
+	WavesVertexDeformShader(ID3D11Device* device, HWND hwnd, 
     szgrh::ConstBufManager &buf_man, unsigned int lights_num);
-
-	~LightShader();
+	~WavesVertexDeformShader();
 
   // Sadly have to use by non-const reference paramenters, as the framework
   // most of the time does not define const accessors for its classes...
@@ -70,7 +78,7 @@ public:
 
   // Set the parameters which change only once per frame
   void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, 
-    std::vector<Light> &hlights, Camera *cam);
+    std::vector<Light> &hlights, Camera *cam, float time);
 
 	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
@@ -84,6 +92,7 @@ private:
 	ID3D11Buffer* m_lightBuffer;
 	ID3D11Buffer* m_camBuffer;
   ID3D11Buffer* material_buf_;
+  ID3D11Buffer* time_buf_;
 };
 
 #endif

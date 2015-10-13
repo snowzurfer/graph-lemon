@@ -11,18 +11,21 @@
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
     BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
     model_(nullptr), cube_mesh_(nullptr),
-    buf_manager_(nullptr) {
+    buf_manager_(nullptr), prev_time_(0.f) {
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
 
   // Create a cube mesh
-  cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png");
+  cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png", 100);
 
   // Create the buffers manager
   buf_manager_ = new szgrh::ConstBufManager();
 
 	m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_, 
     kNumLights);
+
+  waves_shader_ = new WavesVertexDeformShader(m_Direct3D->GetDevice(), hwnd,
+    *buf_manager_, kNumLights);
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());
@@ -36,11 +39,14 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
       lights_[i].SetPosition(3.f, 1.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(0.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
-      lights_[i].set_spot_cutoff(45.f);
-      lights_[i].set_spot_exponent(5.f);
+      //lights_[i].set_spot_cutoff(45.f);
+      //lights_[i].set_spot_exponent(5.f);
+    lights_[i].set_active(true);
+
     }
     else {
       lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
+    lights_[i].set_active(false);
     }
     if (i == 1) {
       lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
@@ -49,7 +55,6 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
       lights_[i].SetDirection(0.f, -1.f, 0.f);
     }
     lights_[i].SetDirection(0.f, -1.f, 0.f);
-    lights_[i].set_active(true);
     lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularPower(7.f);
     lights_[i].SetAttenuation(2.f, 0.f, 0.f);
@@ -103,6 +108,11 @@ Lab3::~Lab3()
     delete buf_manager_;
     buf_manager_ = nullptr;
   }
+
+  if (waves_shader_ != nullptr) {
+    delete waves_shader_;
+    waves_shader_ = nullptr;
+  }
   //if (m_Light) {
   //  delete m_Light;
   //  m_Light = nullptr;
@@ -127,6 +137,9 @@ bool Lab3::Frame()
 		return false;
 	}
 
+  // Increment the time counter
+  prev_time_ += m_Timer->GetTime();
+
 	return true;
 }
 
@@ -142,6 +155,8 @@ bool Lab3::Render()
 
   // Set per-frame shader paramters
   m_Shader->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
+  waves_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(),
+    lights_, m_Camera, prev_time_);
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
@@ -176,10 +191,10 @@ bool Lab3::Render()
 	// Send geometry data (from mesh)
 	cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
 	// Set shader parameters (matrices and texture)
-  m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), cube_transform,
+  waves_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(), cube_transform,
     viewMatrix, projectionMatrix, mock_material);
 	// Render object (combination of mesh geometry and shader process
-	m_Shader->Render(m_Direct3D->GetDeviceContext(), cube_mesh_->GetIndexCount());
+	waves_shader_->Render(m_Direct3D->GetDeviceContext(), cube_mesh_->GetIndexCount());
 
 
 	// Present the rendered scene to the screen.

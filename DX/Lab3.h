@@ -12,6 +12,7 @@
 #include <vector>
 #include "Model.h"
 #include "buffer_resource_manager.h"
+#include "waves_vertex_deform_shaderh.h"
 
 class Lab3 : public BaseApplication
 {
@@ -32,7 +33,9 @@ private:
   CubeMesh *cube_mesh_;
   std::vector<Light> lights_;
   szgrh::ConstBufManager *buf_manager_;
-
+  WavesVertexDeformShader *waves_shader_;
+  // Used to count time
+  float prev_time_;
 };
 
 #endif
