@@ -131,7 +131,7 @@ void WavesVertexDeformShader::InitShader(szgrh::ConstBufManager &buf_man,
   // Create the buffer
   time_buf_ = buf_man.CreateD3D11ConstBuffer("time_buffer",
     mat_buff_desc, m_device);
-  assert(time_buf != nullptr);
+  assert(time_buf_ != nullptr);
 
 }
 
