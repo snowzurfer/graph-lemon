@@ -232,6 +232,7 @@ void WavesVertexDeformShader::SetShaderFrameParameters(
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
+  deviceContext->VSSetConstantBuffers(3, 1, &m_lightBuffer);
 
   // Send camera data to vertex shader
 	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
@@ -250,6 +251,7 @@ void WavesVertexDeformShader::SetShaderFrameParameters(
   time_buff_ptr->amplitude = 1.5f;
   time_buff_ptr->speed = 10.f;
   deviceContext->Unmap(time_buf_, 0);
+  size_t size = sizeof(*time_buff_ptr);
   deviceContext->VSSetConstantBuffers(2, 1, &time_buf_);
 
 }

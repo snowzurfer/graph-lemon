@@ -55,7 +55,7 @@ void BaseShader::loadVertexShader(WCHAR* filename)
 	HRESULT result;
 	ID3DBlob* errorMessage;
 	ID3DBlob* vertexShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[4];
 	unsigned int numElements;
 	
 	// Initialize the pointers this function will use to null.
@@ -112,7 +112,15 @@ void BaseShader::loadVertexShader(WCHAR* filename)
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
 
-	// Get a count of the elements in the layout.
+	polygonLayout[3].SemanticName = "TANGENT";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[3].InputSlot = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[3].InstanceDataStepRate = 0;
+	
+  // Get a count of the elements in the layout.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
 	// Create the vertex input layout.

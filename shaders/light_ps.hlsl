@@ -56,6 +56,7 @@ struct InputType
     float3 normal : NORMAL;
     float3 viewDir : TEXCOORD1;
     float4 worldPos : TEXCOORD2;
+    float4 pixel_to_light_vec[L_NUM] : TEXCOORD3;
 };
 
 float4 main(InputType input) : SV_TARGET {

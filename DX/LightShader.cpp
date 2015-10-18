@@ -216,6 +216,8 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
+	deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
+
 
   // Send camera data to vertex shader
 	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,

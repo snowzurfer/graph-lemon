@@ -56,6 +56,7 @@ struct InputType
     float3 normal : NORMAL;
     float3 viewDir : TEXCOORD1;
     float4 worldPos : TEXCOORD2;
+    float4 pixel_to_light_vec[L_NUM] : TEXCOORD3;
 };
 
 float4 main(InputType input) : SV_TARGET {
@@ -107,9 +108,9 @@ float4 main(InputType input) : SV_TARGET {
       light_intensity = saturate(dot(float4(input.normal, 0.f), -calc_light_dir));
     }
     else if (lights[i].position.w == 0.f) { // Point
-      // Calculate the vector from the pixel in world coordinates to 
+      // Save the vector from the pixel in world coordinates to 
       // the light
-      float4 pixel_to_light_vec = lights[i].position - input.worldPos;
+      float4 pixel_to_light_vec = input.pixel_to_light_vec[i];
 
       // Store the distance between light and pixel
       float dist = length(pixel_to_light_vec);
