@@ -38,9 +38,11 @@ void CubeMesh::InitBuffers(ID3D11Device* device)
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
+  std::vector<VertexType> vertices_vector(m_vertexCount);
 
 	// Create the index array.
 	indices = new unsigned long[m_indexCount];
+  std::vector<Triangle> faces_vector(m_indexCount / 3);
 
 	// Vertex variables
 	float yincrement = 2.0f / m_resolution;
@@ -518,6 +520,11 @@ void CubeMesh::InitBuffers(ID3D11Device* device)
 		txv += txvinc;
 	}
 
+  vertices_vector.assign(vertices, vertices + m_vertexCount);
+
+  CalcTangentArray(vertices_vector, faces_vector);
+
+  memcpy(vertices, vertices_vector.data(), m_vertexCount);
 	
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;

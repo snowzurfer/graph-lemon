@@ -1,5 +1,6 @@
 // base shader.cpp
 #include "baseshader.h"
+#include "Texture.h"
 
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
@@ -49,14 +50,11 @@ BaseShader::~BaseShader()
 }
 
 
-void BaseShader::loadVertexShader(WCHAR* filename)
-{
-
+void BaseShader::loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout, 
+  size_t num_elements, WCHAR* filename) {
 	HRESULT result;
 	ID3DBlob* errorMessage;
 	ID3DBlob* vertexShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[4];
-	unsigned int numElements;
 	
 	// Initialize the pointers this function will use to null.
 	errorMessage = 0;
@@ -83,51 +81,17 @@ void BaseShader::loadVertexShader(WCHAR* filename)
 	result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
 	if (FAILED(result))
 	{
-		//return false;
+    int lol = 0;
 	}
 
-	// Create the vertex input layout description.
-	// This setup needs to match the VertexType stucture in the MeshClass and in the shader.
-	polygonLayout[0].SemanticName = "POSITION";
-	polygonLayout[0].SemanticIndex = 0;
-	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	polygonLayout[0].InputSlot = 0;
-	polygonLayout[0].AlignedByteOffset = 0;
-	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[0].InstanceDataStepRate = 0;
-
-	polygonLayout[1].SemanticName = "TEXCOORD";
-	polygonLayout[1].SemanticIndex = 0;
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[1].InputSlot = 0;
-	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[1].InstanceDataStepRate = 0;
-
-	polygonLayout[2].SemanticName = "NORMAL";
-	polygonLayout[2].SemanticIndex = 0;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	polygonLayout[2].InputSlot = 0;
-	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[2].InstanceDataStepRate = 0;
-
-	polygonLayout[3].SemanticName = "TANGENT";
-	polygonLayout[3].SemanticIndex = 0;
-	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	polygonLayout[3].InputSlot = 0;
-	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[3].InstanceDataStepRate = 0;
 	
-  // Get a count of the elements in the layout.
-	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
 	// Create the vertex input layout.
-	result = m_device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
+	result = m_device->CreateInputLayout(layout, num_elements, 
+    vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
 		&m_layout);
 	if (FAILED(result))
 	{
+    int lol = 0;
 		//return false;
 	}
 
@@ -325,4 +289,117 @@ void BaseShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 
 	// Render the triangle.
 	deviceContext->DrawIndexed(indexCount, 0, 0);
+}
+
+void BaseShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+  const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
+  const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
+	//HRESULT result;
+	//D3D11_MAPPED_SUBRESOURCE mapped_resource;
+	//szgrh::MatrixBufferType* data_ptr;
+	//unsigned int bufferNumber;
+	//XMMATRIX tworld, tview, tproj;
+
+
+	//// Transpose the matrices to prepare them for the shader.
+	//tworld = XMMatrixTranspose(worldMatrix);
+	//tview = XMMatrixTranspose(viewMatrix);
+	//tproj = XMMatrixTranspose(projectionMatrix);
+
+	//// Lock the constant buffer so it can be written to.
+	//result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
+
+	//// Get a pointer to the data in the constant buffer.
+	//data_ptr = (szgrh::MatrixBufferType*)mapped_resource.pData;
+
+	//// Copy the matrices into the constant buffer.
+	//data_ptr->world = tworld;// worldMatrix;
+	//data_ptr->view = tview;
+	//data_ptr->projection = tproj;
+
+	//// Unlock the constant buffer.
+	//deviceContext->Unmap(m_matrixBuffer, 0);
+
+	//// Set the position of the constant buffer in the vertex shader.
+	//bufferNumber = 0;
+
+	//// Now set the constant buffer in the vertex shader with the updated values.
+	//deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+
+ // // Assign the material data
+ // szgrh::MaterialBufferType *mat_buff_ptr;
+ // result = deviceContext->Map(material_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+ //   &mapped_resource);
+ // // Get a ptr to the data in the constant buffer
+ // mat_buff_ptr = (szgrh::MaterialBufferType *)mapped_resource.pData;
+ // // Set its data
+ // mat_buff_ptr->ambient = XMFLOAT4(mat.ambient[0], mat.ambient[1],
+ //   mat.ambient[2], mat.dissolve);
+ // mat_buff_ptr->diffuse = XMFLOAT4(mat.diffuse[0], mat.diffuse[1],
+ //   mat.diffuse[2], mat.dissolve);
+ // mat_buff_ptr->specular = XMFLOAT4(mat.specular[0], mat.specular[1],
+ //   mat.specular[2], mat.dissolve);
+ // mat_buff_ptr->transmittance = XMFLOAT4(mat.transmittance[0], 
+ //   mat.transmittance[1], mat.transmittance[2], 1.f);
+ // mat_buff_ptr->emission = XMFLOAT4(mat.emission[0], mat.emission[1],
+ //   mat.emission[2], mat.dissolve);
+ // mat_buff_ptr->shininess = mat.shininess;
+ // mat_buff_ptr->ior = mat.ior;
+ // mat_buff_ptr->dissolve = mat.dissolve;
+ // mat_buff_ptr->illum = mat.illum;
+ // // Unlock the constant buffer
+ // deviceContext->Unmap(material_buf_, 0);
+ // // Set the constant buffer index in the pixel shader
+ // deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
+ //
+  //if (mat.ambient_texname != L"") {
+  //  ID3D11ShaderResourceView * texture_diffuse = 
+  //    Texture::Inst()->GetTexture(mat.diffuse_texname);
+  //  ID3D11ShaderResourceView * texture_normal = 
+  //    Texture::Inst()->GetTexture(mat.bump_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(0, 1, &texture_diffuse);
+  //}
+  //if (mat.diffuse_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.diffuse_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(0, 1, &texture);
+
+  //}
+  //if (mat.specular_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.specular_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(1, 1, &texture);
+
+  //}
+  //if (mat.specular_highlight_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.specular_highlight_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(2, 1, &texture);
+
+  //}
+  //if (mat.bump_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.bump_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(3, 1, &texture);
+
+  //}
+  //if (mat.displacement_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.displacement_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(4, 1, &texture);
+
+  //}
+  //if (mat.alpha_texname != L"") {
+  //  ID3D11ShaderResourceView * texture = 
+  //    Texture::Inst()->GetTexture(mat.alpha_texname);
+  //  // Set shader textures resource in the pixel shader.
+  //  deviceContext->PSSetShaderResources(5, 1, &texture);
+
+  //}
 }

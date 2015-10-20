@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
+    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExcludePath>$(ExcludePath)</ExcludePath>
     <SourcePath>D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
@@ -94,12 +94,18 @@
     <ClCompile Include="BaseShader.cpp" />
     <ClCompile Include="buffer_resource_manager.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ColourShader.cpp" />
+    <ClCompile Include="ColourShader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Lab1.cpp" />
-    <ClCompile Include="Lab2.cpp" />
+    <ClCompile Include="Lab1.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Lab2.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Lab3.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightShader.cpp" />
@@ -112,28 +118,40 @@
     <ClCompile Include="PointMesh.cpp" />
     <ClCompile Include="QuadMesh.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="shader_resource_manager.cpp" />
     <ClCompile Include="SphereMesh.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="TessellationMesh.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureShader.cpp" />
+    <ClCompile Include="TextureShader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TokenStream.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
-    <ClCompile Include="waves_vertex_deform_shader.cpp" />
+    <ClCompile Include="waves_vertex_deform_shader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="BaseMesh.h" />
     <ClInclude Include="BaseShader.h" />
     <ClInclude Include="buffer_resource_manager.h" />
+    <ClInclude Include="buffer_types.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="ColourShader.h" />
+    <ClInclude Include="ColourShader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Lab1.h" />
-    <ClInclude Include="Lab2.h" />
+    <ClInclude Include="Lab1.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Lab2.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Lab3.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightShader.h" />
@@ -145,15 +163,20 @@
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="QuadMesh.h" />
     <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="shader_resource_manager.h" />
     <ClInclude Include="SphereMesh.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="TessellationMesh.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="TextureShader.h" />
+    <ClInclude Include="TextureShader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TokenStream.h" />
     <ClInclude Include="TriangleMesh.h" />
-    <ClInclude Include="waves_vertex_deform_shaderh.h" />
+    <ClInclude Include="waves_vertex_deform_shaderh.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -169,6 +192,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\shaders\light_vs.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\shaders\normal_map_ps.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\shaders\normal_map_vs.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\shaders\texture_ps.hlsl">

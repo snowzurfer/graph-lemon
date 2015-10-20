@@ -34,16 +34,16 @@ cbuffer CamBuffer : register(cb1) {
   float padding;
 };
 
-cbuffer TimeBuffer : register(cb2) {
+// Const buffer for lights
+cbuffer LightBuffer : register(cb2) {
+  LightType lights[L_NUM];
+};
+
+cbuffer TimeBuffer : register(cb3) {
   float time;
   float amplitude;
   float speed;
   float padding_1;
-};
-
-// Const buffer for lights
-cbuffer LightBuffer : register(cb3) {
-  LightType lights[L_NUM];
 };
 
 struct InputType

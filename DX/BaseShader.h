@@ -8,6 +8,8 @@
 #include <DirectXMath.h>
 #include <fstream>
 #include "buffer_resource_manager.h"
+#include "Material.h"
+#include "buffer_types.h"
 
 using namespace std;
 using namespace DirectX;
@@ -16,12 +18,6 @@ using namespace DirectX;
 class BaseShader
 {
 protected:
-	struct MatrixBufferType
-	{
-		XMMATRIX world;
-		XMMATRIX view;
-		XMMATRIX projection;
-	};
 
 public:
 	void* operator new(size_t i)
@@ -35,15 +31,22 @@ public:
 	}
 
 	BaseShader(ID3D11Device* device, HWND hwnd);
-	~BaseShader();
+	virtual ~BaseShader();
 
 	virtual void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
+  // Sadly have to use by non-const reference paramenters, as the framework
+  // most of the time does not define const accessors for its classes...
+	virtual void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+    const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection,
+    const szgrh::Material &mat);
+
 protected:
-  void InitShader(const szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*) {};
+  void InitShader(WCHAR*, WCHAR*) {};
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
-	void loadVertexShader(WCHAR* filename);
+	void loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
+    size_t num_elements, WCHAR* filename);
 	void loadHullShader(WCHAR* filename);
 	void loadDomainShader(WCHAR* filename);
 	void loadGeometryShader(WCHAR* filename);
@@ -52,7 +55,7 @@ protected:
 protected:
 	ID3D11Device* m_device;
 	HWND m_hwnd;
-	
+
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
 	ID3D11HullShader* m_hullShader;
@@ -61,6 +64,12 @@ protected:
 	ID3D11InputLayout* m_layout;
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11SamplerState* m_sampleState;
+	
+ // ID3D11Buffer* m_matrixBuffer;
+	//ID3D11SamplerState* m_sampleState;
+	//ID3D11Buffer* m_lightBuffer;
+	//ID3D11Buffer* m_camBuffer;
+ // ID3D11Buffer* material_buf_;
 };
 
 #endif

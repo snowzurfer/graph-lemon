@@ -2,6 +2,7 @@
 // Generates a sphere.
 #include "spheremesh.h"
 
+
 SphereMesh::SphereMesh(ID3D11Device* device, WCHAR* textureFilename, int resolution)
 {
 	m_resolution = resolution;
@@ -38,9 +39,11 @@ void SphereMesh::InitBuffers(ID3D11Device* device)
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
+  std::vector<VertexType> vertices_vector(m_vertexCount);
 
 	// Create the index array.
 	indices = new unsigned long[m_indexCount];
+  std::vector<Triangle> faces_vector(m_indexCount / 3);
 
 	// Vertex variables
 	float yincrement = 2.0f / m_resolution;
@@ -544,6 +547,18 @@ void SphereMesh::InitBuffers(ID3D11Device* device)
 		vertices[counter].normal.y = dy;
 		vertices[counter].normal.z = dz;
 	}
+  
+  for (size_t f = 0; f < m_indexCount / 3; ++f) {
+    faces_vector[f].index[0] = indices[3 * f + 0];
+    faces_vector[f].index[1] = indices[3 * f + 1];
+    faces_vector[f].index[2] = indices[3 * f + 2];
+  }
+
+  vertices_vector.assign(vertices, vertices + m_vertexCount);
+
+  CalcTangentArray(vertices_vector, faces_vector);
+
+  memcpy(vertices, vertices_vector.data(), m_vertexCount);
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -576,6 +591,8 @@ void SphereMesh::InitBuffers(ID3D11Device* device)
 
 	// Create the index buffer.
 	device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+
+
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;

@@ -7,8 +7,7 @@
 NormalMappingShader::NormalMappingShader(ID3D11Device* device, HWND hwnd,
   szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
-	InitShader(buf_man, L"../shaders/wave_mod_vs.hlsl", 
-    L"../shaders/wave_mod_ps.hlsl", lights_num);
+	InitShader(buf_man, lights_num);
 }
 
 
@@ -33,20 +32,54 @@ NormalMappingShader::~NormalMappingShader()
 }
 
 
-void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,
-  WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
+void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,unsigned int lights_num) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC camBufferDesc;
+	D3D11_INPUT_ELEMENT_DESC polygon_layout[4];
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the MeshClass and in the shader.
+	polygon_layout[0].SemanticName = "POSITION";
+	polygon_layout[0].SemanticIndex = 0;
+	polygon_layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygon_layout[0].InputSlot = 0;
+	polygon_layout[0].AlignedByteOffset = 0;
+	polygon_layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[0].InstanceDataStepRate = 0;
+
+	polygon_layout[1].SemanticName = "TEXCOORD";
+	polygon_layout[1].SemanticIndex = 0;
+	polygon_layout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygon_layout[1].InputSlot = 0;
+	polygon_layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[1].InstanceDataStepRate = 0;
+
+	polygon_layout[2].SemanticName = "NORMAL";
+	polygon_layout[2].SemanticIndex = 0;
+	polygon_layout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygon_layout[2].InputSlot = 0;
+	polygon_layout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[2].InstanceDataStepRate = 0;
+
+	polygon_layout[3].SemanticName = "TANGENT";
+	polygon_layout[3].SemanticIndex = 0;
+	polygon_layout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygon_layout[3].InputSlot = 0;
+	polygon_layout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[3].InstanceDataStepRate = 0;
 
 	// Load (+ compile) shader files
-	loadVertexShader(vsFilename);
-	loadPixelShader(psFilename);
+	loadVertexShader(polygon_layout, 4, L"../shaders/normal_map_vs.hlsl");
+	loadPixelShader(L"../shaders/normal_map_ps.hlsl");
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.ByteWidth = sizeof(szgrh::MatrixBufferType);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
@@ -79,7 +112,7 @@ void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,
 	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
 	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * lights_num;
+	lightBufferDesc.ByteWidth = sizeof(szgrh::LightBufferType) * lights_num;
 	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	lightBufferDesc.MiscFlags = 0;
@@ -93,9 +126,8 @@ void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,
 
 	// Setup cam buffer
 	camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	camBufferDesc.ByteWidth = sizeof(CamBufferType);
+	camBufferDesc.ByteWidth = sizeof(szgrh::CamBufferType);
 	camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	camBufferDesc.MiscFlags = 0;
 	camBufferDesc.StructureByteStride = 0;
 
@@ -109,7 +141,7 @@ void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,
 	D3D11_BUFFER_DESC mat_buff_desc;
   // Setup material buffer
   mat_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
-	mat_buff_desc.ByteWidth = sizeof(MaterialBufferType);
+	mat_buff_desc.ByteWidth = sizeof(szgrh::MaterialBufferType);
 	mat_buff_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	mat_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	mat_buff_desc.MiscFlags = 0;
@@ -127,7 +159,7 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
   const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
-	MatrixBufferType* data_ptr;
+	szgrh::MatrixBufferType* data_ptr;
 	unsigned int bufferNumber;
 	XMMATRIX tworld, tview, tproj;
 
@@ -141,7 +173,7 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 
 	// Get a pointer to the data in the constant buffer.
-	data_ptr = (MatrixBufferType*)mapped_resource.pData;
+	data_ptr = (szgrh::MatrixBufferType*)mapped_resource.pData;
 
 	// Copy the matrices into the constant buffer.
 	data_ptr->world = tworld;// worldMatrix;
@@ -158,11 +190,11 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Assign the material data
-  MaterialBufferType *mat_buff_ptr;
+  szgrh::MaterialBufferType *mat_buff_ptr;
   result = deviceContext->Map(material_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
   // Get a ptr to the data in the constant buffer
-  mat_buff_ptr = (MaterialBufferType *)mapped_resource.pData;
+  mat_buff_ptr = (szgrh::MaterialBufferType *)mapped_resource.pData;
   // Set its data
   mat_buff_ptr->ambient = XMFLOAT4(mat.ambient[0], mat.ambient[1],
     mat.ambient[2], mat.dissolve);
@@ -184,9 +216,9 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
   ID3D11ShaderResourceView * texture_diffuse = 
-    Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
+    Texture::Inst()->GetTexture(mat.diffuse_texname);
   ID3D11ShaderResourceView * texture_normal = 
-    Texture::Inst()->GetTexture(mat.bump_texname.c_str());
+    Texture::Inst()->GetTexture(mat.bump_texname);
   // Set shader textures resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture_diffuse);
   deviceContext->PSSetShaderResources(1, 1, &texture_normal);
@@ -194,16 +226,16 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
 
 void NormalMappingShader::SetShaderFrameParameters(
   ID3D11DeviceContext* deviceContext, 
-  std::vector<Light> &lights, Camera *cam, float time) {
+  std::vector<Light> &lights, Camera *cam) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
-	LightBufferType* light_ptr;
-	CamBufferType* camPtr;
+	szgrh::LightBufferType* light_ptr;
+	szgrh::CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	
   // Send light data to pixel and vertex shader
   result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
-  light_ptr = (LightBufferType*)mapped_resource.pData;
+  light_ptr = (szgrh::LightBufferType*)mapped_resource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
     light_ptr[i].diffuse = lights[i].GetDiffuseColour();
     light_ptr[i].ambient = lights[i].GetAmbientColour();
@@ -222,12 +254,12 @@ void NormalMappingShader::SetShaderFrameParameters(
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
-  deviceContext->VSSetConstantBuffers(3, 1, &m_lightBuffer);
+  deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
 
   // Send camera data to vertex shader
 	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
-	camPtr = (CamBufferType*)mapped_resource.pData;
+	camPtr = (szgrh::CamBufferType*)mapped_resource.pData;
   camPtr->camPos = cam->GetPosition();
 	deviceContext->Unmap(m_camBuffer, 0);
 	bufferNumber = 1;

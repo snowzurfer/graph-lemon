@@ -152,47 +152,47 @@ bool Texture::does_file_exist(const WCHAR *fname)
 void LoadTextures(ID3D11Device *device, Model &model) {
 
 
-  for (unsigned int i = 0; i < model.materials_.size(); ++i) {
-    std::string path_suffix = "../res/" + model.model_name_ + "/";
-  
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wide;
-    WCHAR cstyle_wide[128];
+  //for (unsigned int i = 0; i < model.materials_.size(); ++i) {
+  //  std::string path_suffix = "../res/" + model.model_name_ + "/";
+  //
+  //  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  //  std::wstring wide;
+  //  WCHAR cstyle_wide[128];
 
-    if (model.materials_[i].ambient_texname != "") {
-      converter.from_bytes(path_suffix + model.materials_[i].ambient_texname);
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
-    }
+  //  if (model.materials_[i].ambient_texname != "") {
+  //    converter.from_bytes(path_suffix + model.materials_[i].ambient_texname);
+  //    wcscpy_s(cstyle_wide, wide.c_str());
+  //    Texture::Inst()->LoadTexture(device, cstyle_wide);
+  //  }
 
-    if (model.materials_[i].diffuse_texname != "") {
-      wide = converter.from_bytes(path_suffix + model.materials_[i].diffuse_texname);
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
-    }
+  //  if (model.materials_[i].diffuse_texname != "") {
+  //    wide = converter.from_bytes(path_suffix + model.materials_[i].diffuse_texname);
+  //    wcscpy_s(cstyle_wide, wide.c_str());
+  //    Texture::Inst()->LoadTexture(device, cstyle_wide);
+  //  }
 
-    if (model.materials_[i].specular_texname != "") {
-      wide = converter.from_bytes(path_suffix + model.materials_[i].specular_texname);
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
-    }
+  //  if (model.materials_[i].specular_texname != "") {
+  //    wide = converter.from_bytes(path_suffix + model.materials_[i].specular_texname);
+  //    wcscpy_s(cstyle_wide, wide.c_str());
+  //    Texture::Inst()->LoadTexture(device, cstyle_wide);
+  //  }
 
 
-    std::string specular_highlight_texname; // map_Ns
+  //  std::string specular_highlight_texname; // map_Ns
 
-    if (model.materials_[i].bump_texname != "") {
-      wide = converter.from_bytes(path_suffix + model.materials_[i].bump_texname);
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
-    }
+  //  if (model.materials_[i].bump_texname != "") {
+  //    wide = converter.from_bytes(path_suffix + model.materials_[i].bump_texname);
+  //    wcscpy_s(cstyle_wide, wide.c_str());
+  //    Texture::Inst()->LoadTexture(device, cstyle_wide);
+  //  }
 
-    std::string displacement_texname;       // disp
+  //  std::string displacement_texname;       // disp
 
-    if (model.materials_[i].alpha_texname != "") {
-      wide = converter.from_bytes(path_suffix + model.materials_[i].alpha_texname);
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
-    }
+  //  if (model.materials_[i].alpha_texname != "") {
+  //    wide = converter.from_bytes(path_suffix + model.materials_[i].alpha_texname);
+  //    wcscpy_s(cstyle_wide, wide.c_str());
+  //    Texture::Inst()->LoadTexture(device, cstyle_wide);
+  //  }
 
-  }
+  //}
 }

@@ -13,6 +13,9 @@
 #include "Model.h"
 #include "buffer_resource_manager.h"
 #include "waves_vertex_deform_shaderh.h"
+#include "normal_mapping_shader.h"
+#include "TextureShader.h"
+#include "shader_resource_manager.h"
 
 class Lab3 : public BaseApplication
 {
@@ -28,12 +31,16 @@ private:
 
 private:
 	LightShader* m_Shader;
+  TextureShader *texture_shader_;
   Model *model_;
 	SphereMesh* m_Mesh;
   CubeMesh *cube_mesh_;
   std::vector<Light> lights_;
   szgrh::ConstBufManager *buf_manager_;
+  szgrh::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
+  NormalMappingShader *normal_map_shader_;
+
   // Used to count time
   float prev_time_;
 };

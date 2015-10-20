@@ -28,14 +28,15 @@ public:
   // illumination model (see http://www.fileformat.info/format/material/)
   int illum;
 
-  std::string ambient_texname;            // map_Ka
-  std::string diffuse_texname;            // map_Kd
-  std::string specular_texname;           // map_Ks
-  std::string specular_highlight_texname; // map_Ns
-  std::string bump_texname;               // map_bump, bump
-  std::string displacement_texname;       // disp
-  std::string alpha_texname;              // map_d
+  std::wstring ambient_texname;            // map_Ka
+  std::wstring diffuse_texname;            // map_Kd
+  std::wstring specular_texname;           // map_Ks
+  std::wstring specular_highlight_texname; // map_Ns
+  std::wstring bump_texname;               // map_bump, bump
+  std::wstring displacement_texname;       // disp
+  std::wstring alpha_texname;              // map_d
 
+  std::string shader_name;
 
   // Default Ctor
   Material() {};
@@ -58,20 +59,6 @@ private:
       displacement_texname &
       alpha_texname;
   }
-
-//typedef struct {
-//  std::vector<float> positions;
-//  std::vector<float> normals;
-//  std::vector<float> texcoords;
-//  std::vector<unsigned int> indices;
-//  std::vector<int> material_ids; // per-mesh material ID
-//} mesh_t;
-//
-//typedef struct {
-//  std::string name;
-//  mesh_t mesh;
-//} shape_t;
-
 
 }; // class Material
 

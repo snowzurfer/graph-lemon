@@ -5,33 +5,25 @@
 #include <codecvt>
 #include <string>
 #include "Texture.h"
+#include "LightShader.h"
+#include "normal_mapping_shader.h"
 
 Model::Model(ID3D11Device* device, WCHAR* model_filename, const std::string &model_name) :
   model_name_(model_name) {
-	// Load model data
-	//LoadModel(filename);
-
-	// Initialize the vertex and index buffer that hold the geometry for the model.
-	//InitBuffers(device);
-
-	// Load the texture for this model.
-	//LoadTexture(device, textureFilename);
-
-  // Load the textures for the materials
-  //LoadTextures_(device);
 }
 
-void Model::Init(ID3D11Device* device, WCHAR* model_filename, const std::string &model_name) {
-	//LoadModel(filename);
+void Model::Init(ID3D11Device* device, HWND hwnd, 
+  szgrh::ConstBufManager &buf_man, unsigned int lights_num,
+  szgrh::ShaderManager &shad_man) {
 
 	// Initialize the vertex and index buffer that hold the geometry for the model.
 	InitBuffers(device);
 
-	// Load the texture for this model.
-	//LoadTexture(device, textureFilename);
-
   // Load the textures for the materials
-  LoadTextures_(device);
+  LoadTextures_(device, hwnd);
+
+  // Load necessary shaders
+  LoadShaders_(device, hwnd, buf_man, lights_num, shad_man);
 }
 
 Model::~Model()
@@ -59,74 +51,130 @@ bool FindReplace(std::string &str, const std::string &find_pattern,
 
   return false;
 }
+bool FindReplace(std::wstring &str, const std::wstring &find_pattern,
+  const std::wstring &rep_pattern) { 
+  size_t index = 0; 
+  index = str.find(find_pattern, index);
+  
+  if (index != std::wstring::npos) {
+    str.replace(index, rep_pattern.length(), rep_pattern);
+
+    return true;
+  }
+
+  return false;
+}
 
 // To the designed of the API:
 // we are not oriental. No need for wchars. Like, no.
-void Model::LoadTextures_(ID3D11Device* device) {
+void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
   // For each material
   for (unsigned int i = 0; i < materials_.size(); ++i) {
-    std::string path_suffix = "../res/" + model_name_ + "/";
-  
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     std::wstring wide;
+    wide = converter.from_bytes(model_name_);
+    std::wstring path_suffix = L"../res/" + wide + L"/";
+  
     WCHAR cstyle_wide[128];
 
-    if (materials_[i].ambient_texname != "") {
+    if (materials_[i].ambient_texname != L"") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].ambient_texname, "\\", "\/");
+      FindReplace(materials_[i].ambient_texname, L"\\", L"\/");
+      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
 
-      wide = converter.from_bytes(path_suffix + materials_[i].ambient_texname);
+      wide = path_suffix + materials_[i].ambient_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
       Texture::Inst()->LoadTexture(device, cstyle_wide);
+      materials_[i].ambient_texname = wide;
     }
 
-    if (materials_[i].diffuse_texname != "") {
+    if (materials_[i].diffuse_texname != L"") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].diffuse_texname, "\\", "\/");
+      FindReplace(materials_[i].diffuse_texname, L"\\", L"\/");
+      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
       
-      wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
+      //wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
+      wide = path_suffix + materials_[i].diffuse_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
       Texture::Inst()->LoadTexture(device, cstyle_wide);
+      materials_[i].diffuse_texname = wide;
     }
 
-    if (materials_[i].specular_texname != "") {
+    if (materials_[i].specular_texname != L"") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].specular_texname, "\\", "\/");
+      FindReplace(materials_[i].specular_texname, L"\\", L"\/");
+      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
       
-      wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
+      //wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
+      wide = path_suffix + materials_[i].specular_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
       Texture::Inst()->LoadTexture(device, cstyle_wide);
+      materials_[i].specular_texname = wide;
     }
 
 
     std::string specular_highlight_texname; // map_Ns
 
-    if (materials_[i].bump_texname != "") {
+    if (materials_[i].bump_texname != L"") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].bump_texname, "\\", "\/");
+      FindReplace(materials_[i].bump_texname, L"\\", L"\/");
+      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
      
-      wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
+      //wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
+      wide = path_suffix + materials_[i].bump_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
       Texture::Inst()->LoadTexture(device, cstyle_wide);
+      materials_[i].bump_texname = wide;
     }
 
     std::string displacement_texname;       // disp
 
-    if (materials_[i].alpha_texname != "") {
+    if (materials_[i].alpha_texname != L"") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].alpha_texname, "\\", "\/");
+      FindReplace(materials_[i].alpha_texname, L"\\", L"\/");
+      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
       
-      wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
+      //wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
+      wide = path_suffix + materials_[i].alpha_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
       Texture::Inst()->LoadTexture(device, cstyle_wide);
+      materials_[i].alpha_texname = wide;
     }
-
   }
 }
 
+void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
+  szgrh::ConstBufManager &buf_man, unsigned int lights_num,
+  szgrh::ShaderManager &shad_man) {
+  // For each material
+  for (unsigned int i = 0; i < materials_.size(); ++i) {
+
+    // Determine which shader to instantiate
+    if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"") {
+      NormalMappingShader *shader =
+        new NormalMappingShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("normal_mapping_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+
+      materials_[i].shader_name = "normal_mapping_shader";
+    }
+    else if (materials_[i].diffuse_texname != L"") {
+      LightShader *shader =
+        new LightShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("light_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+      materials_[i].shader_name = "light_shader";
+
+    }
+  }
+}
 
 void Model::InitBuffers(ID3D11Device* device) {
-  for (unsigned int i = 0; i < 1;  ++i) {
+  for (size_t i = 0; i < meshes_.size();  ++i) {
     meshes_[i].InitBuffers(device);
   }
 }

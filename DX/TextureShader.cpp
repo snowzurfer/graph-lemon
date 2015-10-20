@@ -2,9 +2,10 @@
 #include "textureshader.h"
 
 
-TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+TextureShader::TextureShader(ID3D11Device* device, HWND hwnd,
+  szgrh::ConstBufManager &buf_man) : BaseShader(device, hwnd)
 {
-	InitShader(L"../shaders/texture_vs.hlsl", L"../shaders/texture_ps.hlsl");
+	InitShader(buf_man, L"../shaders/texture_vs.hlsl", L"../shaders/texture_ps.hlsl");
 }
 
 
@@ -36,8 +37,8 @@ TextureShader::~TextureShader()
 }
 
 
-void TextureShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
-{
+void TextureShader::InitShader(szgrh::ConstBufManager &buf_man, 
+  WCHAR* vsFilename, WCHAR* psFilename) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 
@@ -54,7 +55,9 @@ void TextureShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 	matrixBufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+  m_matrixBuffer = buf_man.CreateD3D11ConstBuffer("mvp_buffer",
+    matrixBufferDesc, m_device);
+  assert(m_matrixBuffer != nullptr);
 	
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

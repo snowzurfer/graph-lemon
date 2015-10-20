@@ -13,11 +13,20 @@
 
 using namespace DirectX;
 
-	typedef struct 
+	struct VertexType
+	{
+		XMFLOAT3 position;
+		XMFLOAT2 texture;
+		XMFLOAT3 normal;
+    XMFLOAT4 tangent;
+	};
+	
+  typedef struct 
 	{
 		float x, y, z;
 		float tu, tv;
 		float nx, ny, nz;
+    float tx, ty, tz, tw;
   
     friend class boost::serialization::access;
 
@@ -27,25 +36,25 @@ using namespace DirectX;
       ar & x & y & z;
       ar & tu & tv;
       ar & nx & ny & nz;
+      ar & tx & ty & tz & tw;
     }
 	} ModelType;
+  
+  typedef struct {
+    unsigned int index[3];
+  } Triangle;
 
 class BaseMesh
 {
 protected:
 
-	struct VertexType
-	{
-		XMFLOAT3 position;
-		XMFLOAT2 texture;
-		XMFLOAT3 normal;
-	};
-
-
-
 public:
 	BaseMesh();
 	~BaseMesh();
+  
+
+  static void CalcTangentArray(std::vector<VertexType> &vertices,
+    const std::vector<Triangle> &triangles);
 
 	virtual void SendData(ID3D11DeviceContext*);
 	int GetIndexCount();
@@ -55,6 +64,10 @@ public:
 
   inline const XMMATRIX &transform() const {
     return transform_;
+  }
+
+  inline int mat_id() const {
+    return mat_id_;
   }
 
   inline void set_transform(const XMMATRIX &v) {
