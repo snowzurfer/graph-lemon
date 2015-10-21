@@ -8,6 +8,7 @@
 #include "LightShader.h"
 #include "normal_mapping_shader.h"
 #include "light_alpha_map_shader.h"
+#include "light_alpha_spec_map_shader.h"
 #include "normal_alpha_map_shader.h"
 #include "normal_alpha_spec_map_shader.h"
 
@@ -186,6 +187,17 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       }
 
       materials_[i].shader_name = "normal_mapping_shader";
+    }
+    else if (materials_[i].diffuse_texname != L"" && materials_[i].alpha_texname != L"" &&
+      materials_[i].specular_texname != L"") {
+      LightAlphaSpecMapShader *shader =
+        new LightAlphaSpecMapShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("light_alpha_spec_map_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+      materials_[i].shader_name = "light_alpha_spec_map_shader";
+
     }
     else if (materials_[i].diffuse_texname != L"" && materials_[i].alpha_texname != L"") {
       LightAlphaMapShader *shader =
