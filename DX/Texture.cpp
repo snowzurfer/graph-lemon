@@ -36,7 +36,8 @@ void Texture::ResetInst() {
 
 }
 
-void Texture::LoadTexture(ID3D11Device* device, WCHAR* filename) {
+void Texture::LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context,
+  WCHAR* filename) {
 	HRESULT result;
 
 	// check if file exists
@@ -52,7 +53,7 @@ void Texture::LoadTexture(ID3D11Device* device, WCHAR* filename) {
 	}
 
   // Check if this texture has already been loaded
-  std::map<std::wstring, ID3D11ShaderResourceView *>::const_iterator it = textures_.find(filename);
+  std::unordered_map<std::wstring, ID3D11ShaderResourceView *>::const_iterator it = textures_.find(filename);
   // If the texture already exists 
   if (it != textures_.end()) {
     return;
@@ -88,11 +89,16 @@ void Texture::LoadTexture(ID3D11Device* device, WCHAR* filename) {
 	{
 		result = CreateWICTextureFromFile(device, filename, NULL, &m_texture, 0);
 	}
+
+  
 	
 	if (FAILED(result))
 	{
 		MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
 	}
+
+  // Generate mipmaps
+  dev_context->GenerateMips(m_texture);
 
   // Add texture to the map
   textures_[fn] = m_texture;
@@ -109,7 +115,7 @@ void Texture::FreeTexture(const std::wstring &tx_name) {
 	// Release the texture resource.
  
   // Check that the texture exists
-  std::map<std::wstring, ID3D11ShaderResourceView *>::iterator it = textures_.find(tx_name);
+  std::unordered_map<std::wstring, ID3D11ShaderResourceView *>::iterator it = textures_.find(tx_name);
 
 	if (it != textures_.end()) {
 		it->second->Release();
@@ -120,7 +126,7 @@ void Texture::FreeTexture(const std::wstring &tx_name) {
 
 ID3D11ShaderResourceView* Texture::GetTexture(const std::wstring &tx_name)
 {
-  std::map<std::wstring, ID3D11ShaderResourceView *>::iterator it = textures_.find(tx_name);
+  std::unordered_map<std::wstring, ID3D11ShaderResourceView *>::iterator it = textures_.find(tx_name);
 
 	if (it != textures_.end()) {
 		return it->second;
@@ -133,7 +139,7 @@ ID3D11ShaderResourceView* Texture::GetTexture(const std::string &tx_name) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   std::wstring wide = converter.from_bytes(tx_name);
   
-  std::map<std::wstring,
+  std::unordered_map<std::wstring,
     ID3D11ShaderResourceView *>::iterator it = textures_.find(wide);
 
 	if (it != textures_.end()) {

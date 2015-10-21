@@ -17,7 +17,10 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     normal_map_shader_(nullptr) {
 	// Create Mesh object
 	m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
-	Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(), L"../res/DefaultNormal.png");
+	Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(), 
+    m_Direct3D->GetDeviceContext(), L"../res/DefaultDiffuse.png");
+	Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(), 
+    m_Direct3D->GetDeviceContext(), L"../res/DefaultNormal.png");
 
   // Create a cube mesh
   cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png", 100);
@@ -40,35 +43,41 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());
-    lights_[i].SetPosition(0.f, 7.f, 0.f, 0.f);
+    //lights_[i].SetPosition(0.f, 7.f, 0.f, 0.f);
     // Set the light values
     lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+    lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
+    lights_[i].SetSpecularPower(4.f);
+    lights_[i].SetAttenuation(1.f, 0.1f, 0.f);
+    lights_[i].SetRange(300.f);
+    lights_[i].set_active(false);
     // Set ambient for one light only 
     if (i == 0) {
       //lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
-      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
-      lights_[i].SetPosition(0.f, 5.f, 0.f, 1.f);
+      lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
+      lights_[i].SetPosition(0.f, 10.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-      lights_[i].SetDirection(1.f, -1.f, 0.f);
+      lights_[i].SetDirection(0.f, -1.f, -1.f);
       //lights_[i].set_spot_cutoff(45.f);
       //lights_[i].set_spot_exponent(5.f);
     lights_[i].set_active(true);
 
     }
-    else {
-      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
-    lights_[i].set_active(false);
-    }
     if (i == 1) {
-      lights_[i].SetAmbientColour(0.0f, 0.0f, 0.0f, 1.f);
-      //lights_[i].SetPosition(-3.f, 3.f, -1.f, 0.f);
+      lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
+      lights_[i].SetPosition(40.f, 20.f, -1.f, 0.f);
       lights_[i].SetDiffuseColour(0.f, 1.f, 0.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
+      lights_[i].set_active(true);
     }
-    lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
-    lights_[i].SetSpecularPower(4.f);
-    lights_[i].SetAttenuation(1.f, 0.f, 0.f);
-    lights_[i].SetRange(100.f);
+    if (i == 2) {
+      lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
+      lights_[i].SetPosition(-10.f, 50.f, 0.f, 0.f);
+      lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+      lights_[i].SetDirection(0.f, -1.f, 0.f);
+      lights_[i].set_active(true);
+      lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
+    }
   }
 
   model_ = new Model();
@@ -79,10 +88,12 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     bia >> (*model_);
   }
   // Initialise the model
-  model_->Init(m_Direct3D->GetDevice(), hwnd, 
-    *buf_manager_, kNumLights, *sha_manager_);
+  model_->Init(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), 
+    hwnd, *buf_manager_, kNumLights, *sha_manager_);
 
 
+  // Enable alpha blending
+  m_Direct3D->TurnOnAlphaBlending();
   //lights_[1].SetPosition(3.f, 5.f, 0.f, 1.f);
 }
 

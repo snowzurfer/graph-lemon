@@ -68,7 +68,7 @@ void BaseMesh::SendData(ID3D11DeviceContext* deviceContext)
 void BaseMesh::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	// Create the texture object.
-	Texture::Inst()->LoadTexture(device, filename);
+	//Texture::Inst()->LoadTexture(device, filename);
 
   m_Texture = filename;
 }
@@ -86,7 +86,7 @@ void BaseMesh::InitBuffers(ID3D11Device *device) {
     // Load the vertex array and index array with data.
     for (unsigned int i = 0; i < vertices_.size(); i++) {
       vertices[i].position = XMFLOAT3(vertices_[i].x, vertices_[i].y, -vertices_[i].z);
-      vertices[i].texture = XMFLOAT2(vertices_[i].tu, vertices_[i].tv);
+      vertices[i].texture = XMFLOAT2(vertices_[i].tu, 1 - vertices_[i].tv);
       vertices[i].normal = XMFLOAT3(vertices_[i].nx, vertices_[i].ny, -vertices_[i].nz);
       vertices[i].tangent = XMFLOAT4(vertices_[i].tx, vertices_[i].ty, -vertices_[i].tz,
         vertices_[i].tw);

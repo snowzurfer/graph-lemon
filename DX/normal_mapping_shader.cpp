@@ -1,5 +1,4 @@
 
-// texture shader.cpp
 #include "normal_mapping_shader.h"
 #include "Texture.h"
 
@@ -91,7 +90,7 @@ void NormalMappingShader::InitShader(szgrh::ConstBufManager &buf_man,unsigned in
   assert(m_matrixBuffer != nullptr);
 
 	// Create a texture sampler state description.
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
@@ -222,6 +221,7 @@ void NormalMappingShader::SetShaderParameters(ID3D11DeviceContext* deviceContext
   // Set shader textures resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture_diffuse);
   deviceContext->PSSetShaderResources(1, 1, &texture_normal);
+
 }
 
 void NormalMappingShader::SetShaderFrameParameters(

@@ -87,7 +87,7 @@ void BaseShader::loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
 	
 	// Create the vertex input layout.
 	result = m_device->CreateInputLayout(layout, num_elements, 
-    vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
+vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
 		&m_layout);
 	if (FAILED(result))
 	{

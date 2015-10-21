@@ -38,10 +38,11 @@ public:
 	} ModelType;
 
   Model() {};
-	Model(ID3D11Device* device, WCHAR *model_filename, const std::string &model_name);
+	Model(const std::string &model_filename);
 	~Model();
 
-  void Init(ID3D11Device* device, HWND hwnd, 
+  void Init(ID3D11Device* device, ID3D11DeviceContext *dev_context,
+    HWND hwnd, 
     szgrh::ConstBufManager &buf_man, unsigned int lights_num,
     szgrh::ShaderManager &shad_man);
 	
@@ -73,7 +74,8 @@ private:
   }
   
   // Load in all the textures needed by the materials
-  void LoadTextures_(ID3D11Device* device, HWND hwnd);
+  void LoadTextures_(ID3D11Device* device, ID3D11DeviceContext *dev_context,
+    HWND hwnd);
   void LoadShaders_(ID3D11Device* device, HWND hwnd,
     szgrh::ConstBufManager &buf_man, unsigned int lights_num,
     szgrh::ShaderManager &shad_man);

@@ -129,6 +129,12 @@
     <ClCompile Include="shader_resource_manager.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
+    <ClCompile Include="light_alpha_map_shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="normal_alpha_map_shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -230,6 +236,12 @@
     <ClInclude Include="buffer_types.h">
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="light_alpha_map_shader.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="normal_alpha_map_shader.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -263,6 +275,12 @@
       <Filter>Source Files\Shaders\shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\shaders\normal_map_vs.hlsl">
+      <Filter>Source Files\Shaders\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\light_alpha_map_ps.hlsl">
+      <Filter>Source Files\Shaders\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\light_alpha_map_vs.hlsl">
       <Filter>Source Files\Shaders\shaders</Filter>
     </FxCompile>
   </ItemGroup>

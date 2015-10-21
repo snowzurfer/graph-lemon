@@ -1,17 +1,15 @@
-// texture shader.cpp
-#include "lightshader.h"
+#include "normal_alpha_map_shader.h"
 #include "Texture.h"
 
 
-LightShader::LightShader(ID3D11Device* device, HWND hwnd, 
+NormalAlphaMapShader::NormalAlphaMapShader(ID3D11Device* device, HWND hwnd,
   szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
-	InitShader(buf_man, L"../shaders/light_vs.hlsl", 
-    L"../shaders/light_ps.hlsl", lights_num);
+	InitShader(buf_man, lights_num);
 }
 
 
-LightShader::~LightShader()
+NormalAlphaMapShader::~NormalAlphaMapShader()
 {
 	// Release the sampler state.
 	if (m_sampleState)
@@ -32,13 +30,12 @@ LightShader::~LightShader()
 }
 
 
-void LightShader::InitShader(szgrh::ConstBufManager &buf_man, 
-  WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
+void NormalAlphaMapShader::InitShader(szgrh::ConstBufManager &buf_man,unsigned int lights_num) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC camBufferDesc;
-	D3D11_INPUT_ELEMENT_DESC polygon_layout[3];
+	D3D11_INPUT_ELEMENT_DESC polygon_layout[4];
 
 	// Create the vertex input layout description.
 	// This setup needs to match the VertexType stucture in the MeshClass and in the shader.
@@ -66,9 +63,17 @@ void LightShader::InitShader(szgrh::ConstBufManager &buf_man,
 	polygon_layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygon_layout[2].InstanceDataStepRate = 0;
 
+	polygon_layout[3].SemanticName = "TANGENT";
+	polygon_layout[3].SemanticIndex = 0;
+	polygon_layout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygon_layout[3].InputSlot = 0;
+	polygon_layout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[3].InstanceDataStepRate = 0;
+
 	// Load (+ compile) shader files
-	loadVertexShader(polygon_layout, 3, vsFilename);
-	loadPixelShader(psFilename);
+	loadVertexShader(polygon_layout, 4, L"../shaders/normal_alpha_map_vs.hlsl");
+	loadPixelShader(L"../shaders/normal_alpha_map_ps.hlsl");
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -121,7 +126,6 @@ void LightShader::InitShader(szgrh::ConstBufManager &buf_man,
 	camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	camBufferDesc.ByteWidth = sizeof(szgrh::CamBufferType);
 	camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	camBufferDesc.MiscFlags = 0;
 	camBufferDesc.StructureByteStride = 0;
 
@@ -148,7 +152,7 @@ void LightShader::InitShader(szgrh::ConstBufManager &buf_man,
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+void NormalAlphaMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
   const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
   const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
 	HRESULT result;
@@ -209,20 +213,29 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   // Set the constant buffer index in the pixel shader
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
+  ID3D11ShaderResourceView * texture_diffuse = 
+    Texture::Inst()->GetTexture(mat.diffuse_texname);
+  ID3D11ShaderResourceView * texture_normal = 
+    Texture::Inst()->GetTexture(mat.bump_texname);
+  ID3D11ShaderResourceView * texture_alpha = 
+    Texture::Inst()->GetTexture(mat.alpha_texname);
+  // Set shader textures resource in the pixel shader.
+  deviceContext->PSSetShaderResources(0, 1, &texture_diffuse);
+  deviceContext->PSSetShaderResources(1, 1, &texture_normal);
+  deviceContext->PSSetShaderResources(2, 1, &texture_alpha);
 
-  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
-  // Set shader texture resource in the pixel shader.
-  deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
-void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
+void NormalAlphaMapShader::SetShaderFrameParameters(
+  ID3D11DeviceContext* deviceContext, 
+  std::vector<Light> &lights, Camera *cam) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
 	szgrh::LightBufferType* light_ptr;
 	szgrh::CamBufferType* camPtr;
 	unsigned int bufferNumber;
 	
-  // Send light data to pixel shader
+  // Send light data to pixel and vertex shader
   result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
   light_ptr = (szgrh::LightBufferType*)mapped_resource.pData;
   for (unsigned int i = 0; i < lights.size(); i++) {
@@ -243,8 +256,7 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
-	deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
-
+  deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
 
   // Send camera data to vertex shader
 	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
@@ -257,7 +269,7 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
    
 }
 
-  void LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+  void NormalAlphaMapShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the sampler state in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
@@ -265,6 +277,3 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	// Base render function.
 	BaseShader::Render(deviceContext, indexCount);
 }
-
-
-

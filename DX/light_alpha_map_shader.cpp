@@ -1,18 +1,16 @@
-// texture shader.cpp
-#include "lightshader.h"
+#include "light_alpha_map_shader.h"
 #include "Texture.h"
 
 
-LightShader::LightShader(ID3D11Device* device, HWND hwnd, 
+LightAlphaMapShader::LightAlphaMapShader(ID3D11Device* device, HWND hwnd, 
   szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
-	InitShader(buf_man, L"../shaders/light_vs.hlsl", 
-    L"../shaders/light_ps.hlsl", lights_num);
+	InitShader(buf_man, L"../shaders/light_alpha_map_vs.hlsl", 
+    L"../shaders/light_alpha_map_ps.hlsl", lights_num);
 }
 
 
-LightShader::~LightShader()
-{
+LightAlphaMapShader::~LightAlphaMapShader() {
 	// Release the sampler state.
 	if (m_sampleState)
 	{
@@ -32,7 +30,7 @@ LightShader::~LightShader()
 }
 
 
-void LightShader::InitShader(szgrh::ConstBufManager &buf_man, 
+void LightAlphaMapShader::InitShader(szgrh::ConstBufManager &buf_man, 
   WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -148,7 +146,7 @@ void LightShader::InitShader(szgrh::ConstBufManager &buf_man,
 }
 
 
-void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+void LightAlphaMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
   const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
   const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
 	HRESULT result;
@@ -210,12 +208,16 @@ void LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
 
-  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
+  ID3D11ShaderResourceView * texture = 
+    Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
+  ID3D11ShaderResourceView * texture_alpha = 
+    Texture::Inst()->GetTexture(mat.alpha_texname.c_str());
   // Set shader texture resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture);
+  deviceContext->PSSetShaderResources(1, 1, &texture_alpha);
 }
 
-void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
+void LightAlphaMapShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mapped_resource;
 	szgrh::LightBufferType* light_ptr;
@@ -257,7 +259,7 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
    
 }
 
-  void LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+  void LightAlphaMapShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the sampler state in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
@@ -265,6 +267,3 @@ void LightShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, s
 	// Base render function.
 	BaseShader::Render(deviceContext, indexCount);
 }
-
-
-

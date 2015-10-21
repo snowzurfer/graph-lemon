@@ -7,7 +7,7 @@
 #include <WICTextureLoader.h>
 #include <string>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include "Model.h"
 
 using namespace DirectX;
@@ -22,7 +22,8 @@ public:
   static void ResetInst();
 
   // Load a texture in memory
-  void LoadTexture(ID3D11Device* device, WCHAR* filename);
+  void LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context, 
+    WCHAR* filename);
   
   // Delete a texture from memory
   void FreeTexture(const std::wstring &tx_name);
@@ -42,7 +43,7 @@ private:
   bool does_file_exist(const WCHAR *fileName);
 
   // Have textures be loaded only ONCE in memory
-  std::map<std::wstring, ID3D11ShaderResourceView *> textures_;
+  std::unordered_map<std::wstring, ID3D11ShaderResourceView *> textures_;
 
   // Ptr to single global instance
   static Texture *single_instance_;

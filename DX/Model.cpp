@@ -7,12 +7,15 @@
 #include "Texture.h"
 #include "LightShader.h"
 #include "normal_mapping_shader.h"
+#include "light_alpha_map_shader.h"
+#include "normal_alpha_map_shader.h"
 
-Model::Model(ID3D11Device* device, WCHAR* model_filename, const std::string &model_name) :
-  model_name_(model_name) {
+Model::Model(const std::string &model_filename) :
+  model_name_(model_filename) {
 }
 
-void Model::Init(ID3D11Device* device, HWND hwnd, 
+void Model::Init(ID3D11Device* device, ID3D11DeviceContext *dev_context,
+  HWND hwnd, 
   szgrh::ConstBufManager &buf_man, unsigned int lights_num,
   szgrh::ShaderManager &shad_man) {
 
@@ -20,7 +23,7 @@ void Model::Init(ID3D11Device* device, HWND hwnd,
 	InitBuffers(device);
 
   // Load the textures for the materials
-  LoadTextures_(device, hwnd);
+  LoadTextures_(device, dev_context, hwnd);
 
   // Load necessary shaders
   LoadShaders_(device, hwnd, buf_man, lights_num, shad_man);
@@ -67,7 +70,8 @@ bool FindReplace(std::wstring &str, const std::wstring &find_pattern,
 
 // To the designed of the API:
 // we are not oriental. No need for wchars. Like, no.
-void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
+void Model::LoadTextures_(ID3D11Device* device, 
+  ID3D11DeviceContext *dev_context, HWND hwnd) {
   // For each material
   for (unsigned int i = 0; i < materials_.size(); ++i) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -84,7 +88,7 @@ void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
 
       wide = path_suffix + materials_[i].ambient_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
+      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
       materials_[i].ambient_texname = wide;
     }
 
@@ -96,7 +100,7 @@ void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
       //wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
       wide = path_suffix + materials_[i].diffuse_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
+      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
       materials_[i].diffuse_texname = wide;
     }
 
@@ -108,7 +112,7 @@ void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
       //wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
       wide = path_suffix + materials_[i].specular_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
+      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
       materials_[i].specular_texname = wide;
     }
 
@@ -123,7 +127,7 @@ void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
       //wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
       wide = path_suffix + materials_[i].bump_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
+      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
       materials_[i].bump_texname = wide;
     }
 
@@ -137,7 +141,7 @@ void Model::LoadTextures_(ID3D11Device* device, HWND hwnd) {
       //wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
       wide = path_suffix + materials_[i].alpha_texname;
       wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, cstyle_wide);
+      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
       materials_[i].alpha_texname = wide;
     }
   }
@@ -150,7 +154,18 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
   for (unsigned int i = 0; i < materials_.size(); ++i) {
 
     // Determine which shader to instantiate
-    if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"") {
+    if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"" &&
+      materials_[i].alpha_texname != L"") {
+      NormalAlphaMapShader *shader =
+        new NormalAlphaMapShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("normal_alpha_map_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+
+      materials_[i].shader_name = "normal_alpha_map_shader";
+    }
+    else if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"") {
       NormalMappingShader *shader =
         new NormalMappingShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("normal_mapping_shader", shader)) {
@@ -160,7 +175,17 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
 
       materials_[i].shader_name = "normal_mapping_shader";
     }
-    else if (materials_[i].diffuse_texname != L"") {
+    else if (materials_[i].diffuse_texname != L"" && materials_[i].alpha_texname != L"") {
+      LightAlphaMapShader *shader =
+        new LightAlphaMapShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("light_alpha_map_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+      materials_[i].shader_name = "light_alpha_map_shader";
+
+    }
+    else if (materials_[i].diffuse_texname != L""){
       LightShader *shader =
         new LightShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_shader", shader)) {

@@ -64,23 +64,23 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET {
   // Colour sampler from the colour map
-  float4 texture_colour;
+  float4 sampled_diffuse;
   // Final colour to be output by the shader
   float4 colour = { 0.f, 0.f, 0.f, 0.f };
   // Global, constant ambient contribution
-  float4 ambient_global_colour = {0.2f, 0.2f, 0.2f, 1.f};
+  float4 ambient_global_colour = {0.08f, 0.08f, 0.08f, 1.f};
   // Total contribution of the lights
   float4 total_light_contribution = { 0.f, 0.f, 0.f, 0.f };
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-  texture_colour = texture_diffuse.Sample(SampleType, input.tex);
+  sampled_diffuse = texture_diffuse.Sample(SampleType, input.tex);
 
   // Sample normal from normal map
   float3 sampled_normal = (2.f * texture_normal.Sample(SampleType, input.tex).xyz) - 1.f;
   sampled_normal = normalize(sampled_normal);
 
   // Calculate the global constant ambient contribution
-  ambient_global_colour *= texture_colour * mat.ambient;
+  ambient_global_colour *= sampled_diffuse * mat.ambient;
 
   // For each light in the scene
   for (uint i = 0; i < L_NUM; ++i) {
@@ -101,7 +101,7 @@ float4 main(InputType input) : SV_TARGET {
     // The final contribution of the diffuse part of the light
     float4 final_diff_contribution = { 0.f, 0.f, 0.f, 0.f };
     // The final contribution of the ambient part of the light
-    float4 final_amb_contribution = lights[i].ambient * texture_colour *
+    float4 final_amb_contribution = lights[i].ambient * sampled_diffuse *
       mat.ambient;
     // The spotlight effect in case the light is spotlight
     float spot_effect = 1.f;
@@ -171,7 +171,7 @@ float4 main(InputType input) : SV_TARGET {
     if (light_intensity > 0.f) {
       // Add the diffuse colour contribution
       final_diff_contribution = saturate(lights[i].diffuse * light_intensity *
-        texture_colour * mat.diffuse);
+        sampled_diffuse * mat.diffuse);
 
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
@@ -184,12 +184,12 @@ float4 main(InputType input) : SV_TARGET {
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = saturate(specular_intensity * 
-        lights[i].specular * mat.specular * texture_colour);
+        lights[i].specular * mat.specular * sampled_diffuse);
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor
       total_light_contribution += ((final_amb_contribution + 
-        final_diff_contribution /*+ final_spec_contribution*/) / falloff
+        final_diff_contribution + final_spec_contribution) / falloff
         * spot_effect);
       total_light_contribution = saturate(total_light_contribution);
 
