@@ -135,6 +135,9 @@
     <ClCompile Include="normal_alpha_map_shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="normal_alpha_spec_map_shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -240,6 +243,9 @@
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="normal_alpha_map_shader.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="normal_alpha_spec_map_shader.h">
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
