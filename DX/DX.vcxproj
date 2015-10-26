@@ -111,6 +111,7 @@
     <ClCompile Include="LightShader.cpp" />
     <ClCompile Include="light_alpha_map_shader.cpp" />
     <ClCompile Include="light_alpha_spec_map_shader.cpp" />
+    <ClCompile Include="light_spec_map_shader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="LightShader.h" />
     <ClInclude Include="light_alpha_map_shader.h" />
     <ClInclude Include="light_alpha_spec_map_shader.h" />
+    <ClInclude Include="light_spec_map_shader.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="normal_alpha_map_shader.h" />

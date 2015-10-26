@@ -6,6 +6,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <fstream>
+#include <stack>
 #include "Texture.h"
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
@@ -23,7 +24,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     m_Direct3D->GetDeviceContext(), L"../res/DefaultNormal.png");
 
   // Create a cube mesh
-  cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png", 100);
+  cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png", 2);
 
   // Create the buffers manager
   buf_manager_ = new szgrh::ConstBufManager();
@@ -48,7 +49,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
     lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularPower(4.f);
-    lights_[i].SetAttenuation(1.f, 0.1f, 0.f);
+    lights_[i].SetAttenuation(0.95f, 0.04f, 0.f);
     lights_[i].SetRange(300.f);
     lights_[i].set_active(false);
     // Set ambient for one light only 
@@ -228,8 +229,15 @@ bool Lab3::Render()
   // Create a base shader
   BaseShader *shader = nullptr;
   // For all the meshes in the model
+  std::stack<size_t> alpha_blended_meshes;
   if (model_ != nullptr) {
     for (size_t i = 0; i < model_->meshes_.size(); ++i) {
+      // If the mesh is alpha blended
+      if (model_->materials_[model_->meshes_[i].mat_id()].alpha_texname != L"") {
+        // Defer its rendering
+        alpha_blended_meshes.push(i);
+        continue;
+      }
       model_->meshes_[i].SendData(m_Direct3D->GetDeviceContext());
       shader = sha_manager_->GetShader(
         model_->materials_[model_->meshes_[i].mat_id()].shader_name);
@@ -242,6 +250,25 @@ bool Lab3::Render()
       // Render object (combination of mesh geometry and shader process
       shader->Render(m_Direct3D->GetDeviceContext(),
         model_->meshes_[i].GetIndexCount());
+    }
+
+    // Render alpha blended meshes
+    while (alpha_blended_meshes.size() > 0) {
+      size_t i = alpha_blended_meshes.top();
+      alpha_blended_meshes.pop();
+      model_->meshes_[i].SendData(m_Direct3D->GetDeviceContext());
+      shader = sha_manager_->GetShader(
+        model_->materials_[model_->meshes_[i].mat_id()].shader_name);
+      if (shader == nullptr) {
+        continue;
+      }
+      shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), model_transform,
+        viewMatrix, projectionMatrix, 
+        model_->materials_[model_->meshes_[i].mat_id()]);
+      // Render object (combination of mesh geometry and shader process
+      shader->Render(m_Direct3D->GetDeviceContext(),
+        model_->meshes_[i].GetIndexCount());
+
     }
   }
   // Set the tranform for the plane below the sphere

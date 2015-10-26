@@ -2,6 +2,7 @@
 // Calculate ambient and diffuse lighting for a single light (also texturing)
 
 Texture2D texture_diff : register(t0);
+Texture2D texture_spec : register(t1);
 SamplerState SampleType : register(s0);
 
 // The maximum number of lights in the scene and also the number
@@ -55,8 +56,7 @@ struct InputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 viewDir : TEXCOORD1;
-    float4 worldPos : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD3;
+    float4 pixel_to_light_vec[L_NUM] : TEXCOORD2;
 };
 
 float4 main(InputType input) : SV_TARGET {
@@ -71,6 +71,8 @@ float4 main(InputType input) : SV_TARGET {
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
   sampled_diffuse = texture_diff.Sample(SampleType, input.tex);
+  // Sample spec from spec map, where the w component is the shininess
+  float4 sampled_spec = texture_spec.Sample(SampleType, input.tex); 
 
   // Calculate the global constant ambient contribution
   ambient_global_colour *= sampled_diffuse * mat.ambient;
@@ -110,7 +112,7 @@ float4 main(InputType input) : SV_TARGET {
     else if (lights[i].position.w == 0.f) { // Point
       // Calculate the vector from the pixel in world coordinates to 
       // the light
-      float4 pixel_to_light_vec = lights[i].position - input.worldPos;
+      float4 pixel_to_light_vec = input.pixel_to_light_vec[i];
 
       // Store the distance between light and pixel
       float dist = length(pixel_to_light_vec);
@@ -150,7 +152,6 @@ float4 main(InputType input) : SV_TARGET {
           else {
             spot_effect = 0.f;
           }
-
         }
       }
     }
@@ -168,23 +169,20 @@ float4 main(InputType input) : SV_TARGET {
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
       float specular_intensity = pow(saturate(dot(reflection, input.viewDir)), 
-        mat.shininess);
+        mat.shininess * sampled_spec.w);
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = saturate(specular_intensity * 
-        lights[i].specular * mat.specular * sampled_diffuse);
+        lights[i].specular * mat.specular * sampled_spec );
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor
-      total_light_contribution += ((final_amb_contribution + 
+      total_light_contribution += ((final_amb_contribution +
         final_diff_contribution + final_spec_contribution) / falloff
         * spot_effect);
       total_light_contribution = saturate(total_light_contribution);
-
     }
-
   }
-   
 
   // Add the ambient component to the diffuse to obtain the outpu colour
   colour = saturate(ambient_global_colour + total_light_contribution);

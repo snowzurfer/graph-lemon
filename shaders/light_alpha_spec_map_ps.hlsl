@@ -78,7 +78,7 @@ float4 main(InputType input) : SV_TARGET {
   float4 sampled_spec = texture_spec.Sample(SampleType, input.tex); 
 
   // Calculate the global constant ambient contribution
-  ambient_global_colour *= float4(sampled_diffuse.xyz * mat.ambient.xyz, sampled_alpha);
+  ambient_global_colour *= sampled_diffuse * mat.ambient;
 
   // For each light in the scene
   for (uint i = 0; i < L_NUM; ++i) {
@@ -181,9 +181,9 @@ float4 main(InputType input) : SV_TARGET {
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor
-      total_light_contribution += (float4(((final_amb_contribution.xyz + 
-        final_diff_contribution.xyz + final_spec_contribution.xyz) / falloff
-        * spot_effect), sampled_alpha));
+      total_light_contribution += ((final_amb_contribution + 
+        final_diff_contribution + final_spec_contribution) / falloff
+        * spot_effect);
       total_light_contribution = saturate(total_light_contribution);
 
     }
@@ -192,7 +192,8 @@ float4 main(InputType input) : SV_TARGET {
    
 
   // Add the ambient component to the diffuse to obtain the outpu colour
-  colour = saturate(ambient_global_colour + total_light_contribution);
+  colour = saturate(float4(ambient_global_colour.xyz + 
+    total_light_contribution.xyz, sampled_alpha));
 
   return colour;
 }

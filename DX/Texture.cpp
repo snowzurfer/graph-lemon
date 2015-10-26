@@ -83,22 +83,18 @@ void Texture::LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context
 	// Load the texture in.
 	if (extension == L"dds")
 	{
-		result = CreateDDSTextureFromFile(device, filename, NULL, &m_texture, 0, NULL);
+		result = CreateDDSTextureFromFile(device, dev_context, filename, NULL, &m_texture, 0, NULL);
 	}
 	else
 	{
-		result = CreateWICTextureFromFile(device, filename, NULL, &m_texture, 0);
+		result = CreateWICTextureFromFile(device, dev_context, filename, NULL, &m_texture, 0);
 	}
 
   
-	
 	if (FAILED(result))
 	{
 		MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
 	}
-
-  // Generate mipmaps
-  dev_context->GenerateMips(m_texture);
 
   // Add texture to the map
   textures_[fn] = m_texture;

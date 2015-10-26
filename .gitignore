@@ -187,3 +187,7 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# gVim
+*.swp
+*~

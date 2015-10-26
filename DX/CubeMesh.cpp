@@ -520,11 +520,11 @@ void CubeMesh::InitBuffers(ID3D11Device* device)
 		txv += txvinc;
 	}
 
-  vertices_vector.assign(vertices, vertices + m_vertexCount);
+  //vertices_vector.assign(vertices, vertices + m_vertexCount);
 
-  CalcTangentArray(vertices_vector, faces_vector);
+  //CalcTangentArray(vertices_vector, faces_vector);
 
-  memcpy(vertices, vertices_vector.data(), m_vertexCount);
+  //memcpy(vertices, vertices_vector.data(), m_vertexCount);
 	
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
