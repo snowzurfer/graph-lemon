@@ -24,6 +24,13 @@ public:
   // Load a texture in memory
   void LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context, 
     WCHAR* filename);
+
+  // Load a texture in memory from a descriptor and return the created
+  // 2D texture
+  ID3D11Texture2D *CreateTexture2D(ID3D11Device* device, 
+    const D3D11_TEXTURE2D_DESC &text_desc, 
+    const D3D11_SHADER_RESOURCE_VIEW_DESC &shad_res_view_desc,
+    const std::wstring &filename);
   
   // Delete a texture from memory
   void FreeTexture(const std::wstring &tx_name);

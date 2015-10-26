@@ -3,8 +3,7 @@
 
 #include "orthomesh.h"
 
-OrthoMesh::OrthoMesh(ID3D11Device* device, int width, int height, int xPosition, int yPosition)
-{
+OrthoMesh::OrthoMesh(ID3D11Device* device, int width, int height, int xPosition, int yPosition) {
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
 	m_width = width;
 	m_height = height;
@@ -13,17 +12,15 @@ OrthoMesh::OrthoMesh(ID3D11Device* device, int width, int height, int xPosition,
 	InitBuffers(device);
 
 	// Load the texture for this model.
-	LoadTexture(device, NULL);
+	//LoadTexture(device, NULL);
 }
 
 
-OrthoMesh::~OrthoMesh()
-{
+OrthoMesh::~OrthoMesh() {
 	BaseMesh::~BaseMesh();
 }
 
-void OrthoMesh::InitBuffers(ID3D11Device* device)
-{
+void OrthoMesh::InitBuffers(ID3D11Device* device) {
 	float left, right, top, bottom;
 	VertexType* vertices;
 	unsigned long* indices;

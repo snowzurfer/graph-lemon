@@ -3,6 +3,7 @@
 
 #include <d3d11.h>
 #include <directxmath.h>
+#include <string>
 
 using namespace DirectX;
 
@@ -19,7 +20,8 @@ public:
 		_mm_free(p);
 	}
 
-	RenderTexture(ID3D11Device* device, int textureWidth, int textureHeight, float screenNear, float screenDepth);
+	RenderTexture(ID3D11Device* device, int textureWidth, int textureHeight,
+    float screenNear, float screenDepth, const std::wstring &name);
 	~RenderTexture();
 
 	void SetRenderTarget(ID3D11DeviceContext* deviceContext);
@@ -32,6 +34,10 @@ public:
 	int GetTextureWidth();
 	int GetTextureHeight();
 
+  inline const std::wstring &name() const {
+    return name_;
+  }
+
 private:
 	int m_textureWidth, m_textureHeight;
 	ID3D11Texture2D* m_renderTargetTexture;
@@ -42,6 +48,9 @@ private:
 	D3D11_VIEWPORT m_viewport;
 	XMMATRIX m_projectionMatrix;
 	XMMATRIX m_orthoMatrix;
+
+  // Name of the texture managed
+  std::wstring name_;
 };
 
 #endif

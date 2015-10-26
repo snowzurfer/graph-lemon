@@ -1,9 +1,12 @@
 // render texture
 // alternative render target
 #include "rendertexture.h"
+#include "Texture.h"
 
-RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, int textureHeight, float screenNear, float screenFar)
-{
+RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, 
+  int textureHeight,   float screenNear, float screenFar,
+  const std::wstring &name) :
+    name_(name) {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	HRESULT result;
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
@@ -31,16 +34,14 @@ RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, int texture
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	// Create the render target texture.
-	result = device->CreateTexture2D(&textureDesc, NULL, &m_renderTargetTexture);
+	//// Create the render target texture.
+	//result = device->CreateTexture2D(&textureDesc, NULL, &m_renderTargetTexture);
 	
 	// Setup the description of the render target view.
 	renderTargetViewDesc.Format = textureDesc.Format;
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	// Create the render target view.
-	result = device->CreateRenderTargetView(m_renderTargetTexture, &renderTargetViewDesc, &m_renderTargetView);
 	
 	// Setup the description of the shader resource view.
 	shaderResourceViewDesc.Format = textureDesc.Format;
@@ -49,9 +50,16 @@ RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, int texture
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
 	// Create the shader resource view.
-	result = device->CreateShaderResourceView(m_renderTargetTexture, &shaderResourceViewDesc, &m_shaderResourceView);
+	//result = device->CreateShaderResourceView(m_renderTargetTexture, &shaderResourceViewDesc, &m_shaderResourceView);
+
+  // Create the render target texture and the resource view
+  m_renderTargetTexture = Texture::Inst()->CreateTexture2D(
+    device, textureDesc, shaderResourceViewDesc, name);
+
+	// Create the render target view.
+	result = device->CreateRenderTargetView(m_renderTargetTexture, &renderTargetViewDesc, &m_renderTargetView);
 	
-	// Initialize the description of the depth buffer.
+  // Initialize the description of the depth buffer.
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
 	// Set up the description of the depth buffer.
@@ -110,11 +118,13 @@ RenderTexture::~RenderTexture()
 		m_depthStencilBuffer = 0;
 	}
 
-	if (m_shaderResourceView)
-	{
-		m_shaderResourceView->Release();
-		m_shaderResourceView = 0;
-	}
+  // Commented out because the textures manager will
+  // manage these
+	//if (m_shaderResourceView)
+	//{
+	//	m_shaderResourceView->Release();
+	//	m_shaderResourceView = 0;
+	//}
 
 	if (m_renderTargetView)
 	{

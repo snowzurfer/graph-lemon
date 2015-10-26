@@ -198,3 +198,38 @@ void LoadTextures(ID3D11Device *device, Model &model) {
 
   //}
 }
+  
+ID3D11Texture2D *Texture::CreateTexture2D(ID3D11Device* device,
+  const D3D11_TEXTURE2D_DESC &text_desc,
+  const D3D11_SHADER_RESOURCE_VIEW_DESC &shad_res_view_desc,
+  const std::wstring &name) {
+
+  // Attempt creation of texture
+  ID3D11Texture2D *texture = nullptr;
+  HRESULT result = device->CreateTexture2D(&text_desc, NULL,
+    &texture);
+
+	if (FAILED(result)) {
+		MessageBox(NULL, L"Texture creation error,\
+create texture 2D", L"ERROR", MB_OK);
+    return nullptr;
+	}
+ 
+  // Attempt to create the shader resource view
+  ID3D11ShaderResourceView *shad_res_view = nullptr;
+  result = device->CreateShaderResourceView(texture, &shad_res_view_desc,
+    &shad_res_view);
+
+	if (FAILED(result)) {
+		MessageBox(NULL, L"Shad Res View Creation error,\
+create texture 2D", L"ERROR", MB_OK);
+    texture->Release();
+    texture = nullptr;
+    return nullptr;
+	}
+
+  // Add res view to the map
+  textures_[name] = shad_res_view;
+
+  return texture;
+}

@@ -16,6 +16,8 @@
 #include "normal_mapping_shader.h"
 #include "TextureShader.h"
 #include "shader_resource_manager.h"
+#include "RenderTexture.h"
+#include "OrthoMesh.h"
 
 class Lab3 : public BaseApplication
 {
@@ -29,6 +31,12 @@ public:
 private:
 	bool Render();
 
+  // Render the scene to a texture target
+  void RenderToTexture();
+
+  // Render scene normally, plus rendered target
+  void RenderScene();
+
 private:
 	LightShader* m_Shader;
   TextureShader *texture_shader_;
@@ -40,6 +48,10 @@ private:
   szgrh::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
   NormalMappingShader *normal_map_shader_;
+  // The other render target
+  RenderTexture *render_target_0_;
+  // Ortho mesh onto which to render the secondary render target
+  OrthoMesh *ortho_mesh_0_;
 
   // Used to count time
   float prev_time_;
