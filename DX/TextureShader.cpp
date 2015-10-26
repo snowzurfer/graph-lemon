@@ -102,6 +102,20 @@ void TextureShader::InitShader(szgrh::ConstBufManager &buf_man,
 	samplerDesc.BorderColor[3] = 0;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+  
+  // Create the constant buffer for materials
+	D3D11_BUFFER_DESC mat_buff_desc;
+  // Setup material buffer
+  mat_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
+	mat_buff_desc.ByteWidth = sizeof(szgrh::MaterialBufferType);
+	mat_buff_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	mat_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	mat_buff_desc.MiscFlags = 0;
+	mat_buff_desc.StructureByteStride = 0;
+  // Create the buffer
+  material_buf_ = buf_man.CreateD3D11ConstBuffer("mat_buffer",
+    mat_buff_desc, m_device);
+  assert(material_buf_ != nullptr);
 
 	// Create the texture sampler state.
 	m_device->CreateSamplerState(&samplerDesc, &m_sampleState);
@@ -185,4 +199,7 @@ void TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
 }
 
 
+void TextureShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext) {
+  // Do nothing
+}
 

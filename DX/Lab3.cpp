@@ -105,11 +105,11 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   //lights_[1].SetPosition(3.f, 5.f, 0.f, 1.f);
 
   // Create the first secondary render target
-  //render_target_0_ = new RenderTexture(m_Direct3D->GetDevice(), screenWidth,
-  //  screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
+  render_target_0_ = new RenderTexture(m_Direct3D->GetDevice(), screenWidth,
+    screenHeight, SCREEN_NEAR, SCREEN_DEPTH, L"target_0");
 
-  //// Create the ortho mesh
-  //ortho_mesh_0_ = new OrthoMesh(m_Direct3D->GetDevice(), 200, 150, -300, 225);
+  // Create the ortho mesh
+  ortho_mesh_0_ = new OrthoMesh(m_Direct3D->GetDevice(), 200, 150, -300, 225);
 
 }
 
@@ -203,117 +203,14 @@ bool Lab3::Frame()
 
 bool Lab3::Render()
 {
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+  RenderToTexture();
+
+  RenderScene();
+
+  // Present the rendered scene to the screen.
+  m_Direct3D->EndScene();
 	
-	// Clear the scene. (default blue colour)
-	m_Direct3D->BeginScene(0.39f, 0.58f, 0.92f, 1.0f);
-
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Update();
-
-  // Set per-frame shader paramters
-  //m_Shader->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
-  normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), 
-    lights_, m_Camera);
-  //waves_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(),
-  //  lights_, m_Camera, prev_time_);
-  
-	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetProjectionMatrix(projectionMatrix);
-
-	// Send geometry data (from mesh)
-	cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
-  // Create a mock material
-  szgrh::Material mock_material;
-  mock_material.diffuse_texname = L"../res/DefaultDiffuse.png";
-  mock_material.bump_texname = L"../res/DefaultNormal.png";
-  for (unsigned int i = 0; i < 3; ++i) {
-    mock_material.ambient[i] = 1.f;
-    mock_material.diffuse[i] = 1.f;
-    mock_material.specular[i] = 1.f;
-    mock_material.transmittance[i] = 0.f;
-    mock_material.emission[i] = 0.f;
-  }
-  mock_material.shininess = 7.f;
-  mock_material.ior = 0.f;
-  mock_material.dissolve = 1.f;
-  mock_material.illum = 2;
-
-	// Set shader parameters (matrices and texture)
-  XMMATRIX cube_transform = XMMatrixScaling(2.f, 2.f, 2.f) * 
-    XMMatrixTranslation(0.f, 0.f, 0.f);
-  normal_map_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(), 
-    worldMatrix,
-    viewMatrix, projectionMatrix, mock_material);
-	// Render object (combination of mesh geometry and shader process
-	normal_map_shader_->Render(m_Direct3D->GetDeviceContext(), 
-    cube_mesh_->GetIndexCount());
-
-  XMMATRIX model_transform = XMMatrixScaling(0.1f, 0.1f, 0.1f) /**
-    XMMatrixTranslation(10.f, -20.f, 0.f)*/;
-  // Create a base shader
-  BaseShader *shader = nullptr;
-  // For all the meshes in the model
-  std::stack<size_t> alpha_blended_meshes;
-  if (model_ != nullptr) {
-    for (size_t i = 0; i < model_->meshes_.size(); ++i) {
-      // If the mesh is alpha blended
-      if (model_->materials_[model_->meshes_[i].mat_id()].alpha_texname 
-        != L"") {
-        // Defer its rendering
-        alpha_blended_meshes.push(i);
-        continue;
-      }
-      model_->meshes_[i].SendData(m_Direct3D->GetDeviceContext());
-      shader = sha_manager_->GetShader(
-        model_->materials_[model_->meshes_[i].mat_id()].shader_name);
-      if (shader == nullptr) {
-        continue;
-      }
-      shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), 
-        model_transform, viewMatrix, projectionMatrix, 
-        model_->materials_[model_->meshes_[i].mat_id()]);
-      // Render object (combination of mesh geometry and shader process
-      shader->Render(m_Direct3D->GetDeviceContext(),
-        model_->meshes_[i].GetIndexCount());
-    }
-
-    // Render alpha blended meshes
-    while (alpha_blended_meshes.size() > 0) {
-      size_t i = alpha_blended_meshes.top();
-      alpha_blended_meshes.pop();
-      model_->meshes_[i].SendData(m_Direct3D->GetDeviceContext());
-      shader = sha_manager_->GetShader(
-        model_->materials_[model_->meshes_[i].mat_id()].shader_name);
-      if (shader == nullptr) {
-        continue;
-      }
-      shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), model_transform,
-        viewMatrix, projectionMatrix, 
-        model_->materials_[model_->meshes_[i].mat_id()]);
-      // Render object (combination of mesh geometry and shader process
-      shader->Render(m_Direct3D->GetDeviceContext(),
-        model_->meshes_[i].GetIndexCount());
-    }
-  }
-  // Set the tranform for the plane below the sphere
- // XMMATRIX cube_transform = XMMatrixScaling(1.f, 1.f, 1.f) * 
- //   XMMatrixTranslation(0.f, 0.f, 0.f);
-	//// Send geometry data (from mesh)
-	//cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
-	//// Set shader parameters (matrices and texture)
- // m_Shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), cube_transform,
- //   viewMatrix, projectionMatrix, mock_material);
-	//// Render object (combination of mesh geometry and shader process
-	//m_Shader->Render(m_Direct3D->GetDeviceContext(), cube_mesh_->GetIndexCount());
-
-
-	// Present the rendered scene to the screen.
-	m_Direct3D->EndScene();
-
-	return true;
+  return true;
 }
 
 void Lab3::RenderToTexture() {
@@ -348,6 +245,10 @@ void Lab3::RenderToTexture() {
   bunny_material.ior = 0.f;
   bunny_material.dissolve = 1.f;
   bunny_material.illum = 2;
+  
+  normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), 
+    lights_, m_Camera);
+  
   // Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
   cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
 
@@ -375,8 +276,8 @@ void Lab3::RenderScene() {
 
   // Set per-frame shader paramters
   //m_Shader->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
-  //normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), 
-  //  lights_, m_Camera);
+  normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), 
+    lights_, m_Camera);
   //waves_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(),
   //  lights_, m_Camera, prev_time_);
   

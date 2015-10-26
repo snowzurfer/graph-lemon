@@ -18,6 +18,8 @@ public:
     szgrh::ConstBufManager &buf_man);
 	~TextureShader();
 
+  void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext);
+
 	void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
     const XMMATRIX &world, const XMMATRIX &view, 
     const XMMATRIX &projection, const szgrh::Material &mat);
