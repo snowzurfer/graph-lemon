@@ -129,7 +129,7 @@
     <ClCompile Include="TessellationMesh.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureShader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TokenStream.cpp" />
@@ -179,7 +179,7 @@
     <ClInclude Include="TessellationMesh.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureShader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TokenStream.h" />

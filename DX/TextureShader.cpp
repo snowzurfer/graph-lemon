@@ -1,5 +1,7 @@
 // texture shader.cpp
 #include "textureshader.h"
+#include "Texture.h"
+#include "buffer_types.h"
 
 
 TextureShader::TextureShader(ID3D11Device* device, HWND hwnd,
@@ -41,14 +43,41 @@ void TextureShader::InitShader(szgrh::ConstBufManager &buf_man,
   WCHAR* vsFilename, WCHAR* psFilename) {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_INPUT_ELEMENT_DESC polygon_layout[3];
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the MeshClass and in the shader.
+	polygon_layout[0].SemanticName = "POSITION";
+	polygon_layout[0].SemanticIndex = 0;
+	polygon_layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygon_layout[0].InputSlot = 0;
+	polygon_layout[0].AlignedByteOffset = 0;
+	polygon_layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[0].InstanceDataStepRate = 0;
+
+	polygon_layout[1].SemanticName = "TEXCOORD";
+	polygon_layout[1].SemanticIndex = 0;
+	polygon_layout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygon_layout[1].InputSlot = 0;
+	polygon_layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[1].InstanceDataStepRate = 0;
+	
+  polygon_layout[2].SemanticName = "NORMAL";
+	polygon_layout[2].SemanticIndex = 0;
+	polygon_layout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygon_layout[2].InputSlot = 0;
+	polygon_layout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon_layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygon_layout[2].InstanceDataStepRate = 0;
 
 	// Load (+ compile) shader files
-	loadVertexShader(vsFilename);
+	loadVertexShader(polygon_layout, 3, vsFilename);
 	loadPixelShader(psFilename);
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.ByteWidth = sizeof(szgrh::MatrixBufferType);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
@@ -80,11 +109,11 @@ void TextureShader::InitShader(szgrh::ConstBufManager &buf_man,
 }
 
 
-void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture)
+void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, const szgrh::Material &mat)
 {
 	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
+	D3D11_MAPPED_SUBRESOURCE mapped_resource;
+	szgrh::MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 	XMMATRIX tworld, tview, tproj;
 
@@ -95,10 +124,10 @@ void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	tproj = XMMatrixTranspose(projectionMatrix);
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 	
 	// Get a pointer to the data in the constant buffer.
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
+	dataPtr = (szgrh::MatrixBufferType*)mapped_resource.pData;
 
 	// Copy the matrices into the constant buffer.
 	dataPtr->world = tworld;// worldMatrix;
@@ -113,9 +142,37 @@ void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, cons
 
 	// Now set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  
+  // Assign the material data
+  szgrh::MaterialBufferType *mat_buff_ptr;
+  result = deviceContext->Map(material_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mapped_resource);
+  // Get a ptr to the data in the constant buffer
+  mat_buff_ptr = (szgrh::MaterialBufferType *)mapped_resource.pData;
+  // Set its data
+  mat_buff_ptr->ambient = XMFLOAT4(mat.ambient[0], mat.ambient[1],
+    mat.ambient[2], mat.dissolve);
+  mat_buff_ptr->diffuse = XMFLOAT4(mat.diffuse[0], mat.diffuse[1],
+    mat.diffuse[2], mat.dissolve);
+  mat_buff_ptr->specular = XMFLOAT4(mat.specular[0], mat.specular[1],
+    mat.specular[2], mat.dissolve);
+  mat_buff_ptr->transmittance = XMFLOAT4(mat.transmittance[0], 
+    mat.transmittance[1], mat.transmittance[2], 1.f);
+  mat_buff_ptr->emission = XMFLOAT4(mat.emission[0], mat.emission[1],
+    mat.emission[2], mat.dissolve);
+  mat_buff_ptr->shininess = mat.shininess;
+  mat_buff_ptr->ior = mat.ior;
+  mat_buff_ptr->dissolve = mat.dissolve;
+  mat_buff_ptr->illum = mat.illum;
+  // Unlock the constant buffer
+  deviceContext->Unmap(material_buf_, 0);
+  // Set the constant buffer index in the pixel shader
+  deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
-	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+
+  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
+  // Set shader texture resource in the pixel shader.
+  deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
 void TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)

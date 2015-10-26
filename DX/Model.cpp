@@ -220,7 +220,7 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       materials_[i].shader_name = "light_spec_map_shader";
 
     }
-    else if (materials_[i].diffuse_texname != L""){
+    else if (materials_[i].diffuse_texname != L"") {
       LightShader *shader =
         new LightShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_shader", shader)) {

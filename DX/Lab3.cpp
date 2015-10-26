@@ -40,7 +40,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   normal_map_shader_ = new NormalMappingShader(m_Direct3D->GetDevice(), hwnd,
     *buf_manager_, kNumLights);
 
-  //texture_shader_ = new TextureShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_) ;
+  texture_shader_ = new TextureShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_) ;
 
   for (unsigned int i = 0; i < kNumLights; i++) {
     lights_.push_back(Light());
@@ -268,7 +268,6 @@ bool Lab3::Render()
       // Render object (combination of mesh geometry and shader process
       shader->Render(m_Direct3D->GetDeviceContext(),
         model_->meshes_[i].GetIndexCount());
-
     }
   }
   // Set the tranform for the plane below the sphere
