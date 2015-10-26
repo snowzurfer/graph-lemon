@@ -49,7 +49,9 @@ private:
 	float m_positionX, m_positionY, m_positionZ;
 	float m_rotationX, m_rotationY, m_rotationZ;
 	XMMATRIX m_viewMatrix;
-	float m_speed, m_frameTime;;
+	float m_speed, m_frameTime;
+
+  const float kMoveSpeed = 20.f;
 };
 
 #endif

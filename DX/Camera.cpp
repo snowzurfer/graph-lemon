@@ -113,7 +113,7 @@ void Camera::MoveForward()
 	float radians;
 
 	// Update the forward movement based on the frame time
-	m_speed = m_frameTime * 5.f;
+	m_speed = m_frameTime * kMoveSpeed;
 	
 	// Convert degrees to radians.
 	radians = m_rotationY * 0.0174532925f;
@@ -129,7 +129,7 @@ void Camera::MoveBackward()
 	float radians;
 
 	// Update the backward movement based on the frame time
-	m_speed = m_frameTime * 5.f;// *0.5f;
+	m_speed = m_frameTime * kMoveSpeed;// *0.5f;
 
 	// Convert degrees to radians.
 	radians = m_rotationY * 0.0174532925f;
@@ -143,7 +143,7 @@ void Camera::MoveBackward()
 void Camera::MoveUpward()
 {
 	// Update the upward movement based on the frame time
-	m_speed = m_frameTime * 5.f;// *0.5f;
+	m_speed = m_frameTime * kMoveSpeed;// *0.5f;
 	
 	// Update the height position.
 	m_positionY += m_speed;
@@ -153,7 +153,7 @@ void Camera::MoveUpward()
 void Camera::MoveDownward()
 {
 	// Update the downward movement based on the frame time
-	m_speed = m_frameTime * 5.f;// *0.5f;
+	m_speed = m_frameTime * kMoveSpeed;// *0.5f;
 
 	// Update the height position.
 	m_positionY -= m_speed;
@@ -229,7 +229,7 @@ void Camera::StrafeRight()
 	float radians;
 
 	// Update the forward movement based on the frame time
-	m_speed = m_frameTime * 5.f;
+	m_speed = m_frameTime * kMoveSpeed;
 
 	// Convert degrees to radians.
 	radians = m_rotationY * 0.0174532925f;
@@ -245,7 +245,7 @@ void Camera::StrafeLeft()
 	float radians;
 
 	// Update the forward movement based on the frame time
-	m_speed = m_frameTime * 5.f;
+	m_speed = m_frameTime * kMoveSpeed;
 
 	// Convert degrees to radians.
 	radians = m_rotationY * 0.0174532925f;
