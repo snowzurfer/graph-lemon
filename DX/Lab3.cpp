@@ -9,7 +9,8 @@
 #include <stack>
 #include "Texture.h"
 
-Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in) : 
+Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, 
+  Input *in) : 
     BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
     texture_shader_(nullptr),
     model_(nullptr), cube_mesh_(nullptr),
@@ -84,7 +85,8 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, In
   model_ = new Model();
   // Attempt loading a model 
   {
-    std::ifstream ifs("../res/sponza/sponza_proc.szg", std::ios::in | std::ios::binary);
+    std::ifstream ifs("../res/sponza/sponza_proc.szg", 
+      std::ios::in | std::ios::binary);
     boost::archive::binary_iarchive bia(ifs);
     bia >> (*model_);
   }
@@ -189,7 +191,8 @@ bool Lab3::Render()
 
   // Set per-frame shader paramters
   //m_Shader->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
-  normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), lights_, m_Camera);
+  normal_map_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(), 
+    lights_, m_Camera);
   //waves_shader_->SetShaderFrameParameters(m_Direct3D->GetDeviceContext(),
   //  lights_, m_Camera, prev_time_);
   
@@ -219,10 +222,12 @@ bool Lab3::Render()
 	// Set shader parameters (matrices and texture)
   XMMATRIX cube_transform = XMMatrixScaling(2.f, 2.f, 2.f) * 
     XMMatrixTranslation(0.f, 0.f, 0.f);
-  normal_map_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(), worldMatrix,
+  normal_map_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(), 
+    worldMatrix,
     viewMatrix, projectionMatrix, mock_material);
 	// Render object (combination of mesh geometry and shader process
-	normal_map_shader_->Render(m_Direct3D->GetDeviceContext(), cube_mesh_->GetIndexCount());
+	normal_map_shader_->Render(m_Direct3D->GetDeviceContext(), 
+    cube_mesh_->GetIndexCount());
 
   XMMATRIX model_transform = XMMatrixScaling(0.1f, 0.1f, 0.1f) /**
     XMMatrixTranslation(10.f, -20.f, 0.f)*/;
@@ -233,7 +238,8 @@ bool Lab3::Render()
   if (model_ != nullptr) {
     for (size_t i = 0; i < model_->meshes_.size(); ++i) {
       // If the mesh is alpha blended
-      if (model_->materials_[model_->meshes_[i].mat_id()].alpha_texname != L"") {
+      if (model_->materials_[model_->meshes_[i].mat_id()].alpha_texname 
+        != L"") {
         // Defer its rendering
         alpha_blended_meshes.push(i);
         continue;
@@ -244,8 +250,8 @@ bool Lab3::Render()
       if (shader == nullptr) {
         continue;
       }
-      shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), model_transform,
-        viewMatrix, projectionMatrix, 
+      shader->SetShaderParameters(m_Direct3D->GetDeviceContext(), 
+        model_transform, viewMatrix, projectionMatrix, 
         model_->materials_[model_->meshes_[i].mat_id()]);
       // Render object (combination of mesh geometry and shader process
       shader->Render(m_Direct3D->GetDeviceContext(),
