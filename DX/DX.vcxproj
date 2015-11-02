@@ -99,6 +99,8 @@
     </ClCompile>
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
+    <ClCompile Include="gauss_blur_h_shader.cpp" />
+    <ClCompile Include="gauss_blur_v_shader.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Lab1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -150,6 +152,8 @@
     </ClInclude>
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
+    <ClInclude Include="gauss_blur_h_shader.h" />
+    <ClInclude Include="gauss_blur_v_shader.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Lab1.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

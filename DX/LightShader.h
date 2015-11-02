@@ -22,14 +22,14 @@ private:
 
 public:
 
-	LightShader(ID3D11Device* device, HWND hwnd, 
+  LightShader(ID3D11Device* device, HWND hwnd, 
     szgrh::ConstBufManager &buf_man, unsigned int lights_num);
 
-	~LightShader();
+  ~LightShader();
 
   // Sadly have to use by non-const reference paramenters, as the framework
   // most of the time does not define const accessors for its classes...
-	void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+  void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
     const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection,
     const szgrh::Material &mat);
 
@@ -37,17 +37,17 @@ public:
   void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, 
     std::vector<Light> &hlights, Camera *cam);
 
-	void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
+  void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
 
 private:
-	void InitShader(szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
+  void InitShader(szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
     unsigned int lights_num);
 
 private:
-	ID3D11Buffer* m_matrixBuffer;
-	ID3D11SamplerState* m_sampleState;
-	ID3D11Buffer* m_lightBuffer;
-	ID3D11Buffer* m_camBuffer;
+  ID3D11Buffer* m_matrixBuffer;
+  ID3D11SamplerState* m_sampleState;
+  ID3D11Buffer* m_lightBuffer;
+  ID3D11Buffer* m_camBuffer;
   ID3D11Buffer* material_buf_;
 };
 

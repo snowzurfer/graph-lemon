@@ -13,6 +13,11 @@ struct MatrixBufferType {
   XMMATRIX projection;
 };
 
+struct ScreenSizeBufferType {
+  float screen_size;
+  XMFLOAT3 padding;
+};
+
 struct LightBufferType {
   XMFLOAT4 diffuse;
   XMFLOAT4 ambient;
