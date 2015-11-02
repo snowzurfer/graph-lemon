@@ -109,7 +109,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     screenHeight, SCREEN_NEAR, SCREEN_DEPTH, L"target_0");
 
   // Create the ortho mesh
-  ortho_mesh_0_ = new OrthoMesh(m_Direct3D->GetDevice(), 200, 150, -300, 225);
+  ortho_mesh_0_ = new OrthoMesh(m_Direct3D->GetDevice(), screenWidth / 4, screenHeight / 4, -300, 225);
 
 }
 
