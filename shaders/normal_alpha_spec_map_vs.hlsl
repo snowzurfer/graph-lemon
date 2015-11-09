@@ -22,8 +22,7 @@ struct LightType {
   float3 padding;
 };
 
-cbuffer MatrixBuffer : register(cb0)
-{
+cbuffer MatrixBuffer : register(cb0) {
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
@@ -39,8 +38,7 @@ cbuffer LightBuffer : register(cb2) {
   LightType lights[L_NUM];
 };
 
-struct InputType
-{
+struct InputType {
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;

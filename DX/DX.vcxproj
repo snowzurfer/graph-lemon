@@ -99,6 +99,7 @@
     </ClCompile>
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
+    <ClCompile Include="gaussian_blur.cpp" />
     <ClCompile Include="gauss_blur_h_shader.cpp" />
     <ClCompile Include="gauss_blur_v_shader.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -152,6 +153,7 @@
     </ClInclude>
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
+    <ClInclude Include="gaussian_blur.h" />
     <ClInclude Include="gauss_blur_h_shader.h" />
     <ClInclude Include="gauss_blur_v_shader.h" />
     <ClInclude Include="Input.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="OrthoMesh.h" />
     <ClInclude Include="PlaneMesh.h" />
     <ClInclude Include="PointMesh.h" />
+    <ClInclude Include="post_process.h" />
     <ClInclude Include="QuadMesh.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="shader_resource_manager.h" />

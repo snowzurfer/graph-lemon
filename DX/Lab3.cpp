@@ -8,6 +8,7 @@
 #include <fstream>
 #include <stack>
 #include "Texture.h"
+#include "gaussian_blur.h"
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   Input *in) :
@@ -19,15 +20,12 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   sha_manager_(nullptr),
   prev_time_(0.f),
   normal_map_shader_(nullptr),
-  gauss_blur_h_shader_(nullptr),
-  gauss_blur_v_shader_(nullptr),
-  render_target_downsample0_(nullptr),
-  render_target_downsample1_(nullptr),
-  render_target_upsample_(nullptr),
-  ortho_mesh_downsample_(nullptr),
-  ortho_mesh_upsample_(nullptr),
+  render_target_main_(nullptr),
+  ortho_mesh_screen_(nullptr),
+  post_processer_(nullptr),
   screen_width_(screenWidth),
-  screen_height_(screenHeight) {
+  screen_height_(screenHeight),
+  apply_post_processing_(false) {
   // Create Mesh object
   m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
   Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(),
@@ -55,10 +53,6 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   normal_map_shader_ = new NormalMappingShader(m_Direct3D->GetDevice(), hwnd,
     *buf_manager_, kNumLights);
   texture_shader_ = new TextureShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_);
-  gauss_blur_h_shader_ = new GaussBlurHShader(m_Direct3D->GetDevice(),
-    hwnd, *buf_manager_);
-  gauss_blur_v_shader_ = new GaussBlurVShader(m_Direct3D->GetDevice(),
-    hwnd, *buf_manager_);
 
   // Setup lights
   for (unsigned int i = 0; i < kNumLights; i++) {
@@ -112,49 +106,36 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   model_->Init(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(),
     hwnd, *buf_manager_, kNumLights, *sha_manager_);
 
-
   //lights_[1].SetPosition(3.f, 5.f, 0.f, 1.f);
 
   // Create render targets 
-  render_target_downsample0_ = new RenderTexture(m_Direct3D->GetDevice(),
-    screenWidth / 2, screenHeight / 2, SCREEN_NEAR, SCREEN_DEPTH,
-    L"target_downsample0");
-  render_target_downsample1_ = new RenderTexture(m_Direct3D->GetDevice(),
-    screenWidth / 2, screenHeight / 2, SCREEN_NEAR, SCREEN_DEPTH,
-    L"target_downsample1");
-  render_target_upsample_ = new RenderTexture(m_Direct3D->GetDevice(),
+  render_target_main_ = new RenderTexture(m_Direct3D->GetDevice(),
     screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH,
-    L"target_upsample");
+    L"target_main");
   // Create the ortho mesh
-  ortho_mesh_upsample_ = new OrthoMesh(m_Direct3D->GetDevice(),
+  ortho_mesh_screen_ = new OrthoMesh(m_Direct3D->GetDevice(),
     screenWidth, screenHeight, 0, 0);
-  ortho_mesh_downsample_ = new OrthoMesh(m_Direct3D->GetDevice(),
-    screenWidth / 2, screenHeight / 2, 0, 0);
 
+  post_processer_ = new szgrh::GaussBlur(screenHeight, screenWidth,
+    SCREEN_DEPTH, SCREEN_NEAR, m_Direct3D->GetDevice(),
+    hwnd, *buf_manager_, sha_manager_);
 }
 
 
 Lab3::~Lab3() {
-  if (ortho_mesh_downsample_ != nullptr) {
-    delete ortho_mesh_downsample_;
-    ortho_mesh_downsample_ = nullptr;
-  }
-  if (ortho_mesh_upsample_ != nullptr) {
-    delete ortho_mesh_upsample_;
-    ortho_mesh_upsample_ = nullptr;
+  if (post_processer_ != nullptr) {
+    delete post_processer_;
+    post_processer_ = nullptr;
   }
 
-  if (render_target_upsample_ != nullptr) {
-    delete render_target_upsample_;
-    render_target_upsample_ = nullptr;
+  if (ortho_mesh_screen_!= nullptr) {
+    delete ortho_mesh_screen_;
+    ortho_mesh_screen_ = nullptr;
   }
-  if (render_target_downsample1_ != nullptr) {
-    delete render_target_downsample1_;
-    render_target_downsample1_ = nullptr;
-  }
-  if (render_target_downsample0_ != nullptr) {
-    delete render_target_downsample0_;
-    render_target_downsample0_ = nullptr;
+
+  if (render_target_main_!= nullptr) {
+    delete render_target_main_;
+    render_target_main_ = nullptr;
   }
 
   // Run base application deconstructor
@@ -193,16 +174,6 @@ Lab3::~Lab3() {
     buf_manager_ = nullptr;
   }
   
-  if (gauss_blur_v_shader_ != nullptr) {
-    delete gauss_blur_v_shader_;
-    gauss_blur_v_shader_ = nullptr;
-  }
-
-  if (gauss_blur_h_shader_ != nullptr) {
-    delete gauss_blur_h_shader_;
-    gauss_blur_h_shader_ = nullptr;
-  }
-
   if (waves_shader_ != nullptr) {
     delete waves_shader_;
     waves_shader_ = nullptr;
@@ -243,37 +214,42 @@ bool Lab3::Frame()
   return true;
 }
 
-bool Lab3::Render()
-{
-  DownSample();
+bool Lab3::Render() {
+  // Render scene to a target
+  RenderToTexture(*render_target_main_);
 
-  HorizontalBlur();
-
-  VerticalBlur();
-  //UpSample();
+  // Apply post processing
+  if (apply_post_processing_ && post_processer_ != nullptr) {
+    XMMATRIX base_view_matrix, world_matrix;
+    m_Camera->GetBaseViewMatrix(base_view_matrix);
+    m_Direct3D->GetWorldMatrix(world_matrix);
+    post_processer_->ApplyPostProcess(
+      *render_target_main_,
+      m_Direct3D,
+      base_view_matrix,
+      world_matrix);
+  }
 
   m_Direct3D->BeginScene(0.39f, 0.58f, 0.92f, 1.0f);
-  RenderToBackBuffer();
+  // Render the main target on the back buffer
+  RenderToBackBuffer(*render_target_main_);
 
-  // Present the rendered scene to the screen.
+  // Present the rendered final frame to the screen.
   m_Direct3D->EndScene();
 
   return true;
 }
 
-void Lab3::RenderToTexture() {
-  // Set the render target to be the downscaling render target
-  render_target_downsample0_->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+// Render the scene to a texture target
+void Lab3::RenderToTexture(RenderTexture &target) {
+  // Set the render target to be the main render target
+  target.SetRenderTarget(m_Direct3D->GetDeviceContext());
 
   // Clear the render to texture.
-  render_target_downsample0_->ClearRenderTarget(m_Direct3D->GetDeviceContext(),
+  target.ClearRenderTarget(m_Direct3D->GetDeviceContext(),
     0.0f, 0.0f, 0.0f, 1.0f);
-
-  // Render scene normally
-  RenderScene();
-}
-
-void Lab3::RenderScene() {
+  
   XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 
   // Generate the view matrix based on the camera's position.
@@ -289,7 +265,7 @@ void Lab3::RenderScene() {
   // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
   m_Direct3D->GetWorldMatrix(worldMatrix);
   m_Camera->GetViewMatrix(viewMatrix);
-  m_Direct3D->GetProjectionMatrix(projectionMatrix);
+  projectionMatrix = target.GetProjectionMatrix();
 
   // Send geometry data (from mesh)
   cube_mesh_->SendData(m_Direct3D->GetDeviceContext());
@@ -370,194 +346,32 @@ void Lab3::RenderScene() {
     // Enable alpha blending
     m_Direct3D->TurnOffAlphaBlending();
   }
-
-
-  //// To render ortho mesh
-  //// Turn off the Z buffer to begin all 2D rendering.
-  //m_Direct3D->TurnZBufferOff();
-
-  //XMMATRIX ortho_matrix, base_view_matrix;
-  //m_Direct3D->GetOrthoMatrix(ortho_matrix);// ortho matrix for 2D rendering
-  //m_Camera->GetBaseViewMatrix(base_view_matrix);
-
-  //mock_material.diffuse_texname = render_target_0_->name();
-  //ortho_mesh_0_->SendData(m_Direct3D->GetDeviceContext());
-  //texture_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(),
-  //  worldMatrix, base_view_matrix, ortho_matrix, 
-  //  mock_material);
-  //texture_shader_->Render(m_Direct3D->GetDeviceContext(),
-  //  ortho_mesh_0_->GetIndexCount());
-
-  //m_Direct3D->TurnZBufferOn();
 }
 
-void Lab3::DownSample() {
-  // Set the render target to be the downscaling render target
-  render_target_downsample0_->SetRenderTarget(m_Direct3D->GetDeviceContext());
+// Render to the back buffer from the upsampled render target
+void Lab3::RenderToBackBuffer(const RenderTexture &target) {
+  XMMATRIX ortho_matrix, base_view_matrix, worldMatrix;
 
-  // Clear the render to texture.
-  render_target_downsample0_->ClearRenderTarget(m_Direct3D->GetDeviceContext(),
-    0.0f, 0.0f, 0.0f, 1.0f);
-
-  // Render scene normally
-  RenderScene();
-}
-
-void Lab3::HorizontalBlur() {
-  XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-
-  // Generate the view matrix based on the camera's position.
-  m_Camera->Update();
-
-  // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-  m_Direct3D->GetWorldMatrix(worldMatrix);
-  m_Camera->GetViewMatrix(viewMatrix);
-  m_Direct3D->GetProjectionMatrix(projectionMatrix);
-
-  // Set the other smaller render target
-  render_target_downsample1_->SetRenderTarget(m_Direct3D->GetDeviceContext());
-
-  // Clear the render to texture.
-  render_target_downsample1_->ClearRenderTarget(m_Direct3D->GetDeviceContext(),
-    0.0f, 0.0f, 0.0f, 1.0f);
-
-  // To render ortho mesh
-  // Turn off the Z buffer to begin all 2D rendering.
-  m_Direct3D->TurnZBufferOff();
-
-  XMMATRIX ortho_matrix, base_view_matrix;
-  m_Direct3D->GetOrthoMatrix(ortho_matrix);// ortho matrix for 2D rendering
-  m_Camera->GetBaseViewMatrix(base_view_matrix);
-
-  // Create a mock material
-  szgrh::Material mock_material;
-
-  mock_material.diffuse_texname = render_target_downsample0_->name();
-  ortho_mesh_upsample_->SendData(m_Direct3D->GetDeviceContext());
-  gauss_blur_h_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(),
-    worldMatrix, base_view_matrix, ortho_matrix,
-    mock_material, screen_width_);
-  gauss_blur_h_shader_->Render(m_Direct3D->GetDeviceContext(),
-    ortho_mesh_upsample_->GetIndexCount());
-
-  m_Direct3D->TurnZBufferOn();
-
-}
-
-void Lab3::VerticalBlur() {
-  XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-
-  // Generate the view matrix based on the camera's position.
-  m_Camera->Update();
-
-  // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-  m_Direct3D->GetWorldMatrix(worldMatrix);
-  m_Camera->GetViewMatrix(viewMatrix);
-  m_Direct3D->GetProjectionMatrix(projectionMatrix);
-
-  // Set the render target to be the downscaling render target
-  render_target_upsample_->SetRenderTarget(m_Direct3D->GetDeviceContext());
-
-  // Clear the render to texture.
-  render_target_upsample_->ClearRenderTarget(m_Direct3D->GetDeviceContext(),
-    0.0f, 0.0f, 1.0f, 1.0f);
-
-  // To render ortho mesh
-  // Turn off the Z buffer to begin all 2D rendering.
-  m_Direct3D->TurnZBufferOff();
-
-  XMMATRIX ortho_matrix, base_view_matrix;
-  m_Direct3D->GetOrthoMatrix(ortho_matrix);// ortho matrix for 2D rendering
-  m_Camera->GetBaseViewMatrix(base_view_matrix);
-
-  // Create a mock material
-  szgrh::Material mock_material;
-
-  mock_material.diffuse_texname = render_target_downsample1_->name();
-  ortho_mesh_upsample_->SendData(m_Direct3D->GetDeviceContext());
-  gauss_blur_v_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(),
-    worldMatrix, base_view_matrix, ortho_matrix,
-    mock_material, screen_height_);
-  gauss_blur_v_shader_->Render(m_Direct3D->GetDeviceContext(),
-    ortho_mesh_upsample_->GetIndexCount());
-
-  m_Direct3D->TurnZBufferOn();
-
-}
-
-void Lab3::UpSample() {
-  XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-
-  // Generate the view matrix based on the camera's position.
-  m_Camera->Update();
-
-  // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-  m_Direct3D->GetWorldMatrix(worldMatrix);
-  m_Camera->GetViewMatrix(viewMatrix);
-  m_Direct3D->GetProjectionMatrix(projectionMatrix);
-
-  // Set the render target to be the downscaling render target
-  render_target_upsample_->SetRenderTarget(m_Direct3D->GetDeviceContext());
-
-  // Clear the render to texture.
-  render_target_upsample_->ClearRenderTarget(m_Direct3D->GetDeviceContext(),
-    0.0f, 0.0f, 1.0f, 1.0f);
-
-  // To render ortho mesh
-  // Turn off the Z buffer to begin all 2D rendering.
-  m_Direct3D->TurnZBufferOff();
-
-  XMMATRIX ortho_matrix, base_view_matrix;
-  m_Direct3D->GetOrthoMatrix(ortho_matrix);// ortho matrix for 2D rendering
-  m_Camera->GetBaseViewMatrix(base_view_matrix);
-
-  // Create a mock material
-  szgrh::Material mock_material;
-
-  mock_material.diffuse_texname = render_target_downsample1_->name();
-  ortho_mesh_upsample_->SendData(m_Direct3D->GetDeviceContext());
-  texture_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(),
-    worldMatrix, base_view_matrix, ortho_matrix,
-    mock_material);
-  texture_shader_->Render(m_Direct3D->GetDeviceContext(),
-    ortho_mesh_upsample_->GetIndexCount());
-
-  m_Direct3D->TurnZBufferOn();
-
-}
-
-void Lab3::RenderToBackBuffer() {
-  XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-
-  // Generate the view matrix based on the camera's position.
-  m_Camera->Update();
-
-  // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-  m_Direct3D->GetWorldMatrix(worldMatrix);
-  m_Camera->GetViewMatrix(viewMatrix);
-  m_Direct3D->GetProjectionMatrix(projectionMatrix);
-
-  // Reset the render target back to the original back buffer and not the render to texture anymore.
   m_Direct3D->SetBackBufferRenderTarget();
 
-  // To render ortho mesh
-  // Turn off the Z buffer to begin all 2D rendering.
-  m_Direct3D->TurnZBufferOff();
+  // Generate the view matrix based on the camera's position.
+  m_Camera->Update();
 
-  XMMATRIX ortho_matrix, base_view_matrix;
+  // Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+  m_Direct3D->GetWorldMatrix(worldMatrix);
   m_Direct3D->GetOrthoMatrix(ortho_matrix);// ortho matrix for 2D rendering
   m_Camera->GetBaseViewMatrix(base_view_matrix);
 
-  // Create a mock material
-  szgrh::Material mock_material;
+  m_Direct3D->TurnZBufferOff();
 
-  mock_material.diffuse_texname = render_target_upsample_->name();
-  ortho_mesh_upsample_->SendData(m_Direct3D->GetDeviceContext());
+  szgrh::Material mock_material;
+  mock_material.diffuse_texname = target.name();
+  ortho_mesh_screen_->SendData(m_Direct3D->GetDeviceContext());
   texture_shader_->SetShaderParameters(m_Direct3D->GetDeviceContext(),
-    worldMatrix, base_view_matrix, ortho_matrix,
+    worldMatrix, base_view_matrix, ortho_matrix, 
     mock_material);
   texture_shader_->Render(m_Direct3D->GetDeviceContext(),
-    ortho_mesh_upsample_->GetIndexCount());
+    ortho_mesh_screen_->GetIndexCount());
 
   m_Direct3D->TurnZBufferOn();
 

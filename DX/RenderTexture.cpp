@@ -176,22 +176,22 @@ ID3D11ShaderResourceView* RenderTexture::GetShaderResourceView()
 	return m_shaderResourceView;
 }
 
-XMMATRIX RenderTexture::GetProjectionMatrix()
+XMMATRIX RenderTexture::GetProjectionMatrix() const
 {
 	return m_projectionMatrix;
 }
 
-XMMATRIX RenderTexture::GetOrthoMatrix()
+XMMATRIX RenderTexture::GetOrthoMatrix() const
 {
 	return m_orthoMatrix;
 }
 
-int RenderTexture::GetTextureWidth()
+int RenderTexture::GetTextureWidth() const
 {
 	return m_textureWidth;
 }
 
-int RenderTexture::GetTextureHeight()
+int RenderTexture::GetTextureHeight() const
 {
 	return m_textureHeight;
 }

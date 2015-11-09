@@ -21,6 +21,11 @@
 #include "gauss_blur_h_shader.h"
 #include "gauss_blur_v_shader.h"
 
+namespace szgrh {
+  class PostProcess;
+  class GaussBlur;
+}
+
 class Lab3 : public BaseApplication
 {
 public:
@@ -35,25 +40,10 @@ private:
   bool Render();
 
   // Render the scene to a texture target
-  void RenderToTexture();
-
-  // Render the scene to a smaller render target, hence downsampling
-  void DownSample();
-  
-  // Render the smaller target to a bigger render target, hence upsampling
-  void UpSample();
-
-  // Perform horizontal blurring for Gaussian blur
-  void HorizontalBlur();
-
-  // Perform horizontal blurring for Gaussian blur
-  void VerticalBlur();
+  void RenderToTexture(RenderTexture &target);
 
   // Render to the back buffer from the upsampled render target
-  void RenderToBackBuffer();
-
-  // Render scene normally
-  void RenderScene();
+  void RenderToBackBuffer(const RenderTexture &target);
 
 private:
   LightShader* m_Shader;
@@ -66,18 +56,14 @@ private:
   szgrh::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
   NormalMappingShader *normal_map_shader_;
-  GaussBlurHShader *gauss_blur_h_shader_;
-  GaussBlurVShader *gauss_blur_v_shader_;
-  // The other render targets
-  RenderTexture *render_target_downsample0_;
-  RenderTexture *render_target_downsample1_;
-  RenderTexture *render_target_upsample_;
-  // Ortho meshes for post processing
-  OrthoMesh *ortho_mesh_downsample_;
-  OrthoMesh *ortho_mesh_upsample_;
+  RenderTexture *render_target_main_;
+  OrthoMesh *ortho_mesh_screen_;
+  szgrh::PostProcess *post_processer_;
 
   // Size of the screen
   unsigned int screen_width_, screen_height_;
+
+  bool apply_post_processing_;
 
   // Used to count time
   float prev_time_;

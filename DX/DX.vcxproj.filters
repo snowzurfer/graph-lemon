@@ -144,10 +144,13 @@
     <ClCompile Include="light_spec_map_shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="gauss_blur_h_shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="gauss_blur_v_shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="gaussian_blur.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="gauss_blur_h_shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
@@ -271,6 +274,12 @@
     </ClInclude>
     <ClInclude Include="gauss_blur_v_shader.h">
       <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="post_process.h">
+      <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="gaussian_blur.h">
+      <Filter>Source Files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

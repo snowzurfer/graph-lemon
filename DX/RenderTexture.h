@@ -28,11 +28,11 @@ public:
 	void ClearRenderTarget(ID3D11DeviceContext* deviceContext, float red, float green, float blue, float alpha);
 	ID3D11ShaderResourceView* GetShaderResourceView();
 
-	XMMATRIX GetProjectionMatrix();
-	XMMATRIX GetOrthoMatrix();
+	XMMATRIX GetProjectionMatrix() const;
+	XMMATRIX GetOrthoMatrix() const;
 
-	int GetTextureWidth();
-	int GetTextureHeight();
+	int GetTextureWidth() const;
+	int GetTextureHeight() const;
 
   inline const std::wstring &name() const {
     return name_;
