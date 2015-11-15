@@ -21,9 +21,10 @@
 #include "gauss_blur_h_shader.h"
 #include "gauss_blur_v_shader.h"
 
-namespace szgrh {
+namespace sz {
   class PostProcess;
   class GaussBlur;
+  class Renderer;
 }
 
 class Lab3 : public BaseApplication
@@ -43,7 +44,7 @@ private:
   void RenderToTexture(RenderTexture &target);
 
   // Render to the back buffer from the upsampled render target
-  void RenderToBackBuffer(const RenderTexture &target);
+  void RenderToBackBuffer(const RenderTexture &source);
 
 private:
   LightShader* m_Shader;
@@ -52,13 +53,13 @@ private:
   SphereMesh* m_Mesh;
   CubeMesh *cube_mesh_;
   std::vector<Light> lights_;
-  szgrh::ConstBufManager *buf_manager_;
-  szgrh::ShaderManager *sha_manager_;
+  sz::ConstBufManager *buf_manager_;
+  sz::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
   NormalMappingShader *normal_map_shader_;
-  RenderTexture *render_target_main_;
-  OrthoMesh *ortho_mesh_screen_;
-  szgrh::PostProcess *post_processer_;
+  sz::PostProcess *post_processer_;
+
+  sz::Renderer *renderer_;
 
   // Size of the screen
   unsigned int screen_width_, screen_height_;

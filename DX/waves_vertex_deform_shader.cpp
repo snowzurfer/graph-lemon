@@ -5,115 +5,115 @@
 
 
 WavesVertexDeformShader::WavesVertexDeformShader(ID3D11Device* device, HWND hwnd,
-  szgrh::ConstBufManager &buf_man, unsigned int lights_num) : 
+  sz::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
-	InitShader(buf_man, L"../shaders/wave_mod_vs.hlsl", 
+  InitShader(buf_man, L"../shaders/wave_mod_vs.hlsl", 
     L"../shaders/wave_mod_ps.hlsl", lights_num);
 }
 
 
 WavesVertexDeformShader::~WavesVertexDeformShader()
 {
-	// Release the sampler state.
-	if (m_sampleState)
-	{
-		m_sampleState->Release();
-		m_sampleState = 0;
-	}
+  // Release the sampler state.
+  if (m_sampleState)
+  {
+    m_sampleState->Release();
+    m_sampleState = 0;
+  }
 
-	// Release the layout.
-	if (m_layout)
-	{
-		m_layout->Release();
-		m_layout = 0;
-	}
+  // Release the layout.
+  if (m_layout)
+  {
+    m_layout->Release();
+    m_layout = 0;
+  }
 
-	//Release base shader components
-	BaseShader::~BaseShader();
+  //Release base shader components
+  BaseShader::~BaseShader();
 }
 
 
-void WavesVertexDeformShader::InitShader(szgrh::ConstBufManager &buf_man,
+void WavesVertexDeformShader::InitShader(sz::ConstBufManager &buf_man,
   WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
-	D3D11_BUFFER_DESC matrixBufferDesc;
-	D3D11_SAMPLER_DESC samplerDesc;
-	D3D11_BUFFER_DESC lightBufferDesc;
-	D3D11_BUFFER_DESC camBufferDesc;
+  D3D11_BUFFER_DESC matrixBufferDesc;
+  D3D11_SAMPLER_DESC samplerDesc;
+  D3D11_BUFFER_DESC lightBufferDesc;
+  D3D11_BUFFER_DESC camBufferDesc;
 
-	// Load (+ compile) shader files
-	loadVertexShader(vsFilename);
-	loadPixelShader(psFilename);
+  // Load (+ compile) shader files
+  loadVertexShader(vsFilename);
+  loadPixelShader(psFilename);
 
-	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
+  // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+  // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
   m_matrixBuffer = buf_man.CreateD3D11ConstBuffer("mvp_buffer",
     matrixBufferDesc, m_device);
   assert(m_matrixBuffer != nullptr);
 
-	// Create a texture sampler state description.
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+  // Create a texture sampler state description.
+  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
+  samplerDesc.MipLODBias = 0.0f;
+  samplerDesc.MaxAnisotropy = 1;
+  samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+  samplerDesc.BorderColor[0] = 0;
+  samplerDesc.BorderColor[1] = 0;
+  samplerDesc.BorderColor[2] = 0;
+  samplerDesc.BorderColor[3] = 0;
+  samplerDesc.MinLOD = 0;
+  samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	// Create the texture sampler state.
-	m_device->CreateSamplerState(&samplerDesc, &m_sampleState);
+  // Create the texture sampler state.
+  m_device->CreateSamplerState(&samplerDesc, &m_sampleState);
 
-	// Setup light buffer
-	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
-	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * lights_num;
-	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightBufferDesc.MiscFlags = 0;
-	lightBufferDesc.StructureByteStride = 0;
+  // Setup light buffer
+  // Setup the description of the light dynamic constant buffer that is in the pixel shader.
+  // Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+  lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  lightBufferDesc.ByteWidth = sizeof(LightBufferType) * lights_num;
+  lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  lightBufferDesc.MiscFlags = 0;
+  lightBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant 
+  // Create the constant buffer pointer so we can access the vertex shader constant 
   // buffer from within this class.
   m_lightBuffer = buf_man.CreateD3D11ConstBuffer("scene_lights_buffer",
     lightBufferDesc, m_device);
   assert(m_lightBuffer != nullptr);
 
-	// Setup cam buffer
-	camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	camBufferDesc.ByteWidth = sizeof(CamBufferType);
-	camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	camBufferDesc.MiscFlags = 0;
-	camBufferDesc.StructureByteStride = 0;
+  // Setup cam buffer
+  camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  camBufferDesc.ByteWidth = sizeof(CamBufferType);
+  camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  camBufferDesc.MiscFlags = 0;
+  camBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant 
+  // Create the constant buffer pointer so we can access the vertex shader constant 
   // buffer from within this class.
   m_camBuffer = buf_man.CreateD3D11ConstBuffer("scene_cam_buffer",
     camBufferDesc, m_device);
   assert(m_camBuffer != nullptr);
 
   // Create the constant buffer for materials
-	D3D11_BUFFER_DESC mat_buff_desc;
+  D3D11_BUFFER_DESC mat_buff_desc;
   // Setup material buffer
   mat_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
-	mat_buff_desc.ByteWidth = sizeof(MaterialBufferType);
-	mat_buff_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	mat_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	mat_buff_desc.MiscFlags = 0;
-	mat_buff_desc.StructureByteStride = 0;
+  mat_buff_desc.ByteWidth = sizeof(MaterialBufferType);
+  mat_buff_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  mat_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  mat_buff_desc.MiscFlags = 0;
+  mat_buff_desc.StructureByteStride = 0;
   // Create the buffer
   material_buf_ = buf_man.CreateD3D11ConstBuffer("mat_buffer",
     mat_buff_desc, m_device);
@@ -123,11 +123,11 @@ void WavesVertexDeformShader::InitShader(szgrh::ConstBufManager &buf_man,
   D3D11_BUFFER_DESC time_buf_desc;
   // Setup material buffer
   time_buf_desc.Usage = D3D11_USAGE_DYNAMIC;
-	time_buf_desc.ByteWidth = sizeof(TimeAmpFreqBufferType);
-	time_buf_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	time_buf_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	time_buf_desc.MiscFlags = 0;
-	time_buf_desc.StructureByteStride = 0;
+  time_buf_desc.ByteWidth = sizeof(TimeAmpFreqBufferType);
+  time_buf_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  time_buf_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  time_buf_desc.MiscFlags = 0;
+  time_buf_desc.StructureByteStride = 0;
   // Create the buffer
   time_buf_ = buf_man.CreateD3D11ConstBuffer("time_buffer",
     mat_buff_desc, m_device);
@@ -138,38 +138,38 @@ void WavesVertexDeformShader::InitShader(szgrh::ConstBufManager &buf_man,
 
 void WavesVertexDeformShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
   const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, 
-  const XMMATRIX &projectionMatrix, const szgrh::Material &mat) {
-	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mapped_resource;
-	MatrixBufferType* data_ptr;
-	unsigned int bufferNumber;
-	XMMATRIX tworld, tview, tproj;
+  const XMMATRIX &projectionMatrix, const sz::Material &mat) {
+  HRESULT result;
+  D3D11_MAPPED_SUBRESOURCE mapped_resource;
+  MatrixBufferType* data_ptr;
+  unsigned int bufferNumber;
+  XMMATRIX tworld, tview, tproj;
 
 
-	// Transpose the matrices to prepare them for the shader.
-	tworld = XMMatrixTranspose(worldMatrix);
-	tview = XMMatrixTranspose(viewMatrix);
-	tproj = XMMatrixTranspose(projectionMatrix);
+  // Transpose the matrices to prepare them for the shader.
+  tworld = XMMatrixTranspose(worldMatrix);
+  tview = XMMatrixTranspose(viewMatrix);
+  tproj = XMMatrixTranspose(projectionMatrix);
 
-	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
+  // Lock the constant buffer so it can be written to.
+  result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 
-	// Get a pointer to the data in the constant buffer.
-	data_ptr = (MatrixBufferType*)mapped_resource.pData;
+  // Get a pointer to the data in the constant buffer.
+  data_ptr = (MatrixBufferType*)mapped_resource.pData;
 
-	// Copy the matrices into the constant buffer.
-	data_ptr->world = tworld;// worldMatrix;
-	data_ptr->view = tview;
-	data_ptr->projection = tproj;
+  // Copy the matrices into the constant buffer.
+  data_ptr->world = tworld;// worldMatrix;
+  data_ptr->view = tview;
+  data_ptr->projection = tproj;
 
-	// Unlock the constant buffer.
-	deviceContext->Unmap(m_matrixBuffer, 0);
+  // Unlock the constant buffer.
+  deviceContext->Unmap(m_matrixBuffer, 0);
 
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
+  // Set the position of the constant buffer in the vertex shader.
+  bufferNumber = 0;
 
-	// Now set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  // Now set the constant buffer in the vertex shader with the updated values.
+  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Assign the material data
   MaterialBufferType *mat_buff_ptr;
@@ -205,12 +205,12 @@ void WavesVertexDeformShader::SetShaderParameters(ID3D11DeviceContext* deviceCon
 void WavesVertexDeformShader::SetShaderFrameParameters(
   ID3D11DeviceContext* deviceContext, 
   std::vector<Light> &lights, Camera *cam, float time) {
-	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mapped_resource;
-	LightBufferType* light_ptr;
-	CamBufferType* camPtr;
-	unsigned int bufferNumber;
-	
+  HRESULT result;
+  D3D11_MAPPED_SUBRESOURCE mapped_resource;
+  LightBufferType* light_ptr;
+  CamBufferType* camPtr;
+  unsigned int bufferNumber;
+  
   // Send light data to pixel shader
   result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
   light_ptr = (LightBufferType*)mapped_resource.pData;
@@ -229,19 +229,19 @@ void WavesVertexDeformShader::SetShaderFrameParameters(
     light_ptr[i].spot_cutoff = lights[i].spot_cutoff();
     light_ptr[i].spot_exponent = lights[i].spot_exponent();
   }
-	deviceContext->Unmap(m_lightBuffer, 0);
-	bufferNumber = 0;
-	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
+  deviceContext->Unmap(m_lightBuffer, 0);
+  bufferNumber = 0;
+  deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
   deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
 
   // Send camera data to vertex shader
-	result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
+  result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
-	camPtr = (CamBufferType*)mapped_resource.pData;
+  camPtr = (CamBufferType*)mapped_resource.pData;
   camPtr->camPos = cam->GetPosition();
-	deviceContext->Unmap(m_camBuffer, 0);
-	bufferNumber = 1;
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
+  deviceContext->Unmap(m_camBuffer, 0);
+  bufferNumber = 1;
+  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
    
   // Assign time data
   result = deviceContext->Map(time_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
@@ -256,11 +256,14 @@ void WavesVertexDeformShader::SetShaderFrameParameters(
 
 }
 
-  void WavesVertexDeformShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+  void WavesVertexDeformShader::Render(ID3D11DeviceContext* deviceContext,
+    size_t index_count,
+    size_t index_start,
+    size_t base_vertex)
 {
-	// Set the sampler state in the pixel shader.
-	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+  // Set the sampler state in the pixel shader.
+  deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
-	// Base render function.
-	BaseShader::Render(deviceContext, indexCount);
+  // Base render function.
+  BaseShader::Render(deviceContext, index_count, index_start, base_vertex);
 }

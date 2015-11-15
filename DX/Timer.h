@@ -7,18 +7,18 @@
 class Timer
 {
 public:
-	Timer();
-	~Timer();
+  Timer();
+  ~Timer();
 
-	void Frame();
+  void Frame();
 
-	float GetTime();
+  float GetTime();
 
 private:
-	INT64 m_frequency;
-	float m_ticksPerS;
-	INT64 m_startTime;
-	float m_frameTime;
+  INT64 m_frequency;
+  float m_ticksPerS;
+  INT64 m_startTime;
+  float m_frameTime;
 };
 
 #endif

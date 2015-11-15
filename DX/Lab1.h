@@ -12,17 +12,17 @@ class Lab1 : public BaseApplication
 {
 public:
 
-	Lab1(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input*);
-	~Lab1();
+  Lab1(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input*);
+  ~Lab1();
 
-	bool Frame();
-
-private:
-	bool Render();
+  bool Frame();
 
 private:
-	ColourShader* m_ColourShader;
-	QuadMesh* m_Mesh;
+  bool Render();
+
+private:
+  ColourShader* m_ColourShader;
+  QuadMesh* m_Mesh;
 
 };
 

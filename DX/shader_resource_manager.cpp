@@ -3,7 +3,7 @@
 #include <algorithm>
 
 
-namespace szgrh {
+namespace sz {
 
 ShaderManager::ShaderManager() :
     shaders_() {
@@ -30,7 +30,7 @@ bool ShaderManager::AddShader(const std::string &name, BaseShader *s) {
   }
 
   // Look up the map to check if the shader has already been created
-  std::map<std::string, BaseShader *>::const_iterator it = shaders_.find(name);
+  std::unordered_map<std::string, BaseShader *>::const_iterator it = shaders_.find(name);
   // If the buffer already exists 
   if (it != shaders_.end()) {
     // Inform that the operation didn' work out
@@ -51,7 +51,7 @@ BaseShader *ShaderManager::GetShader(const std::string &name) {
   }
   
   // Look up the map to check if the shader has already been created
-  std::map<std::string, BaseShader *>::const_iterator it = shaders_.find(name);
+  std::unordered_map<std::string, BaseShader *>::const_iterator it = shaders_.find(name);
   // If the buffer already exists 
   if (it != shaders_.end()) {
     return it->second;
@@ -62,4 +62,4 @@ BaseShader *ShaderManager::GetShader(const std::string &name) {
 }
 
 
-} // namespace szgrh
+} // namespace sz

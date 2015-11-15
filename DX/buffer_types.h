@@ -3,7 +3,7 @@
 
 #include <DirectXMath.h>
 
-namespace szgrh {
+namespace sz {
 
 using namespace DirectX;
 

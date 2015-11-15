@@ -10,14 +10,14 @@ class TessellationMesh : public BaseMesh
 {
 
 public:
-	TessellationMesh(ID3D11Device* device, WCHAR* textureFilename);
-	~TessellationMesh();
+  TessellationMesh(ID3D11Device* device, WCHAR* textureFilename);
+  ~TessellationMesh();
 
-	void SendData(ID3D11DeviceContext*);
+  void SendData(ID3D11DeviceContext*);
 
 protected:
-	void InitBuffers(ID3D11Device* device);
-	
+  void InitBuffers(ID3D11Device* device);
+  
 };
 
 #endif

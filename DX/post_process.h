@@ -16,7 +16,7 @@
 class RenderTexture;
 class D3D;
 
-namespace szgrh {
+namespace sz {
 
 class PostProcess {
 public:
@@ -44,6 +44,6 @@ protected:
 
 }; // class PostProcess
 
-} // namespace szgrh
+} // namespace sz
 
 #endif

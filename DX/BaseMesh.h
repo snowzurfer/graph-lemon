@@ -13,19 +13,19 @@
 
 using namespace DirectX;
 
-	struct VertexType
-	{
-		XMFLOAT3 position;
-		XMFLOAT2 texture;
-		XMFLOAT3 normal;
+  struct VertexType
+  {
+    XMFLOAT3 position;
+    XMFLOAT2 texture;
+    XMFLOAT3 normal;
     XMFLOAT4 tangent;
-	};
-	
+  };
+  
   typedef struct 
-	{
-		float x, y, z;
-		float tu, tv;
-		float nx, ny, nz;
+  {
+    float x, y, z;
+    float tu, tv;
+    float nx, ny, nz;
     float tx, ty, tz, tw;
   
     friend class boost::serialization::access;
@@ -38,7 +38,7 @@ using namespace DirectX;
       ar & nx & ny & nz;
       ar & tx & ty & tz & tw;
     }
-	} ModelType;
+  } ModelType;
   
   typedef struct {
     unsigned int index[3];
@@ -49,18 +49,20 @@ class BaseMesh
 protected:
 
 public:
-	BaseMesh();
-	~BaseMesh();
+  BaseMesh();
+  ~BaseMesh();
   
 
   static void CalcTangentArray(std::vector<VertexType> &vertices,
     const std::vector<Triangle> &triangles);
 
-	virtual void SendData(ID3D11DeviceContext*);
-	int GetIndexCount();
-	ID3D11ShaderResourceView* GetTexture();
+  virtual void SendData(ID3D11DeviceContext*);
+  int GetIndexCount();
+  ID3D11ShaderResourceView* GetTexture();
 
-	virtual void InitBuffers(ID3D11Device*);
+  virtual void InitBuffers(std::vector<VertexType> &vertices,
+    std::vector<unsigned int> &indices);
+  virtual void InitBuffers(ID3D11Device* device) {};
 
   inline const XMMATRIX &transform() const {
     return transform_;
@@ -81,18 +83,43 @@ public:
   inline void set_vertices(const std::vector<ModelType> &val) {
     vertices_ = val;
   }
-  
+
   inline void set_indices(const std::vector<unsigned int> &val) {
     indices_ = val;
   }
+
+  inline void set_index_offset(const size_t o) {
+    index_offset_ = o;
+  }
+  inline size_t index_offset() const {
+    return index_offset_;
+  }
+  inline void set_vertex_offset(const size_t o) {
+    vertex_offset_ = o;
+  }
+  inline size_t vertex_offset() const {
+    return vertex_offset_;
+  }
+
+  inline size_t GetIndicesSize() const {
+    return indices_.size();
+  }
+  inline size_t GetVerticesSize() const {
+    return vertices_.size();
+  }
+
 protected:
-	void LoadTexture(ID3D11Device*, WCHAR*);
+  void LoadTexture(ID3D11Device*, WCHAR*);
 
   // World transformation matrix
   XMMATRIX transform_;
-	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-	int m_vertexCount, m_indexCount;
-	std::wstring m_Texture;
+  ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+  size_t m_indexCount, m_vertexCount;
+
+  // The offset of the mesh in the index buffer with respect to
+  // the model's master buffer
+  size_t index_offset_;
+  size_t vertex_offset_;
 
   // List of vertices, used for deserialisation
   std::vector<ModelType> vertices_;
@@ -110,6 +137,7 @@ protected:
     ar & vertices_;
     ar & indices_;
     ar & mat_id_;
+    ar & index_offset_ & vertex_offset_;
   }
 };
 

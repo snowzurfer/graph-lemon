@@ -12,6 +12,9 @@
 #include "light_alpha_spec_map_shader.h"
 #include "normal_alpha_map_shader.h"
 #include "normal_alpha_spec_map_shader.h"
+#include "abertay_framework.h"
+#include "crc.h"
+#include "Material.h"
 
 Model::Model(const std::string &model_filename) :
   model_name_(model_filename) {
@@ -19,26 +22,28 @@ Model::Model(const std::string &model_filename) :
 
 void Model::Init(ID3D11Device* device, ID3D11DeviceContext *dev_context,
   HWND hwnd, 
-  szgrh::ConstBufManager &buf_man, unsigned int lights_num,
-  szgrh::ShaderManager &shad_man) {
+  sz::ConstBufManager &buf_man, unsigned int lights_num,
+  sz::ShaderManager &shad_man) {
 
-	// Initialize the vertex and index buffer that hold the geometry for the model.
-	InitBuffers(device);
+  // Initialize the vertex and index buffer that hold the geometry for the model.
+  InitBuffers(device, dev_context);
 
   // Load the textures for the materials
   LoadTextures_(device, dev_context, hwnd);
 
   // Load necessary shaders
   LoadShaders_(device, hwnd, buf_man, lights_num, shad_man);
+
+  AddMeshesAndMaterials(meshes_, materials_);
 }
 
 Model::~Model()
 {
-	// Run parent deconstructor
-	if (m_model)	{
-		delete[] m_model;
-		m_model = 0;
-	}
+  // Run parent deconstructor
+  if (m_model)  {
+    delete[] m_model;
+    m_model = 0;
+  }
 }
 
 // Simple helper function which checks for the presence of a certain
@@ -57,18 +62,12 @@ bool FindReplace(std::string &str, const std::string &find_pattern,
 
   return false;
 }
-bool FindReplace(std::wstring &str, const std::wstring &find_pattern,
-  const std::wstring &rep_pattern) { 
-  size_t index = 0; 
-  index = str.find(find_pattern, index);
-  
-  if (index != std::wstring::npos) {
-    str.replace(index, rep_pattern.length(), rep_pattern);
 
-    return true;
-  }
+std::wstring ConvertToWide(const std::string &x) {
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::wstring full_path = converter.from_bytes(x);
 
-  return false;
+  return full_path;
 }
 
 // To the designed of the API:
@@ -77,88 +76,92 @@ void Model::LoadTextures_(ID3D11Device* device,
   ID3D11DeviceContext *dev_context, HWND hwnd) {
   // For each material
   for (unsigned int i = 0; i < materials_.size(); ++i) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wide;
-    wide = converter.from_bytes(model_name_);
-    std::wstring path_suffix = L"../res/" + wide + L"/";
-  
-    WCHAR cstyle_wide[128];
+    //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    //std::wstring full_path;
+    //full_path = converter.from_bytes(model_name_);
+    std::string path_suffix = "../res/" + model_name_ + "/";
+    std::string full_path;
+    UInt32 full_path_crc = 0;
 
-    if (materials_[i].ambient_texname != L"") {
+    if (materials_[i].ambient_texname != "") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].ambient_texname, L"\\", L"\/");
-      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
+      FindReplace(materials_[i].ambient_texname, "\\", "\/");
+      //FindReplace(materials_[i].ambient_texname, ".tga", ".png");
 
-      wide = path_suffix + materials_[i].ambient_texname;
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
-      materials_[i].ambient_texname = wide;
+      full_path = path_suffix + materials_[i].ambient_texname;
+
+      Texture::Inst()->LoadTexture(device, dev_context, full_path);
+      materials_[i].ambient_texname = full_path;
+      materials_[i].ambient_texname_crc = abfw::CRC::GetICRC(full_path.c_str());
     }
 
-    if (materials_[i].diffuse_texname != L"") {
+    if (materials_[i].diffuse_texname != "") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].diffuse_texname, L"\\", L"\/");
-      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
+      FindReplace(materials_[i].diffuse_texname, "\\", "\/");
+      //FindReplace(materials_[i].ambient_texname, ".tga", ".png");
       
-      //wide = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
-      wide = path_suffix + materials_[i].diffuse_texname;
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
-      materials_[i].diffuse_texname = wide;
+      //full_path = converter.from_bytes(path_suffix + materials_[i].diffuse_texname);
+      full_path = path_suffix + materials_[i].diffuse_texname;
+
+      Texture::Inst()->LoadTexture(device, dev_context, full_path);
+      materials_[i].diffuse_texname = full_path;
+      materials_[i].diffuse_texname_crc = abfw::CRC::GetICRC(full_path.c_str());
     }
 
-    if (materials_[i].specular_texname != L"") {
+    if (materials_[i].specular_texname != "") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].specular_texname, L"\\", L"\/");
-      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
+      FindReplace(materials_[i].specular_texname, "\\", "\/");
+      //FindReplace(materials_[i].ambient_texname, ".tga", ".png");
       
-      //wide = converter.from_bytes(path_suffix + materials_[i].specular_texname);
-      wide = path_suffix + materials_[i].specular_texname;
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
-      materials_[i].specular_texname = wide;
+      //full_path = converter.from_bytes(path_suffix + materials_[i].specular_texname);
+      full_path = path_suffix + materials_[i].specular_texname;
+
+      Texture::Inst()->LoadTexture(device, dev_context, full_path);
+      materials_[i].specular_texname = full_path;
+      materials_[i].specular_texname_crc = abfw::CRC::GetICRC(full_path.c_str());
     }
 
 
     std::string specular_highlight_texname; // map_Ns
 
-    if (materials_[i].bump_texname != L"") {
+    if (materials_[i].bump_texname != "") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].bump_texname, L"\\", L"\/");
-      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
+      FindReplace(materials_[i].bump_texname, "\\", "\/");
+      //FindReplace(materials_[i].ambient_texname, ".tga", ".png");
      
-      //wide = converter.from_bytes(path_suffix + materials_[i].bump_texname);
-      wide = path_suffix + materials_[i].bump_texname;
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
-      materials_[i].bump_texname = wide;
+      //full_path = converter.from_bytes(path_suffix + materials_[i].bump_texname);
+      full_path = path_suffix + materials_[i].bump_texname;
+
+      Texture::Inst()->LoadTexture(device, dev_context, full_path);
+      materials_[i].bump_texname = full_path;
+      materials_[i].bump_texname_crc = abfw::CRC::GetICRC(full_path.c_str());
     }
 
     std::string displacement_texname;       // disp
 
-    if (materials_[i].alpha_texname != L"") {
+    if (materials_[i].alpha_texname != "") {
       // Check if the texture name uses // as parenthesis and if so, fix it
-      FindReplace(materials_[i].alpha_texname, L"\\", L"\/");
-      //FindReplace(materials_[i].ambient_texname, L".tga", L".png");
+      FindReplace(materials_[i].alpha_texname, "\\", "\/");
+      //FindReplace(materials_[i].ambient_texname, ".tga", ".png");
       
-      //wide = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
-      wide = path_suffix + materials_[i].alpha_texname;
-      wcscpy_s(cstyle_wide, wide.c_str());
-      Texture::Inst()->LoadTexture(device, dev_context, cstyle_wide);
-      materials_[i].alpha_texname = wide;
+      //full_path = converter.from_bytes(path_suffix + materials_[i].alpha_texname);
+      full_path = path_suffix + materials_[i].alpha_texname;
+
+      Texture::Inst()->LoadTexture(device, dev_context, full_path);
+      materials_[i].alpha_texname = full_path;
+      materials_[i].alpha_texname_crc = abfw::CRC::GetICRC(full_path.c_str());
     }
   }
 }
 
 void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
-  szgrh::ConstBufManager &buf_man, unsigned int lights_num,
-  szgrh::ShaderManager &shad_man) {
+  sz::ConstBufManager &buf_man, unsigned int lights_num,
+  sz::ShaderManager &shad_man) {
   // For each material
   for (unsigned int i = 0; i < materials_.size(); ++i) {
-
     // Determine which shader to instantiate
-    if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"" &&
-      materials_[i].alpha_texname != L"" && materials_[i].specular_texname != L"") {
+    if (materials_[i].diffuse_texname != "" && materials_[i].bump_texname != "" &&
+      materials_[i].alpha_texname != "" && materials_[i].specular_texname != "") {
       NormalAlphaSpecMapShader *shader =
         new NormalAlphaSpecMapShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("normal_alpha_spec_map_shader", shader)) {
@@ -168,8 +171,8 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
 
       materials_[i].shader_name = "normal_alpha_spec_map_shader";
     }
-    else if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"" &&
-      materials_[i].alpha_texname != L"") {
+    else if (materials_[i].diffuse_texname != "" && materials_[i].bump_texname != "" &&
+      materials_[i].alpha_texname != "") {
       NormalAlphaMapShader *shader =
         new NormalAlphaMapShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("normal_alpha_map_shader", shader)) {
@@ -179,7 +182,7 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
 
       materials_[i].shader_name = "normal_alpha_map_shader";
     }
-    else if (materials_[i].diffuse_texname != L"" && materials_[i].bump_texname != L"") {
+    else if (materials_[i].diffuse_texname != "" && materials_[i].bump_texname != "") {
       NormalMappingShader *shader =
         new NormalMappingShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("normal_mapping_shader", shader)) {
@@ -189,8 +192,8 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
 
       materials_[i].shader_name = "normal_mapping_shader";
     }
-    else if (materials_[i].diffuse_texname != L"" && materials_[i].alpha_texname != L"" &&
-      materials_[i].specular_texname != L"") {
+    else if (materials_[i].diffuse_texname != "" && materials_[i].alpha_texname != "" &&
+      materials_[i].specular_texname != "") {
       LightAlphaSpecMapShader *shader =
         new LightAlphaSpecMapShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_alpha_spec_map_shader", shader)) {
@@ -200,7 +203,7 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       materials_[i].shader_name = "light_alpha_spec_map_shader";
 
     }
-    else if (materials_[i].diffuse_texname != L"" && materials_[i].alpha_texname != L"") {
+    else if (materials_[i].diffuse_texname != "" && materials_[i].alpha_texname != "") {
       LightAlphaMapShader *shader =
         new LightAlphaMapShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_alpha_map_shader", shader)) {
@@ -210,7 +213,7 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       materials_[i].shader_name = "light_alpha_map_shader";
 
     }
-    else if (materials_[i].diffuse_texname != L"" && materials_[i].specular_texname != L"") {
+    else if (materials_[i].diffuse_texname != "" && materials_[i].specular_texname != "") {
       LightSpecMapShader *shader =
         new LightSpecMapShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_spec_map_shader", shader)) {
@@ -220,7 +223,7 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       materials_[i].shader_name = "light_spec_map_shader";
 
     }
-    else if (materials_[i].diffuse_texname != L"") {
+    else if (materials_[i].diffuse_texname != "") {
       LightShader *shader =
         new LightShader(device, hwnd, buf_man, lights_num);
       if (!shad_man.AddShader("light_shader", shader)) {
@@ -233,147 +236,96 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
   }
 }
 
-void Model::InitBuffers(ID3D11Device* device) {
-  for (size_t i = 0; i < meshes_.size();  ++i) {
-    meshes_[i].InitBuffers(device);
+void Model::InitBuffers(ID3D11Device* device,
+  ID3D11DeviceContext* deviceContext) {
+  D3D11_BUFFER_DESC vertex_buf_desc, index_buf_desc;
+  D3D11_SUBRESOURCE_DATA vertex_data, index_data;
+
+  // Create subresources and fill them with data from the meshes
+  D3D11_MAPPED_SUBRESOURCE mapped_resource;
+  std::vector<VertexType> vertices;
+  std::vector<unsigned int> indices;
+
+  // Load the buffers with data from the meshes
+  for (size_t i = 0; i < meshes_.size(); ++i) {
+    meshes_[i].InitBuffers(vertices, indices);
+  }
+
+  // Create the vertex buffer
+  vertex_buf_desc.Usage = D3D11_USAGE_DEFAULT;
+  vertex_buf_desc.ByteWidth = sizeof(VertexType) * vertices.size();
+  vertex_buf_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  vertex_buf_desc.CPUAccessFlags = 0;
+  vertex_buf_desc.MiscFlags = 0;
+  vertex_buf_desc.StructureByteStride = 0;
+
+  vertex_data.pSysMem = vertices.data();
+  vertex_data.SysMemPitch = 0;
+  vertex_data.SysMemSlicePitch = 0;
+
+  HRESULT hr = device->CreateBuffer(&vertex_buf_desc, &vertex_data,
+    &vertex_buf_);
+  if (hr != S_OK) {
+    std::cout << hr << std::endl;
+  }
+
+  // Create the index buffer
+  index_buf_desc.Usage = D3D11_USAGE_DEFAULT;
+  index_buf_desc.ByteWidth = sizeof(unsigned int) * indices.size();
+  index_buf_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  index_buf_desc.CPUAccessFlags = 0;
+  index_buf_desc.MiscFlags = 0;
+  index_buf_desc.StructureByteStride = 0;
+
+  index_data.pSysMem = indices.data();
+  index_data.SysMemPitch = 0;
+  index_data.SysMemSlicePitch = 0;
+
+  hr = device->CreateBuffer(&index_buf_desc, &index_data, &index_buf_);
+  if (hr != S_OK) {
+    std::cout << hr << std::endl;
   }
 }
 
-void Model::LoadModel(WCHAR* filename) {
-	// Process model file
-	//std::ifstream fileStream;
-	//int fileSize = 0;
+void Model::SendData(ID3D11DeviceContext* dev_context) {
+  unsigned int stride;
+  unsigned int offset;
 
-	//fileStream.open(filename, std::ifstream::in);
+  // Set vertex buffer stride and offset.
+  stride = sizeof(VertexType);
+  offset = 0;
 
-	//if (fileStream.is_open() == false)
-	//	MessageBox(NULL, filename, L"Missing Model File", MB_OK);
+  // Set the vertex buffer to active in the input assembler so it can be rendered.
+  dev_context->IASetVertexBuffers(0, 1, &vertex_buf_, &stride, &offset);
 
-	//fileStream.seekg(0, std::ios::end);
-	//fileSize = (int)fileStream.tellg();
-	//fileStream.seekg(0, std::ios::beg);
+  // Set the index buffer to active in the input assembler so it can be rendered.
+  dev_context->IASetIndexBuffer(index_buf_, DXGI_FORMAT_R32_UINT, 0);
 
-	//if (fileSize <= 0)
-	//	MessageBox(NULL, filename, L"Model file empty", MB_OK);
+  // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+  dev_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
 
-	//char *buffer = new char[fileSize];
+void Model::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,
+  const std::vector<sz::Material> &materials) {
+  for (size_t i = 0; i < meshes.size(); ++i) {
+    // Get the mesh's material's crc name
+    size_t m_id = meshes[i].mat_id();
+    UInt32 m_crc = materials[m_id].name_crc;
 
-	//if (buffer == 0)
-	//	MessageBox(NULL, filename, L"Model buffer is to small", MB_OK);
+    // Add the mesh in the correct slot
+    sz::MeshesMatMap::iterator it = meshes_by_material_.find(m_crc);
+    if (it != meshes_by_material_.end()) {
+      sz::MatMeshPair &pair =
+        it->second;
 
-	//memset(buffer, '\0', fileSize);
+      pair.second.push_back(&(meshes[i]));
+    }
+    else {
+      sz::MatMeshPair pair(&materials[m_id], std::vector<BaseMesh *>());
+      
+      pair.second.push_back(&meshes[i]);
 
-	//TokenStream tokenStream, lineStream, faceStream;
-	//std::string tempLine, token;
-
-	//fileStream.read(buffer, fileSize);
-	//tokenStream.SetTokenStream(buffer);
-
-	//delete[] buffer;
-
-	//tokenStream.ResetStream();
-
-	//std::vector<float> verts, norms, texC;
-	//std::vector<int> faces;
-
-
-	//char lineDelimiters[2] = { '\n', ' ' };
-
-	//while (tokenStream.MoveToNextLine(&tempLine))
-	//{
-	//	lineStream.SetTokenStream((char*)tempLine.c_str());
-	//	tokenStream.GetNextToken(0, 0, 0);
-
-	//	if (!lineStream.GetNextToken(&token, lineDelimiters, 2))
-	//		continue;
-
-	//	if (strcmp(token.c_str(), "v") == 0)
-	//	{
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		verts.push_back((float)atof(token.c_str()));
-
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		verts.push_back((float)atof(token.c_str()));
-
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		verts.push_back((float)atof(token.c_str()));
-	//	}
-	//	else if (strcmp(token.c_str(), "vn") == 0)
-	//	{
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		norms.push_back((float)atof(token.c_str()));
-
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		norms.push_back((float)atof(token.c_str()));
-
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		norms.push_back((float)atof(token.c_str()));
-	//	}
-	//	else if (strcmp(token.c_str(), "vt") == 0)
-	//	{
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		texC.push_back((float)atof(token.c_str()));
-
-	//		lineStream.GetNextToken(&token, lineDelimiters, 2);
-	//		texC.push_back((float)atof(token.c_str()));
-	//	}
-	//	else if (strcmp(token.c_str(), "f") == 0)
-	//	{
-	//		char faceTokens[3] = { '\n', ' ', '/' };
-	//		std::string faceIndex;
-
-	//		faceStream.SetTokenStream((char*)tempLine.c_str());
-	//		faceStream.GetNextToken(0, 0, 0);
-
-	//		for (int i = 0; i < 3; i++)
-	//		{
-	//			faceStream.GetNextToken(&faceIndex, faceTokens, 3);
-	//			faces.push_back((int)atoi(faceIndex.c_str()));
-
-	//			faceStream.GetNextToken(&faceIndex, faceTokens, 3);
-	//			faces.push_back((int)atoi(faceIndex.c_str()));
-
-	//			faceStream.GetNextToken(&faceIndex, faceTokens, 3);
-	//			faces.push_back((int)atoi(faceIndex.c_str()));
-	//		}
-	//	}
-	//	else if (strcmp(token.c_str(), "#") == 0)
-	//	{
-	//		int a = 0;
-	//		int b = a;
-	//	}
-
-	//	token[0] = '\0';
-	//}
-
-	//// "Unroll" the loaded obj information into a list of triangles.
-
-	//int vIndex = 0, nIndex = 0, tIndex = 0;
-	//int numFaces = (int)faces.size() / 9;
-
-	////// Create the model using the vertex count that was read in.
-	//m_vertexCount = numFaces * 3;
-	//m_model = new ModelType[m_vertexCount];
-	//
-	//for (int f = 0; f < (int)faces.size(); f += 3)
-	//{
-	//	m_model[vIndex].x = verts[(faces[f + 0] - 1) * 3 + 0];
-	//	m_model[vIndex].y = verts[(faces[f + 0] - 1) * 3 + 1];
-	//	m_model[vIndex].z = verts[(faces[f + 0] - 1) * 3 + 2];
-	//	m_model[vIndex].tu = texC[(faces[f + 1] - 1) * 2 + 0];
-	//	m_model[vIndex].tv = texC[(faces[f + 1] - 1) * 2 + 1];
-	//	m_model[vIndex].nx = norms[(faces[f + 2] - 1) * 3 + 0];
-	//	m_model[vIndex].ny = norms[(faces[f + 2] - 1) * 3 + 1];
-	//	m_model[vIndex].nz = norms[(faces[f + 2] - 1) * 3 + 2];
-
-	//	//increase index count
-	//	vIndex++;
-
-	//}
-	//m_indexCount = vIndex;
-
-	//verts.clear();
-	//norms.clear();
-	//texC.clear();
-	//faces.clear();
+      meshes_by_material_[m_crc] = pair;
+    }
+  }
 }

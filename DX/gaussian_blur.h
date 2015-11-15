@@ -12,12 +12,12 @@ class GaussBlurHShader;
 class GaussBlurVShader;
 class TextureShader;
 class D3D;
-namespace szgrh {
+namespace sz {
   class ConstBufManager;
   class ShaderManager;
 }
 
-namespace szgrh {
+namespace sz {
 
 class GaussBlur : public PostProcess {
 public:
@@ -68,6 +68,6 @@ private:
 
 }; // class GaussBlur
 
-} // namespace szgrh
+} // namespace sz
 
 #endif

@@ -12,12 +12,12 @@ class TriangleMesh : public BaseMesh
 {
 
 public:
-	TriangleMesh(ID3D11Device* device, WCHAR* textureFilename);
-	~TriangleMesh();
+  TriangleMesh(ID3D11Device* device, WCHAR* textureFilename);
+  ~TriangleMesh();
 
 protected:
-	void InitBuffers(ID3D11Device* device);
-	
+  void InitBuffers(ID3D11Device* device);
+  
 };
 
 #endif

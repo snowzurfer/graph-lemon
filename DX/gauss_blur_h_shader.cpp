@@ -4,7 +4,7 @@
 
 
 GaussBlurHShader::GaussBlurHShader(ID3D11Device* device, HWND hwnd,
-  szgrh::ConstBufManager &buf_man) : BaseShader(device, hwnd)
+  sz::ConstBufManager &buf_man) : BaseShader(device, hwnd)
 {
   InitShader(buf_man, L"../shaders/gauss_blur_h_vs.hlsl",
     L"../shaders/gauss_blur_h_ps.hlsl");
@@ -38,7 +38,7 @@ GaussBlurHShader::~GaussBlurHShader() {
 }
 
 
-void GaussBlurHShader::InitShader(szgrh::ConstBufManager &buf_man, 
+void GaussBlurHShader::InitShader(sz::ConstBufManager &buf_man, 
   WCHAR* vsFilename, WCHAR* psFilename) {
   D3D11_BUFFER_DESC matrix_buffer_desc;
   D3D11_SAMPLER_DESC samplerDesc;
@@ -69,7 +69,7 @@ void GaussBlurHShader::InitShader(szgrh::ConstBufManager &buf_man,
 
   // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
   matrix_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-  matrix_buffer_desc.ByteWidth = sizeof(szgrh::MatrixBufferType);
+  matrix_buffer_desc.ByteWidth = sizeof(sz::MatrixBufferType);
   matrix_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
   matrix_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   matrix_buffer_desc.MiscFlags = 0;
@@ -98,7 +98,7 @@ void GaussBlurHShader::InitShader(szgrh::ConstBufManager &buf_man,
   // Setup constant buffer for the screensize
   D3D11_BUFFER_DESC screensize_buffer_desc;
   screensize_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-  screensize_buffer_desc.ByteWidth = sizeof(szgrh::ScreenSizeBufferType);
+  screensize_buffer_desc.ByteWidth = sizeof(sz::ScreenSizeBufferType);
   screensize_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
   screensize_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   screensize_buffer_desc.MiscFlags = 0;
@@ -115,12 +115,12 @@ void GaussBlurHShader::InitShader(szgrh::ConstBufManager &buf_man,
 
 void GaussBlurHShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix,
-  const XMMATRIX &projectionMatrix, const szgrh::Material &mat,
+  const XMMATRIX &projectionMatrix, const sz::Material &mat,
   const float screensize) {
   HRESULT result;
   D3D11_MAPPED_SUBRESOURCE mapped_resource;
-  szgrh::MatrixBufferType* dataPtr;
-  szgrh::ScreenSizeBufferType *screensize_ptr = nullptr;
+  sz::MatrixBufferType* dataPtr;
+  sz::ScreenSizeBufferType *screensize_ptr = nullptr;
   unsigned int bufferNumber;
   XMMATRIX tworld, tview, tproj;
 
@@ -133,7 +133,7 @@ void GaussBlurHShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 
   // Get a pointer to the data in the constant buffer.
-  dataPtr = (szgrh::MatrixBufferType*)mapped_resource.pData;
+  dataPtr = (sz::MatrixBufferType*)mapped_resource.pData;
 
   // Copy the matrices into the constant buffer.
   dataPtr->world = tworld;// worldMatrix;
@@ -152,23 +152,26 @@ void GaussBlurHShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   // Send size data
   deviceContext->Map(screensize_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
-  screensize_ptr = (szgrh::ScreenSizeBufferType *)mapped_resource.pData;
+  screensize_ptr = (sz::ScreenSizeBufferType *)mapped_resource.pData;
   screensize_ptr->screen_size = screensize;
   deviceContext->Unmap(screensize_buf_, 0);
   deviceContext->VSSetConstantBuffers(1, 1, &screensize_buf_);
 
-  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname.c_str());
+  ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname_crc);
   // Set shader texture resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
-void GaussBlurHShader::Render(ID3D11DeviceContext* deviceContext, int indexCount)
+void GaussBlurHShader::Render(ID3D11DeviceContext* deviceContext,
+    size_t index_count,
+    size_t index_start,
+    size_t base_vertex)
 {
   // Set the sampler state in the pixel shader.
   deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
   // Base render function.
-  BaseShader::Render(deviceContext, indexCount);
+  BaseShader::Render(deviceContext, index_count, index_start, base_vertex);
 }
 
 

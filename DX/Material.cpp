@@ -1,7 +1,7 @@
 
 #include "Material.h"
 
-namespace szgrh {
+namespace sz {
 
   Material::Material(const std::string &mat_name):
     name(mat_name),
@@ -12,4 +12,4 @@ namespace szgrh {
   }
 
 
-} // namespace szgrh
+} // namespace sz

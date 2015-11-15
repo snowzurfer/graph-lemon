@@ -12,11 +12,11 @@ class QuadMesh : public BaseMesh
 {
 
 public:
-	QuadMesh(ID3D11Device* device, WCHAR* textureFilename);
-	~QuadMesh();
+  QuadMesh(ID3D11Device* device, WCHAR* textureFilename);
+  ~QuadMesh();
 
 protected:
-	void InitBuffers(ID3D11Device* device);
+  void InitBuffers(ID3D11Device* device);
 
 };
 

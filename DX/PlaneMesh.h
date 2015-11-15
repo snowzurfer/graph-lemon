@@ -7,12 +7,12 @@ class PlaneMesh : public BaseMesh
 {
 
 public:
-	PlaneMesh(ID3D11Device* device, WCHAR* textureFilename, int resolution = 100);
-	~PlaneMesh();
+  PlaneMesh(ID3D11Device* device, WCHAR* textureFilename, int resolution = 100);
+  ~PlaneMesh();
 
 protected:
-	void InitBuffers(ID3D11Device* device);
-	int m_resolution;
+  void InitBuffers(ID3D11Device* device);
+  int m_resolution;
 };
 
 #endif

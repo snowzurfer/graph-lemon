@@ -23,7 +23,7 @@ private:
 public:
 
   LightShader(ID3D11Device* device, HWND hwnd, 
-    szgrh::ConstBufManager &buf_man, unsigned int lights_num);
+    sz::ConstBufManager &buf_man, unsigned int lights_num);
 
   ~LightShader();
 
@@ -31,16 +31,19 @@ public:
   // most of the time does not define const accessors for its classes...
   void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
     const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection,
-    const szgrh::Material &mat);
+    const sz::Material &mat);
 
   // Set the parameters which change only once per frame
   void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, 
     std::vector<Light> &hlights, Camera *cam);
 
-  void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
+  void Render(ID3D11DeviceContext* deviceContext,
+    size_t index_count,
+    size_t index_start = 0,
+    size_t base_vertex = 0);
 
 private:
-  void InitShader(szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
+  void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
     unsigned int lights_num);
 
 private:

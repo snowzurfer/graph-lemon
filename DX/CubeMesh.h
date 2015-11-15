@@ -9,12 +9,12 @@ class CubeMesh : public BaseMesh
 {
 
 public:
-	CubeMesh(ID3D11Device* device, WCHAR* textureFilename, int resolution = 20);
-	~CubeMesh();
+  CubeMesh(ID3D11Device* device, WCHAR* textureFilename, int resolution = 20);
+  ~CubeMesh();
 
 protected:
-	void InitBuffers(ID3D11Device* device);
-	int m_resolution;
+  void InitBuffers(ID3D11Device* device);
+  int m_resolution;
 };
 
 #endif

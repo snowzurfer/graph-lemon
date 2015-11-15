@@ -10,13 +10,13 @@ class PointMesh : public BaseMesh
 {
 
 public:
-	PointMesh(ID3D11Device* device, WCHAR* textureFilename);
-	~PointMesh();
+  PointMesh(ID3D11Device* device, WCHAR* textureFilename);
+  ~PointMesh();
 
-	void SendData(ID3D11DeviceContext*);
+  void SendData(ID3D11DeviceContext*);
 
 protected:
-	void InitBuffers(ID3D11Device* device);
+  void InitBuffers(ID3D11Device* device);
 
 };
 

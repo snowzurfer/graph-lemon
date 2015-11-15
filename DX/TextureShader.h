@@ -15,19 +15,22 @@ class TextureShader: public BaseShader {
 public:
 
   TextureShader(ID3D11Device* device, HWND hwnd, 
-    szgrh::ConstBufManager &buf_man);
+    sz::ConstBufManager &buf_man);
   ~TextureShader();
 
   void SetShaderFrameParameters(ID3D11DeviceContext* deviceContext);
 
   void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
     const XMMATRIX &world, const XMMATRIX &view, 
-    const XMMATRIX &projection, const szgrh::Material &mat);
+    const XMMATRIX &projection, const sz::Material &mat);
   
-  void Render(ID3D11DeviceContext* deviceContext, int vertexCount);
+  void Render(ID3D11DeviceContext* deviceContext,
+    size_t index_count,
+    size_t index_start = 0,
+    size_t base_vertex = 0);
 
 private:
-  void InitShader(szgrh::ConstBufManager &buf_man, WCHAR*, WCHAR*);
+  void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*);
   
 private:
   ID3D11Buffer* m_matrixBuffer;

@@ -23,9 +23,9 @@ struct LightType {
 };
 
 cbuffer MatrixBuffer : register(cb0) {
-    matrix worldMatrix;
-    matrix viewMatrix;
-    matrix projectionMatrix;
+  matrix worldMatrix;
+  matrix viewMatrix;
+  matrix projectionMatrix;
 };
 
 cbuffer CamBuffer : register(cb1) {
@@ -39,84 +39,83 @@ cbuffer LightBuffer : register(cb2) {
 };
 
 struct InputType {
-    float4 position : POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
-    float4 tangent : TANGENT;
+  float4 position : POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float4 tangent : TANGENT;
 };
 
-struct OutputType
-{
-    float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-    float3 tangent_view_dir : TEXCOORD1;
-    float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-    float4 tangent_light_dir[L_NUM] : COLOR0;
+struct OutputType {
+  float4 position : SV_POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float3 tangent : TANGENT;
+  float3 tangent_view_dir : TEXCOORD1;
+  float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+  float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+  float4 tangent_light_dir[L_NUM] : COLOR0;
 };
 
 OutputType main(InputType input)
 {
-    OutputType output;
-    
-    // Change the position vector to be 4 units for proper matrix calculations.
-    input.position.w = 1.0f;
+  OutputType output;
+  
+  // Change the position vector to be 4 units for proper matrix calculations.
+  input.position.w = 1.0f;
 
-    output.tangent = normalize(input.tangent.xyz);
+  output.tangent = normalize(input.tangent.xyz);
 
-    // Calculate the bitangent B = (N x T) * T.w
-    float3 bitangent = cross(input.normal, input.tangent.xyz) * input.tangent.w;
+  // Calculate the bitangent B = (N x T) * T.w
+  float3 bitangent = cross(input.normal, input.tangent.xyz) * input.tangent.w;
 
-    // Transform tangent, bitangent and normal into world space
-    float3 tangent_worldspace = normalize(mul(input.tangent.xyz, (float3x3)worldMatrix));
-    float3 bitangent_worldspace = normalize(mul(bitangent, (float3x3)worldMatrix));
-    float3 normal_worldspace = normalize(mul(input.normal, (float3x3)worldMatrix));
+  // Transform tangent, bitangent and normal into world space
+  float3 tangent_worldspace = normalize(mul(input.tangent.xyz, (float3x3)worldMatrix));
+  float3 bitangent_worldspace = normalize(mul(bitangent, (float3x3)worldMatrix));
+  float3 normal_worldspace = normalize(mul(input.normal, (float3x3)worldMatrix));
 
-    // Calculate the position of the vertex in world coordinates
-    float4 world_pos = mul(input.position, worldMatrix);
-    
-    // Transform the view direction into tangent space
-    output.tangent_view_dir = cam_pos - world_pos.xyz;
-    output.tangent_view_dir = normalize(float3(
-      dot(tangent_worldspace, output.tangent_view_dir),
-      dot(bitangent_worldspace, output.tangent_view_dir),
-      dot(normal_worldspace, output.tangent_view_dir)));
+  // Calculate the position of the vertex in world coordinates
+  float4 world_pos = mul(input.position, worldMatrix);
+  
+  // Transform the view direction into tangent space
+  output.tangent_view_dir = cam_pos - world_pos.xyz;
+  output.tangent_view_dir = normalize(float3(
+    dot(tangent_worldspace, output.tangent_view_dir),
+    dot(bitangent_worldspace, output.tangent_view_dir),
+    dot(normal_worldspace, output.tangent_view_dir)));
    
-    // Calculate the vector from the pixel in world coordinates to the lights
-    // and then transform it into tangent space;
-    // Also transform the direction of the light to tangent space
-    for (uint i = 0; i < L_NUM; ++i) {
-      output.tangent_pixel_to_light_vec[i] = lights[i].position - world_pos;
-      output.pixel_to_light_vec[i] = output.tangent_pixel_to_light_vec[i];
-      output.tangent_pixel_to_light_vec[i] = 
-        normalize(
-        float4(dot(tangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
-        dot(bitangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
-        dot(normal_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
-        1.f));
-      
-      output.tangent_light_dir[i] =
-        normalize(float4(dot(tangent_worldspace, lights[i].direction.xyz),
-        dot(bitangent_worldspace, lights[i].direction.xyz),
-        dot(normal_worldspace, lights[i].direction.xyz),
-        1.f));
-    }
-
-    // Calculate the position of the vertex against the world, view, and projection matrices.
-    output.position = mul(input.position, worldMatrix);
-    output.position = mul(output.position, viewMatrix);
-    output.position = mul(output.position, projectionMatrix);
+  // Calculate the vector from the pixel in world coordinates to the lights
+  // and then transform it into tangent space;
+  // Also transform the direction of the light to tangent space
+  for (uint i = 0; i < L_NUM; ++i) {
+    output.tangent_pixel_to_light_vec[i] = lights[i].position - world_pos;
+    output.pixel_to_light_vec[i] = output.tangent_pixel_to_light_vec[i];
+    output.tangent_pixel_to_light_vec[i] = 
+    normalize(
+    float4(dot(tangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
+    dot(bitangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
+    dot(normal_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
+    1.f));
     
-    // Store the texture coordinates for the pixel shader.
-    output.tex = input.tex;
+    output.tangent_light_dir[i] =
+    normalize(float4(dot(tangent_worldspace, lights[i].direction.xyz),
+    dot(bitangent_worldspace, lights[i].direction.xyz),
+    dot(normal_worldspace, lights[i].direction.xyz),
+    1.f));
+  }
 
-    // Calculate the normal vector against the world matrix only.
-    output.normal = normal_worldspace;
+  // Calculate the position of the vertex against the world, view, and projection matrices.
+  output.position = mul(input.position, worldMatrix);
+  output.position = mul(output.position, viewMatrix);
+  output.position = mul(output.position, projectionMatrix);
+  
+  // Store the texture coordinates for the pixel shader.
+  output.tex = input.tex;
+
+  // Calculate the normal vector against the world matrix only.
+  output.normal = normal_worldspace;
 	
-    //// Normalize the normal vector.
-    //output.normal = normalize(output.normal);
+  //// Normalize the normal vector.
+  //output.normal = normalize(output.normal);
 
-    return output;
+  return output;
 }

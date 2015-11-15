@@ -1,9 +1,9 @@
 //  A shader manager class which manages the shaders needed by materials 
-//	* Shaders are passed this class
-//	* They ask this class for the buffer with a given name (string)
-//	* The class looks up for the buffer with that name
-//		* If already created, return the handle
-//		* If not created, create it and return the handle
+//  * Shaders are passed this class
+//  * They ask this class for the buffer with a given name (string)
+//  * The class looks up for the buffer with that name
+//    * If already created, return the handle
+//    * If not created, create it and return the handle
 
 #ifndef _SHADER_RESOURCE_MANAGER_H
 #define _SHADER_RESOURCE_MANAGER_H
@@ -13,15 +13,15 @@
 #include <D3Dcompiler.h>
 #include <DirectXMath.h>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include "BaseShader.h"
 
-namespace szgrh {
+namespace sz {
   
 class ShaderManager {
 private:
   // The map of shaders relatively to their assigned name
-  std::map<std::string, BaseShader*> shaders_;
+  std::unordered_map<std::string, BaseShader*> shaders_;
 
 public:
   // Ctor
@@ -42,6 +42,6 @@ public:
   
 }; // class ShaderManager
 
-} // namespace szgrh
+} // namespace sz
 
 #endif

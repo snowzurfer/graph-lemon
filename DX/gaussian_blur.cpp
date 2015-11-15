@@ -9,7 +9,7 @@
 #include "gauss_blur_v_shader.h"
 #include "d3d.h"
 
-namespace szgrh {
+namespace sz {
 
 GaussBlur::GaussBlur(const unsigned int scr_height, const unsigned int scr_width,
   const float scr_depth, const float scr_near, ID3D11Device* device,
@@ -23,10 +23,10 @@ GaussBlur::GaussBlur(const unsigned int scr_height, const unsigned int scr_width
 {
   render_target_downsample0_ = new RenderTexture(device,
     scr_width / 2, scr_height / 2, scr_near, scr_depth,
-    L"target_downsample0");
+    "target_downsample0");
   render_target_downsample1_ = new RenderTexture(device,
     scr_width / 2, scr_height / 2, scr_near, scr_depth,
-    L"target_downsample1");
+    "target_downsample1");
 
   // Create the ortho mesh
   ortho_mesh_upsample_ = new OrthoMesh(device,
@@ -99,7 +99,7 @@ void GaussBlur::DownSample(RenderTexture &target, D3D *direct3D,
     render_target_downsample0_->GetOrthoMatrix();// ortho matrix for 2D rendering
 
   // Create a mock material
-  szgrh::Material mock_material;
+  sz::Material mock_material;
 
   mock_material.diffuse_texname = target.name();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
@@ -109,7 +109,7 @@ void GaussBlur::DownSample(RenderTexture &target, D3D *direct3D,
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material);
     texture_shader->Render(direct3D->GetDeviceContext(),
-      ortho_mesh_downsample_->GetIndexCount());
+      ortho_mesh_downsample_->GetIndexCount(), 0);
   }
 
 }
@@ -128,7 +128,7 @@ void GaussBlur::UpSample(RenderTexture &target, D3D *direct3D,
     target.GetOrthoMatrix();// ortho matrix for 2D rendering
 
   // Create a mock material
-  szgrh::Material mock_material;
+  sz::Material mock_material;
 
   mock_material.diffuse_texname = render_target_downsample0_->name();
   ortho_mesh_upsample_->SendData(direct3D->GetDeviceContext());
@@ -138,7 +138,7 @@ void GaussBlur::UpSample(RenderTexture &target, D3D *direct3D,
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material);
     texture_shader->Render(direct3D->GetDeviceContext(),
-      ortho_mesh_upsample_->GetIndexCount());
+      ortho_mesh_upsample_->GetIndexCount(), 0);
   }
 
 }
@@ -157,7 +157,7 @@ void GaussBlur::HorizontalBlur(RenderTexture &target, D3D *direct3D,
     render_target_downsample1_->GetOrthoMatrix();// ortho matrix for 2D rendering
 
   // Create a mock material
-  szgrh::Material mock_material;
+  sz::Material mock_material;
 
   mock_material.diffuse_texname = render_target_downsample0_->name();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
@@ -168,7 +168,7 @@ void GaussBlur::HorizontalBlur(RenderTexture &target, D3D *direct3D,
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material, scr_width_ * 0.5f);
     gauss_shader->Render(direct3D->GetDeviceContext(),
-      ortho_mesh_downsample_->GetIndexCount());
+      ortho_mesh_downsample_->GetIndexCount(), 0);
   }
 
 }
@@ -187,7 +187,7 @@ void GaussBlur::VerticalBlur(RenderTexture &target, D3D *direct3D,
     render_target_downsample0_->GetOrthoMatrix();// ortho matrix for 2D rendering
 
   // Create a mock material
-  szgrh::Material mock_material;
+  sz::Material mock_material;
 
   mock_material.diffuse_texname = render_target_downsample1_->name();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
@@ -198,7 +198,7 @@ void GaussBlur::VerticalBlur(RenderTexture &target, D3D *direct3D,
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material, scr_height_ * 0.5f);
     gauss_shader->Render(direct3D->GetDeviceContext(),
-      ortho_mesh_downsample_->GetIndexCount());
+      ortho_mesh_downsample_->GetIndexCount(), 0);
   }
 
 }
@@ -224,4 +224,4 @@ void GaussBlur::ApplyPostProcess(RenderTexture &target, D3D *direct3D,
 }
 
 
-} // namespace szgrh
+} // namespace sz

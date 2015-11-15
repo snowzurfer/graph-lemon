@@ -1,9 +1,9 @@
 //  A buffer manager class which manages the constant buffers needed by shaders
-//	* Shaders are passed this class
-//	* They ask this class for the buffer with a given name (string)
-//	* The class looks up for the buffer with that name
-//		* If already created, return the handle
-//		* If not created, create it and return the handle
+//  * Shaders are passed this class
+//  * They ask this class for the buffer with a given name (string)
+//  * The class looks up for the buffer with that name
+//    * If already created, return the handle
+//    * If not created, create it and return the handle
 
 #ifndef _BUFFER_RESOURCE_MANAGER_H
 #define _BUFFER_RESOURCE_MANAGER_H
@@ -15,7 +15,7 @@
 #include <string>
 #include <map>
 
-namespace szgrh {
+namespace sz {
   
 class ConstBufManager {
 private:
@@ -40,6 +40,6 @@ public:
   
 }; // class ConstBufManager
 
-} // namespace szgrh
+} // namespace sz
 
 #endif

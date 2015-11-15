@@ -3,7 +3,7 @@
 #include <algorithm>
 
 
-namespace szgrh {
+namespace sz {
 
 ConstBufManager::ConstBufManager() :
     buffers_() {
@@ -36,7 +36,7 @@ ID3D11Buffer *ConstBufManager::CreateD3D11ConstBuffer(const std::string &name,
 
   // Create a buffer pointer
   ID3D11Buffer *buf_;
-	HRESULT h_result = device->CreateBuffer(&desc, NULL, &buf_);
+  HRESULT h_result = device->CreateBuffer(&desc, NULL, &buf_);
 
   // Check for errors
   if (h_result != S_OK) {
@@ -49,4 +49,4 @@ ID3D11Buffer *ConstBufManager::CreateD3D11ConstBuffer(const std::string &name,
   return buf_;
 }
 
-} // namespace szgrh
+} // namespace sz
