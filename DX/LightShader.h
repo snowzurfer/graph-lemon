@@ -1,7 +1,7 @@
 // Light shader.h
 // Basic single light shader setup
-#ifndef _LIGHTSHADER_H_
-#define _LIGHTSHADER_H_
+#ifndef _LIGHTSHADER_H
+#define _LIGHTSHADER_H
 
 #include "BaseShader.h"
 #include "light.h"
@@ -14,12 +14,8 @@
 using namespace std;
 using namespace DirectX;
 
-const unsigned int kNumLights = 4;
 
 class LightShader : public BaseShader {
-private:
-
-
 public:
 
   LightShader(ID3D11Device* device, HWND hwnd, 

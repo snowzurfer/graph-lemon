@@ -3,6 +3,8 @@
 
 #include <DirectXMath.h>
 
+const unsigned int kNumLights = 4;
+
 namespace sz {
 
 using namespace DirectX;
@@ -11,6 +13,8 @@ struct MatrixBufferType {
   XMMATRIX world;
   XMMATRIX view;
   XMMATRIX projection;
+  XMMATRIX lights_view[kNumLights];
+  XMMATRIX lights_proj[kNumLights];
 };
 
 struct ScreenSizeBufferType {

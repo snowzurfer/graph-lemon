@@ -2,7 +2,8 @@
 // Direct3D setup
 #include "d3d.h"
 
-D3D::D3D(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+D3D::D3D(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear) :
+    wireframe_enabled_(false)
 {
   IDXGIFactory* factory;
   IDXGIAdapter* adapter;
@@ -20,7 +21,6 @@ D3D::D3D(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscre
   float fieldOfView, screenAspect;
   D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
   D3D11_BLEND_DESC blendStateDescription;
-
 
   // Store the vsync setting.
   m_vsync_enabled = vsync;
@@ -542,6 +542,17 @@ void D3D::TurnOnWireframe()
 {
   // Now set the rasterizer state.
   m_deviceContext->RSSetState(m_rasterStateWF);
+}
+
+void D3D::ToggleWireFrame() {
+  if (wireframe_enabled_) {
+    m_deviceContext->RSSetState(m_rasterState);
+  }
+  else {
+    m_deviceContext->RSSetState(m_rasterStateWF);
+  }
+
+  wireframe_enabled_ = !wireframe_enabled_;
 }
 
 void D3D::TurnOffWireframe()

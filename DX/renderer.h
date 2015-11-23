@@ -32,7 +32,8 @@ public:
   // Ctor
   Renderer(const unsigned int scr_height, const unsigned int scr_width,
     const float scr_depth, const float scr_near, ID3D11Device* device,
-    HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man);
+    HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
+    const size_t lights_num);
 
   // Dtor
   virtual ~Renderer();
@@ -57,6 +58,8 @@ protected:
 
   // Shared by all the rendering modes
   RenderTexture *render_target_main_;
+  RenderTexture *render_target_depth_;
+  const size_t depth_target_w_, depth_target_h_;
   OrthoMesh *ortho_mesh_screen_;
   Material *render_target_main_mat_;
 
@@ -64,9 +67,21 @@ protected:
   ShaderManager *sha_man_;
   ConstBufManager *buf_man_;
   
+  // Per-frame buffers
+  ID3D11Buffer* light_buff_;
+  ID3D11Buffer* camera_buff_;
+  
   // Render to the back buffer from a source render target
   void RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
     const XMMATRIX &base_view_matrix);
+  
+  // Setup buffers used per-frame
+  void SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
+    size_t lights_num);
+
+  // Set per-frame parameters of shaders
+  void SetFrameParameters(ID3D11DeviceContext* deviceContext,
+    std::vector<Light> &lights, Camera *cam);
 
 }; // class Renderer
 

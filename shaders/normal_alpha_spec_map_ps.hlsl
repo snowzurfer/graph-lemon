@@ -1,15 +1,17 @@
 // Light pixel shader
 // Calculate ambient and diffuse lighting for a single light (also texturing)
 
+// The maximum number of lights in the scene and also the number
+// of lights which are passed every frame
+#define L_NUM 4
+
 Texture2D texture_diffuse : register(t0);
 Texture2D texture_normal : register(t1);
 Texture2D texture_alpha : register(t2);
 Texture2D texture_spec : register(t3);
+Texture2D texture_lights_depth[L_NUM]: register(t4);
 SamplerState SampleType : register(s0);
 
-// The maximum number of lights in the scene and also the number
-// of lights which are passed every frame
-#define L_NUM 4
 
 // Represents a single light
 struct LightType {
@@ -52,8 +54,7 @@ cbuffer MatBuffer : register(cb1) {
 };
 
 
-struct InputType
-{
+struct InputType {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
@@ -116,12 +117,9 @@ float4 main(InputType input) : SV_TARGET {
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
       calc_light_dir = input.tangent_light_dir[i];
-      //calc_light_dir = lights[i].direction;
 
       // Calculate the amount of light on this pixel.
       light_intensity = saturate(dot(float4(sampled_normal, 0.f), -calc_light_dir));
-      //light_intensity = saturate(dot(float4(input.normal
-        //, 0.f), -calc_light_dir));
     }
     else if (lights[i].position.w == 0.f) { // Point
       // Save the vector from the pixel in world coordinates to 

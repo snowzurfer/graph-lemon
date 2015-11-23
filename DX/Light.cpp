@@ -21,6 +21,22 @@ void Light::GenerateViewMatrix()
   m_viewMatrix = XMMatrixLookAtLH(m_position, m_lookAt, up);
 }
 
+void Light::GenerateViewMatrixFromDirection()
+{
+  XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+
+  //up = XMVectorSetX(up, 0.0f);
+  //up = XMVectorSetY(up, 1.0f);
+  //up = XMVectorSetZ(up, 0.0f);
+  XMVECTOR dir = XMVectorSet(m_direction.x,
+    m_direction.y,
+    m_direction.z,
+    1.f);
+
+  // Create the view matrix from the three vectors.
+  m_viewMatrix = XMMatrixLookToLH(m_position, dir, up);
+}
+
 void Light::GenerateProjectionMatrix(float screenNear, float screenFar)
 {
   float fieldOfView, screenAspect;

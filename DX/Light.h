@@ -12,7 +12,6 @@ public:
   // Ctor
   Light();
 
-
   void* operator new(size_t i)
   {
     return _mm_malloc(i, 16);
@@ -24,6 +23,7 @@ public:
   }
 
   void GenerateViewMatrix();
+  void GenerateViewMatrixFromDirection();
   void GenerateProjectionMatrix(float, float);
 
   // Setters

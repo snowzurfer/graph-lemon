@@ -237,7 +237,7 @@ void NormalAlphaSpecMapShader::SetShaderFrameParameters(
   sz::LightBufferType* light_ptr;
   sz::CamBufferType* camPtr;
   unsigned int bufferNumber;
-  
+
   // Send light data to pixel and vertex shader
   result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
   light_ptr = (sz::LightBufferType*)mapped_resource.pData;

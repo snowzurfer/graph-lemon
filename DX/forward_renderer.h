@@ -19,7 +19,8 @@ public:
   // Ctor
   ForwardRenderer(const unsigned int scr_height, const unsigned int scr_width,
     const float scr_depth, const float scr_near, ID3D11Device* device,
-    HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man);
+    HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
+    const size_t lights_num);
 
   // Dtor
   ~ForwardRenderer() {};
@@ -27,9 +28,15 @@ public:
   void Render(D3D *d3d, Camera *cam, std::vector<Light> *lights);
 
 private:
+
   // Render the scene to a texture target
   void RenderToTexture(RenderTexture &target, D3D *d3d,
     Camera *cam, std::vector<Light> *lights);
+
+  // Render the scene's depth to a target from a given
+  // light's perspective
+  void RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d, Light *light);
+
 
 }; // class ForwardRenderer
 

@@ -111,6 +111,7 @@
     <ClCompile Include="crc.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
+    <ClCompile Include="DepthShader.cpp" />
     <ClCompile Include="forward_renderer.cpp" />
     <ClCompile Include="gaussian_blur.cpp" />
     <ClCompile Include="gauss_blur_h_shader.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="crc.h" />
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
+    <ClInclude Include="DepthShader.h" />
     <ClInclude Include="forward_renderer.h" />
     <ClInclude Include="gaussian_blur.h" />
     <ClInclude Include="gauss_blur_h_shader.h" />

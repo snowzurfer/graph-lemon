@@ -72,7 +72,8 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
       lights_[i].SetPosition(0.f, 10.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-      lights_[i].SetDirection(0.f, -1.f, -1.f);
+      lights_[i].SetDirection(-1.f, -0.8f, 0.f);
+      lights_[i].SetLookAt(1.f, 0.f, 1.f);
       //lights_[i].set_spot_cutoff(45.f);
       //lights_[i].set_spot_exponent(5.f);
       lights_[i].set_active(true);
@@ -88,6 +89,14 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     if (i == 2) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
       lights_[i].SetPosition(-10.f, 50.f, 0.f, 0.f);
+      lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+      lights_[i].SetDirection(0.f, -1.f, 0.f);
+      lights_[i].set_active(true);
+      lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
+    }
+    if (i == 3) {
+      lights_[i].SetAmbientColour(0.5f, 0.5f, 0.5f, 1.f);
+      lights_[i].SetPosition(-10.f, -50.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
       lights_[i].set_active(true);
@@ -109,7 +118,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
 
   renderer_ = new sz::ForwardRenderer(screenHeight, screenWidth,
     SCREEN_DEPTH, SCREEN_NEAR, m_Direct3D->GetDevice(),
-    hwnd, buf_manager_, sha_manager_);
+    hwnd, buf_manager_, sha_manager_, kNumLights);
   //renderer_->AddMeshesAndMaterials(model_->meshes_, model_->materials_);
   renderer_->AddModel(model_);
 
@@ -195,6 +204,12 @@ bool Lab3::Frame()
 
   // Update camera
   m_Camera->Update();
+
+  // Update lights
+  for (Light &light : lights_) {
+    light.GenerateProjectionMatrix(1.f, 50.f);
+    light.GenerateViewMatrixFromDirection();
+  }
 
   // Render the graphics.
   result = Render();

@@ -30,7 +30,8 @@ NormalAlphaMapShader::~NormalAlphaMapShader()
 }
 
 
-void NormalAlphaMapShader::InitShader(sz::ConstBufManager &buf_man,unsigned int lights_num) {
+void NormalAlphaMapShader::InitShader(sz::ConstBufManager &buf_man,
+    unsigned int lights_num) {
   D3D11_BUFFER_DESC matrixBufferDesc;
   D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC lightBufferDesc;
@@ -219,6 +220,8 @@ void NormalAlphaMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
     Texture::Inst()->GetTexture(mat.bump_texname_crc);
   ID3D11ShaderResourceView * texture_alpha = 
     Texture::Inst()->GetTexture(mat.alpha_texname_crc);
+  ID3D11ShaderResourceView * texture_shadows = 
+    Texture::Inst()->GetTexture("target_depth");
   // Set shader textures resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture_diffuse);
   deviceContext->PSSetShaderResources(1, 1, &texture_normal);

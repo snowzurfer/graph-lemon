@@ -22,11 +22,12 @@ struct LightType {
   float3 padding;
 };
 
-cbuffer MatrixBuffer : register(cb0)
-{
+cbuffer MatrixBuffer : register(cb0) {
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
+    matrix lightViewMatrix[L_NUM];
+    matrix lightProjMatrix[L_NUM];
 };
 
 cbuffer CamBuffer : register(cb1) {
@@ -39,16 +40,14 @@ cbuffer LightBuffer : register(cb2) {
   LightType lights[L_NUM];
 };
 
-struct InputType
-{
+struct InputType {
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
 };
 
-struct OutputType
-{
+struct OutputType {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
@@ -57,10 +56,10 @@ struct OutputType
     float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
     float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
     float4 tangent_light_dir[L_NUM] : COLOR0;
+    float4 lightview_position[L_NUM] : TEXCOORD11;
 };
 
-OutputType main(InputType input)
-{
+OutputType main(InputType input) {
     OutputType output;
     
     // Change the position vector to be 4 units for proper matrix calculations.
@@ -104,9 +103,16 @@ OutputType main(InputType input)
         dot(bitangent_worldspace, lights[i].direction.xyz),
         dot(normal_worldspace, lights[i].direction.xyz),
         1.f));
+    
+      // Calculate the position of the vertex as seen from the light
+      output.lightview_position[i] = mul(input.position, worldMatrix);
+      output.lightview_position[i] = mul(output.lightview_position[i], lightViewMatrix[i]);
+      output.lightview_position[i] = mul(output.lightview_position[i], lightProjMatrix[i]);
     }
 
-    // Calculate the position of the vertex against the world, view, and projection matrices.
+
+    // Calculate the position of the vertex against the world, view,
+    // and projection matrices.
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);

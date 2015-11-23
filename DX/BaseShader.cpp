@@ -1,7 +1,8 @@
 // base shader.cpp
 #include "baseshader.h"
 #include "Texture.h"
-
+#include "Camera.h"
+#include "Light.h"
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
 {
@@ -55,7 +56,7 @@ void BaseShader::loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
   HRESULT result;
   ID3DBlob* errorMessage;
   ID3DBlob* vertexShaderBuffer;
-  
+
   // Initialize the pointers this function will use to null.
   errorMessage = 0;
   vertexShaderBuffer = 0;

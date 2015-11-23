@@ -44,12 +44,14 @@ public:
   void TurnOffAlphaBlending();
   void TurnOnWireframe();
   void TurnOffWireframe();
+  void ToggleWireFrame();
 
   void SetBackBufferRenderTarget();
   void ResetViewport();
 
 private:
   bool m_vsync_enabled;
+  bool wireframe_enabled_;
   int m_videoCardMemory;
   char m_videoCardDescription[128];
   IDXGISwapChain* m_swapChain;

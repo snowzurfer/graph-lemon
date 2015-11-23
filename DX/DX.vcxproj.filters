@@ -168,6 +168,9 @@
     <ClCompile Include="forward_renderer.cpp">
       <Filter>Source Files\System\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="DepthShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -307,6 +310,9 @@
     </ClInclude>
     <ClInclude Include="forward_renderer.h">
       <Filter>Source Files\System\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthShader.h">
+      <Filter>Source Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
