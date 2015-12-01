@@ -1,6 +1,7 @@
 #include "normal_alpha_map_shader.h"
 #include "Texture.h"
-
+#include "RenderTexture.h"
+#include <sstream>
 
 NormalAlphaMapShader::NormalAlphaMapShader(ID3D11Device* device, HWND hwnd,
   sz::ConstBufManager &buf_man, unsigned int lights_num) : 
@@ -213,6 +214,17 @@ void NormalAlphaMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
   deviceContext->Unmap(material_buf_, 0);
   // Set the constant buffer index in the pixel shader
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
+
+  // Set shader resources for shadow maps
+  for (size_t i = 0; i < kNumLights; ++i) {
+    std::string name;
+    std::stringstream ss;
+    ss << "target_depth_" << i;
+    name = ss.str();
+    ID3D11ShaderResourceView * texture = 
+      Texture::Inst()->GetTexture(name.c_str());
+    deviceContext->PSSetShaderResources(3 + i, 1, &texture);
+  }
 
   ID3D11ShaderResourceView * texture_diffuse = 
     Texture::Inst()->GetTexture(mat.diffuse_texname_crc);

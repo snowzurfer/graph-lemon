@@ -32,7 +32,7 @@ ColourShader::~ColourShader()
 void ColourShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 {
   D3D11_BUFFER_DESC matrixBufferDesc;
-  
+
   // Load (+ compile) shader files
   loadVertexShader(vsFilename);
   loadPixelShader(psFilename);
@@ -47,7 +47,6 @@ void ColourShader::InitShader(WCHAR* vsFilename, WCHAR* psFilename)
 
   // Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
   m_device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-
 }
 
 

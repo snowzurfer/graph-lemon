@@ -9,7 +9,7 @@ Texture2D texture_diffuse : register(t0);
 Texture2D texture_normal : register(t1);
 Texture2D texture_alpha : register(t2);
 Texture2D texture_spec : register(t3);
-Texture2D texture_lights_depth[L_NUM]: register(t4);
+Texture2D texture_light_depth[L_NUM] : register(t4);
 SamplerState SampleType : register(s0);
 
 
@@ -28,6 +28,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 // Represents a material
@@ -60,9 +62,10 @@ struct InputType {
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 tangent_view_dir : TEXCOORD1;
-    float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-    float4 tangent_light_dir[L_NUM] : COLOR0;
+    float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+    float3 tangent_light_dir[L_NUM] : TEXCOORD11;
+    float4 lightview_position[L_NUM] : TEXCOORD16;
 };
 
 float4 main(InputType input) : SV_TARGET {
@@ -74,6 +77,8 @@ float4 main(InputType input) : SV_TARGET {
   float4 ambient_global_colour = {0.08f, 0.08f, 0.08f, 1.f};
   // Total contribution of the lights
   float4 total_light_contribution = { 0.f, 0.f, 0.f, 0.f };
+  // Bias for shawdowing
+  float bias = 0.001f;
 
   // Sample the pixel color from the texture using the sampler at this texture coordinate location.
   sampled_diffuse = texture_diffuse.Sample(SampleType, input.tex);
@@ -98,7 +103,7 @@ float4 main(InputType input) : SV_TARGET {
     }
   
     // Vector from the light to the fragment
-    float4 calc_light_dir;
+    float3 calc_light_dir;
     // How much the pixel is influenced by light
     float light_intensity = 0.f;
     // Falloff factor for point lights 
@@ -112,19 +117,28 @@ float4 main(InputType input) : SV_TARGET {
       mat.ambient;
     // The spotlight effect in case the light is spotlight
     float spot_effect = 1.f;
+    // The amount of shadowing on this pixel
+    float shadow_effect = 1.f;
   
+    // Calculate the projected texture coordinates
+    float2 proj_tex_coord;
+    proj_tex_coord.x = input.lightview_position[i].x /
+      input.lightview_position[i].w / 2.f + 0.5f;
+    proj_tex_coord.y = -input.lightview_position[i].y /
+      input.lightview_position[i].w / 2.f + 0.5f;
+    
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
       calc_light_dir = input.tangent_light_dir[i];
 
       // Calculate the amount of light on this pixel.
-      light_intensity = saturate(dot(float4(sampled_normal, 0.f), -calc_light_dir));
+      light_intensity = saturate(dot(sampled_normal, -calc_light_dir));
     }
     else if (lights[i].position.w == 0.f) { // Point
       // Save the vector from the pixel in world coordinates to 
       // the light
-      float4 pixel_to_light_vec = input.pixel_to_light_vec[i];
+      float3 pixel_to_light_vec = input.pixel_to_light_vec[i];
 
       // Store the distance between light and pixel
       float dist = length(pixel_to_light_vec);
@@ -141,7 +155,7 @@ float4 main(InputType input) : SV_TARGET {
 
         // Calculate the intensity of the point light
         light_intensity = saturate(dot(pixel_to_light_vec, 
-          float4(sampled_normal, 0.f)));
+          sampled_normal));
         
         // If the light is striking the front of the pixel
         if (light_intensity > 0.f) {
@@ -151,22 +165,70 @@ float4 main(InputType input) : SV_TARGET {
         }
 
         // If the light is a spotlight
-        if (lights[i].spot_cutoff != 180.f) {
+        if (lights[i].spot_cutoff != 3.14159265358979323846f) {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel, in tangent space
           float cos_directions = max(dot(calc_light_dir, 
             input.tangent_light_dir[i]), 0);
 
+
+
           // If the pixel lies within the cone of illumination 
           if (cos_directions > cos(lights[i].spot_cutoff)) {
             // Calculate the spotlight effect
             spot_effect = pow(cos_directions, lights[i].spot_exponent);
+
+    
+            
+            // Determine if the projected coordinates are in the 0 to 1 range
+            if((saturate(proj_tex_coord.x) == proj_tex_coord.x) &&
+              (saturate(proj_tex_coord.y) == proj_tex_coord.y)) {
+              float sample_depth = 1.f;
+              
+              // Sample the depth map
+              switch(i) {
+                case 0:
+                  sample_depth = texture_light_depth[0].Sample(SampleType, proj_tex_coord).r;
+                  break;
+                case 1:
+                  sample_depth = texture_light_depth[1].Sample(SampleType, proj_tex_coord).r;
+                  break;
+                case 2:
+                  sample_depth = texture_light_depth[2].Sample(SampleType, proj_tex_coord).r;
+                  break;
+                case 3:
+                  sample_depth = texture_light_depth[3].Sample(SampleType, proj_tex_coord).r;
+                  break;
+              }
+            
+              // Calculate depth at this pixel
+              float light_depth = input.lightview_position[i].z /
+                input.lightview_position[i].w;
+              light_depth -= bias;
+
+              // Determine whether to shadow this pixel or not
+              if(light_depth > sample_depth) {
+                // Calculate the amount of shadowing on this pixel
+                shadow_effect = 0.f;
+              }
+              //else if (light_depth == sample_depth){
+                //shadow_effect = 0.5;
+              //}
+              //else {
+                //shadow_effect = 1.f;
+              //}
+              //colour = float4(shadow_effect, shadow_effect, shadow_effect, 1.f); 
+
+ 
+
+            }
           }
           // If the pixel doesn't lie within the cone
           else {
             spot_effect = 0.f;
-          }
 
+    
+          }
         }
       }
     }
@@ -194,7 +256,7 @@ float4 main(InputType input) : SV_TARGET {
       // accounting for the falloff factor
       total_light_contribution += ((final_amb_contribution + 
         final_diff_contribution + final_spec_contribution) / falloff
-        * spot_effect);
+        * spot_effect * shadow_effect);
       total_light_contribution = saturate(total_light_contribution);
     }
   }
@@ -202,7 +264,7 @@ float4 main(InputType input) : SV_TARGET {
 
   // Add the ambient component to the diffuse to obtain the outpu colour
   colour = saturate(float4(ambient_global_colour.xyz + 
-    total_light_contribution.xyz, sampled_alpha));
+     total_light_contribution.xyz, sampled_alpha));
   //colour = float4(saturate((sampled_normal + 1 ) * 0.5), 1.f);
 
   return colour;

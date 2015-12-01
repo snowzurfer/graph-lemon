@@ -26,6 +26,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 // Represents a material
@@ -58,10 +60,10 @@ struct InputType {
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 tangent_view_dir : TEXCOORD1;
-    float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-    float4 tangent_light_dir[L_NUM] : COLOR0;
-    float4 lightview_position[L_NUM] : TEXCOORD11;
+    float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+    float3 tangent_light_dir[L_NUM] : TEXCOORD11;
+    float4 lightview_position[L_NUM] : TEXCOORD16;
 };
 
 float4 main(InputType input) : SV_TARGET {
@@ -97,7 +99,7 @@ float4 main(InputType input) : SV_TARGET {
     }
   
     // Vector from the light to the fragment
-    float4 calc_light_dir;
+    float3 calc_light_dir;
     // How much the pixel is influenced by light
     float light_intensity = 0.f;
     // Falloff factor for point lights 
@@ -118,22 +120,22 @@ float4 main(InputType input) : SV_TARGET {
     float2 proj_tex_coord;
     proj_tex_coord.x = input.lightview_position[i].x /
       input.lightview_position[i].w / 2.f + 0.5f;
-    proj_tex_coord.y = input.lightview_position[i].y /
+    proj_tex_coord.y = -input.lightview_position[i].y /
       input.lightview_position[i].w / 2.f + 0.5f;
   
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
       calc_light_dir = input.tangent_light_dir[i];
-      //calc_light_dir = lights[i].direction;
+      //calc_light_dir = lights[i].direction.xyz;
 
       // Calculate the amount of light on this pixel.
-      light_intensity = saturate(dot(float4(sampled_normal, 0.f), -calc_light_dir));
+      light_intensity = saturate(dot(sampled_normal, -calc_light_dir));
     }
     else if (lights[i].position.w == 0.f) { // Point
       // Save the vector from the pixel in world coordinates to 
       // the light
-      float4 pixel_to_light_vec = input.pixel_to_light_vec[i];
+      float3 pixel_to_light_vec = input.pixel_to_light_vec[i];
 
       // Store the distance between light and pixel
       float dist = length(pixel_to_light_vec);
@@ -150,7 +152,7 @@ float4 main(InputType input) : SV_TARGET {
 
         // Calculate the intensity of the point light
         light_intensity = saturate(dot(pixel_to_light_vec, 
-          float4(sampled_normal, 0.f)));
+          sampled_normal));
         
         // If the light is striking the front of the pixel
         if (light_intensity > 0.f) {
@@ -160,16 +162,19 @@ float4 main(InputType input) : SV_TARGET {
         }
 
         // If the light is a spotlight
-        if (lights[i].spot_cutoff != 180.f) {
+        if (lights[i].spot_cutoff != 3.14159265358979323846f) {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel, in tangent space
           float cos_directions = max(dot(calc_light_dir, 
             input.tangent_light_dir[i]), 0);
 
+
+
           // If the pixel lies within the cone of illumination 
           if (cos_directions > cos(lights[i].spot_cutoff)) {
             // Calculate the spotlight effect
             spot_effect = pow(cos_directions, lights[i].spot_exponent);
+
             
             // Determine if the projected coordinates are in the 0 to 1 range
             if((saturate(proj_tex_coord.x) == proj_tex_coord.x) &&
@@ -198,15 +203,27 @@ float4 main(InputType input) : SV_TARGET {
               light_depth -= bias;
 
               // Determine whether to shadow this pixel or not
-              if(light_depth >= sample_depth) {
+              if(light_depth > sample_depth) {
                 // Calculate the amount of shadowing on this pixel
-                shadow_effect = 0.3f;
+                shadow_effect = 0.f;
               }
+              //else if (light_depth == sample_depth){
+                //shadow_effect = 0.5;
+              //}
+              //else {
+                //shadow_effect = 1.f;
+              //}
+              //colour = float4(shadow_effect, shadow_effect, shadow_effect, 1.f); 
+
+ 
+
             }
           }
           // If the pixel doesn't lie within the cone
           else {
             spot_effect = 0.f;
+
+    
           }
         }
       }
@@ -247,6 +264,7 @@ float4 main(InputType input) : SV_TARGET {
   colour = saturate(float4(ambient_global_colour.xyz + 
     total_light_contribution.xyz, sampled_alpha));
 
+  //colour = saturate(float4(1.f, 0.f, 0.f, 1.f));
   return colour;
 }
 

@@ -23,6 +23,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 // Represents a material
@@ -56,7 +58,7 @@ struct InputType
     float3 normal : NORMAL;
     float3 viewDir : TEXCOORD1;
     float4 worldPos : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD3;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD3;
 };
 
 float4 main(InputType input) : SV_TARGET {
@@ -84,7 +86,7 @@ float4 main(InputType input) : SV_TARGET {
     }
   
     // Vector from the light to the fragment
-    float4 calc_light_dir;
+    float3 calc_light_dir;
     // How much the pixel is influenced by light
     float light_intensity = 0.f;
     // Falloff factor for point lights 
@@ -102,15 +104,15 @@ float4 main(InputType input) : SV_TARGET {
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
-      calc_light_dir = lights[i].direction;
+      calc_light_dir = lights[i].direction.xyz;
 
       // Calculate the amount of light on this pixel.
-      light_intensity = saturate(dot(float4(input.normal, 0.f), -calc_light_dir));
+      light_intensity = saturate(dot(input.normal, -calc_light_dir));
     }
     else if (lights[i].position.w == 0.f) { // Point
       // Save the vector from the pixel in world coordinates to 
       // the light
-      float4 pixel_to_light_vec = input.pixel_to_light_vec[i];
+      float3 pixel_to_light_vec = input.pixel_to_light_vec[i];
 
       // Store the distance between light and pixel
       float dist = length(pixel_to_light_vec);
@@ -126,7 +128,7 @@ float4 main(InputType input) : SV_TARGET {
         calc_light_dir = -pixel_to_light_vec;
 
         // Calculate the intensity of the point light
-        light_intensity = saturate(dot(pixel_to_light_vec, float4(input.normal, 0.f)));
+        light_intensity = saturate(dot(pixel_to_light_vec, input.normal));
         
         // If the light is striking the front of the pixel
         if (light_intensity > 0.f) {
@@ -136,19 +138,25 @@ float4 main(InputType input) : SV_TARGET {
         }
 
         // If the light is a spotlight
-        if (lights[i].spot_cutoff != 180.f) {
+        if (lights[i].spot_cutoff != 3.14159265358979323846f) {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel
           float cos_directions = max(dot(calc_light_dir, lights[i].direction), 0);
+
+colour = float4(cos_directions,  cos_directions, cos_directions, 1.f);
 
           // If the pixel lies within the cone of illumination 
           if (cos_directions > cos(lights[i].spot_cutoff)) {
             // Calculate the spotlight effect
             spot_effect = pow(cos_directions, lights[i].spot_exponent);
+
+    
           }
           // If the pixel doesn't lie within the cone
           else {
             spot_effect = 0.f;
+
+    
           }
 
         }

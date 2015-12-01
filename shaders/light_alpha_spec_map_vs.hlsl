@@ -20,13 +20,15 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
-cbuffer MatrixBuffer : register(cb0)
-{
-    matrix worldMatrix;
-    matrix viewMatrix;
-    matrix projectionMatrix;
+cbuffer MatrixBuffer : register(cb0) {
+  matrix worldMatrix;
+  matrix viewMatrix;
+  matrix projectionMatrix;
+
 };
 
 cbuffer CamBuffer : register(cb1) {
@@ -53,7 +55,9 @@ struct OutputType
     float3 normal : NORMAL;
     // How does the suffix modify the type?
     float3 viewDir: TEXCOORD1;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD2;
+    float4 world_pos : TEXCOORD2;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD3;
+    float4 lightview_position[L_NUM] : TEXCOORD11;
 };
 
 OutputType main(InputType input)
@@ -68,7 +72,12 @@ OutputType main(InputType input)
 
     // Calculate the vector from the pixel in world coordinates to the lights
     for (uint i = 0; i < L_NUM; ++i) {
-      output.pixel_to_light_vec[i] = lights[i].position - world_pos;
+      output.pixel_to_light_vec[i] = lights[i].position.xyz - world_pos.xyz;
+      
+      // Calculate the position of the vertex as seen from the light
+      output.lightview_position[i] = mul(input.position, worldMatrix);
+      output.lightview_position[i] = mul(output.lightview_position[i], lights[i].view_matrix);
+      output.lightview_position[i] = mul(output.lightview_position[i], lights[i].proj_matrix);
     }
     
     // Determine the viewing direction based on the position of the camera and
@@ -79,6 +88,8 @@ OutputType main(InputType input)
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
+
+    output.world_pos = world_pos;
     
     // Store the texture coordinates for the pixel shader.
     output.tex = input.tex;

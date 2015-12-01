@@ -2,6 +2,7 @@
 #include "depthshader.h"
 #include "buffer_resource_manager.h"
 #include "Material.h"
+#include "RenderTexture.h"
 
 DepthShader::DepthShader(ID3D11Device* device, HWND hwnd,
     sz::ConstBufManager &buf_man) : BaseShader(device, hwnd) {

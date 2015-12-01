@@ -27,8 +27,10 @@ ForwardRenderer::ForwardRenderer(const unsigned int scr_height,
 
 void ForwardRenderer::Render(D3D *d3d, Camera *cam,
   std::vector<Light> *lights) {
-  // Render scene from the light's point of view
-  RenderSceneDepthFromLight(*render_target_depth_, d3d, (&(*lights)[0]));
+  // Render scene from the lights' point of view
+  for (size_t i = 0; i < lights->size(); ++i) {
+    RenderSceneDepthFromLight(*(render_targets_depth_[i]), d3d, (&(*lights)[i]));
+  }
 
   // Render scene to a target
   RenderToTexture(*render_target_main_, d3d, cam, lights);
@@ -188,24 +190,24 @@ void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   // For all the meshes which do not belong to a model
   //std::stack<size_t> alpha_blended_meshes;
    //For all the entries in the map
-  //for (auto map_pair : meshes_by_material_) {
-  //  MatMeshPair &pair = map_pair.second;
+  for (auto map_pair : meshes_by_material_) {
+    MatMeshPair &pair = map_pair.second;
 
-  //  // Set the parameters for this shader
-  //  shader->SetShaderParameters(d3d->GetDeviceContext(),
-  //    model_transform, view_matrix, projection_matrix,
-  //    *(pair.first));
-  //  // Set DX shaders and input layout
-  //  shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
-  //  shader->SetSamplers(d3d->GetDeviceContext());
+    // Set the parameters for this shader
+    shader->SetShaderParameters(d3d->GetDeviceContext(),
+      model_transform, view_matrix, projection_matrix,
+      *(pair.first));
+    // Set DX shaders and input layout
+    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
+    shader->SetSamplers(d3d->GetDeviceContext());
 
-  //  // For all the meshes associated with it
-  //  for (BaseMesh *mesh : pair.second) {
-  //    mesh->SendData(d3d->GetDeviceContext());
-  //    shader->Render(d3d->GetDeviceContext(),
-  //      mesh->GetIndexCount());
-  //  }
-  //}
+    // For all the meshes associated with it
+    for (BaseMesh *mesh : pair.second) {
+      mesh->SendData(d3d->GetDeviceContext());
+      shader->Render(d3d->GetDeviceContext(),
+        mesh->GetIndexCount());
+    }
+  }
 
 }
 

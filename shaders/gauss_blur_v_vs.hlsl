@@ -7,6 +7,8 @@ cbuffer MatrixBuffer : register(cb0) {
 cbuffer ScreenSizeBuffer : register(cb1) {
     float screenHeight;
     float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 

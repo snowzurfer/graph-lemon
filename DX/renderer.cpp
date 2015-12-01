@@ -13,6 +13,8 @@
 #include "DepthShader.h"
 #include "Model.h"
 #include "Light.h"
+#include <sstream>
+#include <string>
 
 namespace sz {
 
@@ -24,6 +26,7 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   models_(),
   render_target_main_(nullptr),
   render_target_depth_(nullptr),
+  render_targets_depth_(lights_num),
   depth_target_w_(1024),
   depth_target_h_(1024),
   ortho_mesh_screen_(nullptr),
@@ -37,9 +40,16 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   render_target_main_ = new RenderTexture(device,
     scr_width, scr_height, scr_near, scr_depth,
     "target_main");
-  render_target_depth_ = new RenderTexture(device,
-    depth_target_w_, depth_target_h_, scr_near, scr_depth,
-    "target_depth");
+
+    for (size_t i = 0; i < render_targets_depth_.size(); ++i) {
+      std::string name;
+      std::stringstream ss;
+      ss << "target_depth_" << i;
+      name = ss.str();
+      render_targets_depth_[i] = new RenderTexture(device,
+        depth_target_w_, depth_target_h_, scr_near, scr_depth,
+        name.c_str());
+    }
 
   // Create the ortho mesh
   ortho_mesh_screen_ = new OrthoMesh(device,
@@ -81,10 +91,13 @@ Renderer::~Renderer() {
     render_target_main_ = nullptr;
   }
 
-  if (render_target_depth_!= nullptr) {
-    delete render_target_depth_;
-    render_target_depth_ = nullptr;
+  for (RenderTexture *target : render_targets_depth_) {
+    if (target != nullptr) {
+      delete target;
+      target = nullptr;
+    }
   }
+  render_targets_depth_.clear();
 }
 
 void Renderer::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,
@@ -155,7 +168,8 @@ void Renderer::RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
   render_target_main_mat_->diffuse_texname_crc =
     abfw::CRC::GetICRC(render_target_main_mat_->diffuse_texname.c_str());
   ortho_mesh_screen_->SendData(d3d->GetDeviceContext());
-  BaseShader *texture_shader = sha_man_->GetShader("texture_shader");
+  BaseShader *shader = sha_man_->GetShader("texture_shader");
+  TextureShader *texture_shader = static_cast<TextureShader *>(shader);
   if (texture_shader != nullptr) {
     texture_shader->SetShaderParameters(d3d->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
@@ -211,7 +225,7 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   sz::LightBufferType* light_ptr;
   sz::CamBufferType* camPtr;
   unsigned int bufferNumber;
-  
+
   // Send light data to pixel and vertex shader
   result = deviceContext->Map(light_buff_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
   light_ptr = (sz::LightBufferType*)mapped_resource.pData;
@@ -229,6 +243,8 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
     light_ptr[i].active = static_cast<unsigned int>(lights[i].active());
     light_ptr[i].spot_cutoff = lights[i].spot_cutoff();
     light_ptr[i].spot_exponent = lights[i].spot_exponent();
+    light_ptr[i].view = XMMatrixTranspose(lights[i].GetViewMatrix());
+    light_ptr[i].proj = XMMatrixTranspose(lights[i].GetProjectionMatrix());
   }
   deviceContext->Unmap(light_buff_, 0);
   bufferNumber = 0;

@@ -59,6 +59,7 @@ protected:
   // Shared by all the rendering modes
   RenderTexture *render_target_main_;
   RenderTexture *render_target_depth_;
+  std::vector<RenderTexture *> render_targets_depth_;
   const size_t depth_target_w_, depth_target_h_;
   OrthoMesh *ortho_mesh_screen_;
   Material *render_target_main_mat_;

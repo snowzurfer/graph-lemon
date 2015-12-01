@@ -20,6 +20,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 cbuffer MatrixBuffer : register(cb0) {
@@ -53,10 +55,10 @@ struct OutputType {
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 tangent_view_dir : TEXCOORD1;
-    float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-    float4 tangent_light_dir[L_NUM] : COLOR0;
-    float4 lightview_position[L_NUM] : TEXCOORD11;
+    float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+    float3 tangent_light_dir[L_NUM] : TEXCOORD11;
+    float4 lightview_position[L_NUM] : TEXCOORD16;
 };
 
 OutputType main(InputType input) {
@@ -89,25 +91,23 @@ OutputType main(InputType input) {
     // and then transform it into tangent space;
     // Also transform the direction of the light to tangent space
     for (uint i = 0; i < L_NUM; ++i) {
-      output.tangent_pixel_to_light_vec[i] = lights[i].position - world_pos;
+      output.tangent_pixel_to_light_vec[i] = lights[i].position.xyz - world_pos.xyz;
       output.pixel_to_light_vec[i] = output.tangent_pixel_to_light_vec[i];
       output.tangent_pixel_to_light_vec[i] = 
-        normalize(
-        float4(dot(tangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
+        normalize(float3(
+        dot(tangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
         dot(bitangent_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
-        dot(normal_worldspace, output.tangent_pixel_to_light_vec[i].xyz),
-        1.f));
+        dot(normal_worldspace, output.tangent_pixel_to_light_vec[i].xyz)));
       
       output.tangent_light_dir[i] =
-        normalize(float4(dot(tangent_worldspace, lights[i].direction.xyz),
+        normalize(float3(dot(tangent_worldspace, lights[i].direction.xyz),
         dot(bitangent_worldspace, lights[i].direction.xyz),
-        dot(normal_worldspace, lights[i].direction.xyz),
-        1.f));
+        dot(normal_worldspace, lights[i].direction.xyz)));
     
       // Calculate the position of the vertex as seen from the light
       output.lightview_position[i] = mul(input.position, worldMatrix);
-      output.lightview_position[i] = mul(output.lightview_position[i], lightViewMatrix[i]);
-      output.lightview_position[i] = mul(output.lightview_position[i], lightProjMatrix[i]);
+      output.lightview_position[i] = mul(output.lightview_position[i], lights[i].view_matrix);
+      output.lightview_position[i] = mul(output.lightview_position[i], lights[i].proj_matrix);
     }
 
 
@@ -124,7 +124,7 @@ OutputType main(InputType input) {
     output.normal = normal_worldspace;
 	
     //// Normalize the normal vector.
-    //output.normal = normalize(output.normal);
+    output.normal = normalize(output.normal);
 
     return output;
 }

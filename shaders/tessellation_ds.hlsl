@@ -21,6 +21,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 cbuffer MatrixBuffer : register(cb0) {
@@ -57,9 +59,9 @@ struct OutputType {
   float3 normal : NORMAL;
   float3 tangent : TANGENT;
   float3 tangent_view_dir : TEXCOORD1;
-  float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-  float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-  float4 tangent_light_dir[L_NUM] : COLOR0;
+  float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+  float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+  float3 tangent_light_dir[L_NUM] : COLOR0;
 };
 
 

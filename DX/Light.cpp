@@ -2,9 +2,11 @@
 // Holds data that represents a light source
 
 #include "light.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 Light::Light() :
-    spot_cutoff_(180.f),
+    spot_cutoff_(M_PI),
     spot_exponent_(1.f) {
 
 }
@@ -62,7 +64,9 @@ void Light::SetDiffuseColour(float red, float green, float blue, float alpha)
 
 void Light::SetDirection(float x, float y, float z)
 {
-  m_direction = XMFLOAT3(x, y, z);
+  float magnitude = sqrtf(x * x + y * y + z * z);
+  m_direction = XMFLOAT3(x / magnitude,
+    y / magnitude, z / magnitude);
 }
 
 void Light::SetSpecularColour(float red, float green, float blue, float alpha)

@@ -322,7 +322,7 @@ void Model::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,
     }
     else {
       sz::MatMeshPair pair(&materials[m_id], std::vector<BaseMesh *>());
-      
+
       pair.second.push_back(&meshes[i]);
 
       meshes_by_material_[m_crc] = pair;

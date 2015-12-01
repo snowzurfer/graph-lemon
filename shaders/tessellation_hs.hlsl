@@ -5,6 +5,8 @@ cbuffer TessellationBuffer : register(cb)
 {
     float tessellationFactor;
     float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 struct InputType

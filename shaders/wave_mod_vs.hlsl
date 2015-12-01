@@ -20,6 +20,8 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 cbuffer MatrixBuffer : register(cb0)
@@ -62,7 +64,7 @@ struct OutputType
     // How does the suffix modify the type?
     float3 viewDir: TEXCOORD1;
     float4 worldPos : TEXCOORD2;
-    float4 pixel_to_light_vec[L_NUM] : TEXCOORD3;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD3;
 };
 
 OutputType main(InputType input)

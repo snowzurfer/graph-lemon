@@ -1,5 +1,7 @@
 #include "light_spec_map_shader.h"
 #include "Texture.h"
+#include "RenderTexture.h"
+#include <sstream>
 
 
 LightSpecMapShader::LightSpecMapShader(ID3D11Device* device, HWND hwnd, 
@@ -207,6 +209,16 @@ void LightSpecMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   // Set the constant buffer index in the pixel shader
   deviceContext->PSSetConstantBuffers(1, 1, &material_buf_);
 
+  // Set shader resources for shadow maps
+  for (size_t i = 0; i < kNumLights; ++i) {
+    std::string name;
+    std::stringstream ss;
+    ss << "target_depth_" << i;
+    name = ss.str();
+    ID3D11ShaderResourceView * texture = 
+      Texture::Inst()->GetTexture(name.c_str());
+    deviceContext->PSSetShaderResources(2 + i, 1, &texture);
+  }
 
   ID3D11ShaderResourceView * texture =
     Texture::Inst()->GetTexture(mat.diffuse_texname_crc);
@@ -214,7 +226,7 @@ void LightSpecMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     Texture::Inst()->GetTexture(mat.specular_texname_crc);
   // Set shader texture resource in the pixel shader.
   deviceContext->PSSetShaderResources(0, 1, &texture);
-  //deviceContext->PSSetShaderResources(1, 1, &texture_spec);
+  deviceContext->PSSetShaderResources(1, 1, &texture_spec);
 }
 
 void LightSpecMapShader::SetShaderFrameParameters(ID3D11DeviceContext* deviceContext, std::vector<Light> &lights, Camera *cam) {

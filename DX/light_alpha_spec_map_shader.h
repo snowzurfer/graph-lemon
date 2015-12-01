@@ -17,7 +17,6 @@ using namespace DirectX;
 
 class LightAlphaSpecMapShader : public BaseShader {
 public:
-
   LightAlphaSpecMapShader(ID3D11Device* device, HWND hwnd, 
     sz::ConstBufManager &buf_man, unsigned int lights_num);
 
@@ -25,7 +24,7 @@ public:
 
   // Sadly have to use by non-const reference paramenters, as the framework
   // most of the time does not define const accessors for its classes...
-  void SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+  void SetShaderParameters(ID3D11DeviceContext* deviceContext,
     const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection,
     const sz::Material &mat);
 

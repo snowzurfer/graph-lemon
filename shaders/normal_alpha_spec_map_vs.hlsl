@@ -20,12 +20,15 @@ struct LightType {
   float spot_cutoff;
   float spot_exponent;
   float3 padding;
+  matrix view_matrix;
+  matrix proj_matrix;
 };
 
 cbuffer MatrixBuffer : register(cb0) {
   matrix worldMatrix;
   matrix viewMatrix;
   matrix projectionMatrix;
+
 };
 
 cbuffer CamBuffer : register(cb1) {
@@ -51,9 +54,10 @@ struct OutputType {
   float3 normal : NORMAL;
   float3 tangent : TANGENT;
   float3 tangent_view_dir : TEXCOORD1;
-  float4 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-  float4 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-  float4 tangent_light_dir[L_NUM] : COLOR0;
+  float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
+  float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
+  float3 tangent_light_dir[L_NUM] : COLOR0;
+  float4 lightview_position[L_NUM] : TEXCOORD11;
 };
 
 OutputType main(InputType input)
@@ -87,7 +91,7 @@ OutputType main(InputType input)
   // and then transform it into tangent space;
   // Also transform the direction of the light to tangent space
   for (uint i = 0; i < L_NUM; ++i) {
-    output.tangent_pixel_to_light_vec[i] = lights[i].position - world_pos;
+    output.tangent_pixel_to_light_vec[i] = lights[i].position.xyz - world_pos.xyz;
     output.pixel_to_light_vec[i] = output.tangent_pixel_to_light_vec[i];
     output.tangent_pixel_to_light_vec[i] = 
     normalize(
@@ -101,6 +105,11 @@ OutputType main(InputType input)
     dot(bitangent_worldspace, lights[i].direction.xyz),
     dot(normal_worldspace, lights[i].direction.xyz),
     1.f));
+      
+    // Calculate the position of the vertex as seen from the light
+    output.lightview_position[i] = mul(input.position, worldMatrix);
+    output.lightview_position[i] = mul(output.lightview_position[i], lights[i].view_matrix);
+    output.lightview_position[i] = mul(output.lightview_position[i], lights[i].proj_matrix);
   }
 
   // Calculate the position of the vertex against the world, view, and projection matrices.

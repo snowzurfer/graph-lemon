@@ -37,7 +37,6 @@ private:
   // light's perspective
   void RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d, Light *light);
 
-
 }; // class ForwardRenderer
 
 } // namespace sz

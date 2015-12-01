@@ -11,6 +11,8 @@
 #include "gaussian_blur.h"
 #include "renderer.h"
 #include "forward_renderer.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   Input *in) :
@@ -36,6 +38,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
 
   // Create a cube mesh
   cube_mesh_ = new CubeMesh(m_Direct3D->GetDevice(), L"../res/bunny.png", 2);
+  
   Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(),
     m_Direct3D->GetDeviceContext(), "../res/bunny.png");
   Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(),
@@ -63,26 +66,23 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularColour(1.f, 1.f, 1.f, 1.f);
     lights_[i].SetSpecularPower(4.f);
-    lights_[i].SetAttenuation(0.95f, 0.04f, 0.f);
+    lights_[i].SetAttenuation(0.95f, 0.f, 0.f);
     lights_[i].SetRange(300.f);
     lights_[i].set_active(false);
     // Set ambient for one light only 
     if (i == 0) {
-      //lights_[i].SetAmbientColour(0.3f, 0.3f, 0.3f, 1.f);
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
-      lights_[i].SetPosition(0.f, 10.f, 0.f, 0.f);
+      lights_[i].SetPosition(-60.f, 70.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-      lights_[i].SetDirection(-1.f, -0.8f, 0.f);
-      lights_[i].SetLookAt(1.f, 0.f, 1.f);
-      //lights_[i].set_spot_cutoff(45.f);
-      //lights_[i].set_spot_exponent(5.f);
+      lights_[i].SetDirection(1.f, -0.3f, -0.1f);
+      lights_[i].set_spot_cutoff(static_cast<float>(M_PI_4));
+      lights_[i].set_spot_exponent(30.f);
       lights_[i].set_active(true);
-
     }
     if (i == 1) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
-      lights_[i].SetPosition(40.f, 20.f, -1.f, 0.f);
-      lights_[i].SetDiffuseColour(0.f, 1.f, 0.f, 1.f);
+      lights_[i].SetPosition(-40.f, 20.f, -1.f, 0.f);
+      lights_[i].SetDiffuseColour(0.5f, 0.5f, 0.5f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
       lights_[i].set_active(true);
     }
@@ -91,7 +91,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       lights_[i].SetPosition(-10.f, 50.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
-      lights_[i].set_active(true);
+      //lights_[i].set_active(true);
       lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
     }
     if (i == 3) {
@@ -99,7 +99,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       lights_[i].SetPosition(-10.f, -50.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
-      lights_[i].set_active(true);
+      //lights_[i].set_active(true);
       lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
     }
   }
@@ -207,7 +207,7 @@ bool Lab3::Frame()
 
   // Update lights
   for (Light &light : lights_) {
-    light.GenerateProjectionMatrix(1.f, 50.f);
+    light.GenerateProjectionMatrix(SCREEN_NEAR, SCREEN_DEPTH);
     light.GenerateViewMatrixFromDirection();
   }
 

@@ -39,6 +39,8 @@ struct LightBufferType {
   float spot_cutoff;
   float spot_exponent;
   XMFLOAT3 padding;
+  XMMATRIX view;
+  XMMATRIX proj;
 };
 
 struct CamBufferType {

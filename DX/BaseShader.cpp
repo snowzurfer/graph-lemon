@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "Camera.h"
 #include "Light.h"
+#include "RenderTexture.h"
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
 {
