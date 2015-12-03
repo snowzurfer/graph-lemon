@@ -50,6 +50,8 @@ public:
     const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection,
     const sz::Material &mat);
 
+  void CleanupTextures(ID3D11DeviceContext* deviceContext);
+
 protected:
   void InitShader(WCHAR*, WCHAR*) {};
   void ShutdownShader();

@@ -56,8 +56,8 @@ struct OutputType {
   float3 tangent_view_dir : TEXCOORD1;
   float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
   float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-  float3 tangent_light_dir[L_NUM] : COLOR0;
-  float4 lightview_position[L_NUM] : TEXCOORD11;
+  float3 tangent_light_dir[L_NUM] : TEXCOORD11;
+  float4 lightview_position[L_NUM] : TEXCOORD16;
 };
 
 OutputType main(InputType input)

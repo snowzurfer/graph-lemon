@@ -4,6 +4,9 @@
 #include "Camera.h"
 #include "Light.h"
 #include "RenderTexture.h"
+#include <locale>
+#include <codecvt>
+#include <string>
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
 {
@@ -102,6 +105,12 @@ vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
   vertexShaderBuffer = 0;
 }
 
+void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
+{
+  if (child != nullptr)
+    child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
+}
+
 void BaseShader::loadPixelShader(WCHAR* filename)
 {
   HRESULT result;
@@ -128,7 +137,9 @@ void BaseShader::loadPixelShader(WCHAR* filename)
 
   // Create the pixel shader from the buffer.
   result = m_device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
-  
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::string narrow = converter.to_bytes(filename);
+  SetDebugName(m_pixelShader, narrow);
   pixelShaderBuffer->Release();
   pixelShaderBuffer = 0;
 }
@@ -263,6 +274,22 @@ void BaseShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, W
 
 void BaseShader::Render(ID3D11DeviceContext* deviceContext, size_t index_count,
     size_t index_start, size_t base_vertex) {
+
+  deviceContext->DrawIndexed(index_count, index_start, base_vertex);
+}
+void BaseShader::CleanupTextures(ID3D11DeviceContext* deviceContext) {
+  ID3D11ShaderResourceView * texture[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1]
+    = { NULL };
+
+  deviceContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT - 1,
+    texture);
+}
+
+
+void BaseShader::SetInputLayoutAndShaders(ID3D11DeviceContext* deviceContext) {
+  // Set the vertex input layout.
+  deviceContext->IASetInputLayout(m_layout);
+
   // Set the vertex and pixel shaders that will be used to render.
   deviceContext->VSSetShader(m_vertexShader, NULL, 0);
   deviceContext->PSSetShader(m_pixelShader, NULL, 0);
@@ -281,13 +308,9 @@ void BaseShader::Render(ID3D11DeviceContext* deviceContext, size_t index_count,
   if (m_geometryShader) {
     deviceContext->GSSetShader(m_geometryShader, NULL, 0);
   }
-
-  deviceContext->DrawIndexed(index_count, index_start, base_vertex);
-}
-
-void BaseShader::SetInputLayoutAndShaders(ID3D11DeviceContext* deviceContext) {
-  // Set the vertex input layout.
-  deviceContext->IASetInputLayout(m_layout);
+  else {
+    deviceContext->GSSetShader(NULL, NULL, 0);
+  }
 
 }
 

@@ -6,11 +6,9 @@
 
 using namespace DirectX;
 
-class PointMesh : public BaseMesh
-{
-
+class PointMesh : public BaseMesh {
 public:
-  PointMesh(ID3D11Device* device, WCHAR* textureFilename);
+  PointMesh(ID3D11Device* device);
   ~PointMesh();
 
   void SendData(ID3D11DeviceContext*);

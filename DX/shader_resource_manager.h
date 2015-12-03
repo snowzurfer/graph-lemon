@@ -39,6 +39,8 @@ public:
 
   // Get ref to a shader
   BaseShader *GetShader(const std::string &name);
+
+  void CleanupShaderResources(ID3D11DeviceContext* deviceContext);
   
 }; // class ShaderManager
 

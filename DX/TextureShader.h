@@ -29,6 +29,8 @@ public:
     size_t index_start = 0,
     size_t base_vertex = 0);
 
+  //void CleanupTextures(ID3D11DeviceContext* deviceContext);
+
 private:
   void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*);
   

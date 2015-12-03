@@ -1,36 +1,30 @@
 // Mesh.cpp
 #include "pointmesh.h"
 
-PointMesh::PointMesh(ID3D11Device* device, WCHAR* textureFilename)
-{
+PointMesh::PointMesh(ID3D11Device* device) :
+  BaseMesh() {
   // Initialize the vertex and index buffer that hold the geometry for the triangle.
   InitBuffers(device);
-
-  // Load the texture for this model.
-  LoadTexture(device, textureFilename);
 }
 
 
-PointMesh::~PointMesh()
-{
+PointMesh::~PointMesh() {
   // Run parent deconstructor
   BaseMesh::~BaseMesh();
 }
 
 
-
-void PointMesh::InitBuffers(ID3D11Device* device)
-{
+void PointMesh::InitBuffers(ID3D11Device* device) {
   VertexType* vertices;
   unsigned long* indices;
   D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
   D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
   // Set the number of vertices in the vertex array.
-  m_vertexCount = 3;
+  m_vertexCount = 1;
 
   // Set the number of indices in the index array.
-  m_indexCount = 3;
+  m_indexCount = 1;
 
   // Create the vertex array.
   vertices = new VertexType[m_vertexCount];
@@ -43,18 +37,8 @@ void PointMesh::InitBuffers(ID3D11Device* device)
   vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
   vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
-  vertices[1].position = XMFLOAT3(-1.0f, 0.0f, 0.0f);  // Bottom left.
-  vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
-  vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-  vertices[2].position = XMFLOAT3(1.0f, 0.0f, 0.0f);  // Bottom right.
-  vertices[2].texture = XMFLOAT2(1.0f, 0.0f);
-  vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
   // Load the index array with data.
   indices[0] = 0;  // Top/
-  indices[1] = 1;  // Bottom left.
-  indices[2] = 2;  // Bottom right.
 
   // Set up the description of the static vertex buffer.
   vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -96,8 +80,7 @@ void PointMesh::InitBuffers(ID3D11Device* device)
   indices = 0;
 }
 
-void PointMesh::SendData(ID3D11DeviceContext* deviceContext)
-{
+void PointMesh::SendData(ID3D11DeviceContext* deviceContext) {
   unsigned int stride;
   unsigned int offset;
 

@@ -125,6 +125,31 @@ void Renderer::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,
   }
 }
 
+void Renderer::AddMeshesAndMaterials(std::vector<BaseMesh *> &meshes,
+    const std::vector<Material> &materials) {
+  for (size_t i = 0; i < meshes.size(); ++i) {
+    // Get the mesh's material's crc name
+    size_t m_id = meshes[i]->mat_id();
+    UInt32 m_crc = materials[m_id].name_crc;
+
+    // Add the mesh in the correct slot
+    MeshesMatMap::iterator it = meshes_by_material_.find(m_crc);
+    if (it != meshes_by_material_.end()) {
+      MatMeshPair &pair =
+        it->second;
+
+      pair.second.push_back(meshes[i]);
+    }
+    else {
+      MatMeshPair pair(&materials[m_id], std::vector<BaseMesh *>());
+
+      pair.second.push_back(meshes[i]);
+
+      meshes_by_material_[m_crc] = pair;
+    }
+  }
+}
+
 void Renderer::AddModel(Model *model) {
   models_.push_back(model);
 }
@@ -171,6 +196,7 @@ void Renderer::RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
   BaseShader *shader = sha_man_->GetShader("texture_shader");
   TextureShader *texture_shader = static_cast<TextureShader *>(shader);
   if (texture_shader != nullptr) {
+    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
     texture_shader->SetShaderParameters(d3d->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
       *render_target_main_mat_);
@@ -180,6 +206,7 @@ void Renderer::RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
 
   d3d->TurnZBufferOn();
 
+  texture_shader->CleanupTextures(d3d->GetDeviceContext());
 }
 
 void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,

@@ -182,6 +182,11 @@ void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   deviceContext->PSSetShaderResources(0, 1, &texture);
 }
 
+//void TextureShader::CleanupTextures(ID3D11DeviceContext* deviceContext) {
+//  ID3D11ShaderResourceView * texture[1] = { NULL };
+//
+//  deviceContext->PSSetShaderResources(0, 1, texture);
+//}
 void TextureShader::Render(ID3D11DeviceContext* deviceContext,
     size_t index_count,
     size_t index_start,

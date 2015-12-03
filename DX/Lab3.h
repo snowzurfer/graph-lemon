@@ -20,6 +20,8 @@
 #include "OrthoMesh.h"
 #include "gauss_blur_h_shader.h"
 #include "gauss_blur_v_shader.h"
+#include "PointMesh.h"
+#include "GeometryShader.h"
 
 namespace sz {
   class PostProcess;
@@ -52,13 +54,16 @@ private:
   Model *model_;
   SphereMesh* m_Mesh;
   CubeMesh *cube_mesh_;
+  std::vector<BaseMesh *> lights_pt_meshes_;
+  GeometryBoxShader *geometrybox_shader_;
+  std::vector<sz::Material> lights_pt_meshes_materials_;
   std::vector<Light> lights_;
   sz::ConstBufManager *buf_manager_;
   sz::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
   NormalMappingShader *normal_map_shader_;
   sz::PostProcess *post_processer_;
-
+  
   sz::Renderer *renderer_;
 
   // Size of the screen

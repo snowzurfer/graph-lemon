@@ -27,6 +27,8 @@ ForwardRenderer::ForwardRenderer(const unsigned int scr_height,
 
 void ForwardRenderer::Render(D3D *d3d, Camera *cam,
   std::vector<Light> *lights) {
+  sha_man_->CleanupShaderResources(d3d->GetDeviceContext());
+
   // Render scene from the lights' point of view
   for (size_t i = 0; i < lights->size(); ++i) {
     RenderSceneDepthFromLight(*(render_targets_depth_[i]), d3d, (&(*lights)[i]));
@@ -103,7 +105,7 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
       }
     }
   }
- 
+
   // For all the meshes which do not belong to a model
   //std::stack<size_t> alpha_blended_meshes;
    //For all the entries in the map
@@ -118,22 +120,24 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
     }
 
     // Set the parameters for this shader
-    shader->SetShaderParameters(d3d->GetDeviceContext(),
-      model_transform, view_matrix, projection_matrix,
-      *(pair.first));
     // Set DX shaders and input layout
-    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
     shader->SetSamplers(d3d->GetDeviceContext());
+    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
 
     // For all the meshes associated with it
     for (BaseMesh *mesh : pair.second) {
+      shader->SetShaderParameters(d3d->GetDeviceContext(),
+        mesh->transform(), view_matrix, projection_matrix,
+        *(pair.first));
       mesh->SendData(d3d->GetDeviceContext());
       shader->Render(d3d->GetDeviceContext(),
         mesh->GetIndexCount());
+
     }
   }
 
 }
+
 
 void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   Light *light) {
@@ -193,16 +197,21 @@ void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   for (auto map_pair : meshes_by_material_) {
     MatMeshPair &pair = map_pair.second;
 
+    // Skip rendering of depth of geometry positional boxes
+    if (pair.first->shader_name == "geometrybox_shader") {
+      continue;
+    }
+
     // Set the parameters for this shader
-    shader->SetShaderParameters(d3d->GetDeviceContext(),
-      model_transform, view_matrix, projection_matrix,
-      *(pair.first));
     // Set DX shaders and input layout
-    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
     shader->SetSamplers(d3d->GetDeviceContext());
+    shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
 
     // For all the meshes associated with it
     for (BaseMesh *mesh : pair.second) {
+      shader->SetShaderParameters(d3d->GetDeviceContext(),
+        mesh->transform(), view_matrix, projection_matrix,
+        *(pair.first));
       mesh->SendData(d3d->GetDeviceContext());
       shader->Render(d3d->GetDeviceContext(),
         mesh->GetIndexCount());

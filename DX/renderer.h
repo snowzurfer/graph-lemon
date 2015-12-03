@@ -42,7 +42,8 @@ public:
     const std::vector<Material> &materials);
   void AddMeshAndMaterial(BaseMesh &mesh, const Material &material);
   void AddModel(Model *model);
-
+  void AddMeshesAndMaterials(std::vector<BaseMesh *> &meshes,
+    const std::vector<Material> &materials);
   virtual void Render(D3D *d3d, Camera *cam, std::vector<Light> *lights) = 0;
 
 protected:

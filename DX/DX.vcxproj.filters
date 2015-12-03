@@ -171,6 +171,9 @@
     <ClCompile Include="DepthShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="GeometryShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -312,6 +315,9 @@
       <Filter>Source Files\System\renderer</Filter>
     </ClInclude>
     <ClInclude Include="DepthShader.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryShader.h">
       <Filter>Source Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>

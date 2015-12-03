@@ -61,5 +61,10 @@ BaseShader *ShaderManager::GetShader(const std::string &name) {
 
 }
 
+void ShaderManager::CleanupShaderResources(ID3D11DeviceContext* deviceContext) {
+  for (auto shader : shaders_) {
+    shader.second->CleanupTextures(deviceContext);
+  }
+}
 
 } // namespace sz

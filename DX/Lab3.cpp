@@ -20,6 +20,8 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   texture_shader_(nullptr),
   model_(nullptr),
   cube_mesh_(nullptr),
+  lights_pt_meshes_(),
+  geometrybox_shader_(nullptr),
   buf_manager_(nullptr),
   sha_manager_(nullptr),
   prev_time_(0.f),
@@ -49,7 +51,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   // Create the shaders manager
   sha_manager_ = new sz::ShaderManager();
 
-  // Create necessary shaders for meshes which are not loaded
+  // Create necessary shaders for meshes which are not loaded by a model
   m_Shader = new LightShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_,
     kNumLights);
   //waves_shader_ = new WavesVertexDeformShader(m_Direct3D->GetDevice(), hwnd,
@@ -57,6 +59,15 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   normal_map_shader_ = new NormalMappingShader(m_Direct3D->GetDevice(), hwnd,
     *buf_manager_, kNumLights);
   texture_shader_ = new TextureShader(m_Direct3D->GetDevice(), hwnd, *buf_manager_);
+  geometrybox_shader_ = new GeometryBoxShader(m_Direct3D->GetDevice(), hwnd,
+    *buf_manager_);
+  // No need to check for duplicates, geometrybox shaders are only created here
+  sha_manager_->AddShader("geometrybox_shader", geometrybox_shader_);
+  sz::Material lights_pt_meshes_material;
+  lights_pt_meshes_material.shader_name = "geometrybox_shader";
+  lights_pt_meshes_material.name = "light_meshes_material";
+  lights_pt_meshes_material.name_crc = abfw::CRC::GetICRC("light_meshes_material");
+  lights_pt_meshes_materials_.push_back(lights_pt_meshes_material);
 
   // Setup lights
   for (unsigned int i = 0; i < kNumLights; i++) {
@@ -102,6 +113,15 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       //lights_[i].set_active(true);
       lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
     }
+
+    // Create the lights point meshes
+    lights_pt_meshes_.push_back(new PointMesh(m_Direct3D->GetDevice()));
+    lights_pt_meshes_[i]->set_transform(XMMatrixTranslation(
+      lights_[i].GetPosition3().x,
+      lights_[i].GetPosition3().y,
+      lights_[i].GetPosition3().z
+      ));
+    lights_pt_meshes_[i]->set_mat_id(0);
   }
 
   model_ = new Model();
@@ -121,10 +141,13 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     hwnd, buf_manager_, sha_manager_, kNumLights);
   //renderer_->AddMeshesAndMaterials(model_->meshes_, model_->materials_);
   renderer_->AddModel(model_);
+  renderer_->AddMeshesAndMaterials(lights_pt_meshes_,
+    lights_pt_meshes_materials_);
 
   post_processer_ = new sz::GaussBlur(screenHeight, screenWidth,
     SCREEN_DEPTH, SCREEN_NEAR, m_Direct3D->GetDevice(),
     hwnd, *buf_manager_, sha_manager_);
+
 }
 
 
@@ -206,9 +229,14 @@ bool Lab3::Frame()
   m_Camera->Update();
 
   // Update lights
-  for (Light &light : lights_) {
-    light.GenerateProjectionMatrix(SCREEN_NEAR, SCREEN_DEPTH);
-    light.GenerateViewMatrixFromDirection();
+  for (size_t i = 0; i < lights_.size(); i++) {
+    lights_[i].GenerateProjectionMatrix(SCREEN_NEAR, SCREEN_DEPTH);
+    lights_[i].GenerateViewMatrixFromDirection();
+    lights_pt_meshes_[i]->set_transform(XMMatrixTranslation(
+      lights_[i].GetPosition3().x,
+      lights_[i].GetPosition3().y,
+      lights_[i].GetPosition3().z
+      ));
   }
 
   // Render the graphics.
