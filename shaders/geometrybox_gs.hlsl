@@ -18,30 +18,62 @@ void main(point InputType input[1], inout TriangleStream<OutputType> triStream) 
   OutputType output;
 
   // Array used to build a cube out of triangle faces
-  float3 g_positions[12] =
+  float4 g_positions[36] =
   {
     // Front face
-    float3( -1, 1, -1 ),
-    float3( -1, -1, -1 ),
-    float3( 1, -1, -1 ),
-    float3( -1, 1, -1),
-    float3( 1, -1, -1),
-    float3( 1, 1, -1),
+    float4( -1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, -1.f, -1.f, 1.f),
+    float4( -1.f, -1.f, -1.f, 1.f),
+    float4( -1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, -1.f, -1.f, 1.f),
 
     // Right side face
-    float3( 1, 1, -1 ),
-    float3( 1, -1, -1 ),
-    float3( 1, -1, -1 ),
-    float3( 1, 1, -1 ),
-    float3( 1, -1, 1),
-    float3( 1, 1, 1),
+    float4( 1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, -1.f, 1.f, 1.f),
+    float4( 1.f, -1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, 1.f, 1.f),
+    float4( 1.f, -1.f, 1.f, 1.f),
+    
+    // Back side face
+    float4( 1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, 1.f, 1.f),
+    float4( 1.f, -1.f, 1.f, 1.f),
+    float4( 1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, 1.f, 1.f),
+    
+    // Left side face
+    float4( -1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, -1.f, 1.f),
+    float4( -1.f, -1.f, 1.f, 1.f),
+    float4( -1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, 1.f, -1.f, 1.f),
+    float4( -1.f, -1.f, -1.f, 1.f),
+    
+    // Top side face
+    float4( -1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, 1.f, 1.f, 1.f),
+    float4( -1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, -1.f, 1.f),
+    float4( 1.f, 1.f, 1.f, 1.f),
+    
+    // Bottom side face
+    float4( 1.f, -1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, -1.f, 1.f),
+    float4( 1.f, -1.f, -1.f, 1.f),
+    float4( 1.f, -1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, 1.f, 1.f),
+    float4( -1.f, -1.f, -1.f, 1.f)
   };
   
   // Change the position vector to be 4 units for proper matrix calculations.
   input[0].position.w = 1.0f;
 
   // Create cube around the point
-  for(int i = 0; i < 12; i++) {
+  for(int i = 0; i < 36; i++) {
     output.position = input[0].position + g_positions[i];
     output.position = mul(output.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
