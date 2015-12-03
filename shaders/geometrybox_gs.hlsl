@@ -50,35 +50,5 @@ void main(point InputType input[1], inout TriangleStream<OutputType> triStream) 
     triStream.Append(output);
   }
 
-  // Move the vertex away from the point position
-  output.position = input[0].position + float4(0.0, 1.0, 0.0, 0.0);
-  
-  output.position = mul(output.position, worldMatrix);
-  output.position = mul(output.position, viewMatrix);
-  output.position = mul(output.position, projectionMatrix);
-
-  triStream.Append(output);
-
-  // Move the vertex away from the point position
-  output.position = input[0].position + float4(1.0, 0.0, 0.0, 0.0);
-  
-  output.position = mul(output.position, worldMatrix);
-  output.position = mul(output.position, viewMatrix);
-  output.position = mul(output.position, projectionMatrix);
-
-
-
-  triStream.Append(output);
-
-  // Move the vertex away from the point position
-  output.position = input[0].position + float4(-1.0, 0.0, 0.0, 0.0);
-  
-  output.position = mul(output.position, worldMatrix);
-  output.position = mul(output.position, viewMatrix);
-    output.position = mul(output.position, projectionMatrix);
-
-  triStream.Append(output);
-
-
   triStream.RestartStrip();
 }
