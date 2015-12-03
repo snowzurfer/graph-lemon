@@ -1,3 +1,6 @@
+// Size of box can be increased using the traditional
+// scaling of the worldmatrix
+
 cbuffer MatrixBuffer : register(cb0) {
   matrix worldMatrix;
   matrix viewMatrix;
