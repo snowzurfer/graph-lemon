@@ -12,6 +12,8 @@
 #include "Model.h"
 #include "buffer_types.h"
 #include <cassert>
+#include <imgui.h>
+#include "gaussian_blur.h"
 
 namespace sz {
 
@@ -36,6 +38,20 @@ void ForwardRenderer::Render(D3D *d3d, Camera *cam,
 
   // Render scene to a target
   RenderToTexture(*render_target_main_, d3d, cam, lights);
+
+  ImGui::Checkbox("Apply post processing", &use_post_process_);
+
+  if (use_post_process_) {
+    sha_man_->CleanupShaderResources(d3d->GetDeviceContext());
+    XMMATRIX base_view;
+    cam->GetBaseViewMatrix(base_view);
+    post_processer_->ApplyPostProcess(
+      *render_target_main_,
+      d3d,
+      base_view,
+      XMMatrixIdentity()
+      );
+  }
 
   d3d->BeginScene(0.39f, 0.58f, 0.92f, 1.0f);
   // Render the main target on the back buffer

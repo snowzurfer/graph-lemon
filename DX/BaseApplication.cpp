@@ -77,8 +77,6 @@ bool BaseApplication::Frame()
   HandleInput(m_Timer->GetTime());
 
   ImGui_ImplDX11_NewFrame();
-     
-            ImGui::Text("Hello, world!");
 
   return true;
 }

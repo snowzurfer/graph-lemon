@@ -15,6 +15,7 @@
 #include "Light.h"
 #include <sstream>
 #include <string>
+#include "gaussian_blur.h"
 
 namespace sz {
 
@@ -23,6 +24,8 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
   const size_t lights_num) :
   meshes_by_material_(),
+  use_post_process_(false),
+  post_processer_(nullptr),
   models_(),
   render_target_main_(nullptr),
   render_target_depth_(nullptr),
@@ -78,9 +81,18 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   }
 
   SetupPerFrameBuffers(device, buf_man, lights_num);
+
+  post_processer_ = new sz::GaussBlur(scr_height, scr_width,
+    scr_depth, scr_near, device, 
+    hwnd, *buf_man_, sha_man_);
 }
 
 Renderer::~Renderer() {
+  if (post_processer_ != nullptr) {
+    delete post_processer_;
+    post_processer_ = nullptr;
+  }
+
   if (ortho_mesh_screen_!= nullptr) {
     delete ortho_mesh_screen_;
     ortho_mesh_screen_ = nullptr;

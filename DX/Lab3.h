@@ -24,7 +24,6 @@
 #include "GeometryShader.h"
 
 namespace sz {
-  class PostProcess;
   class GaussBlur;
   class Renderer;
 }
@@ -62,8 +61,7 @@ private:
   sz::ShaderManager *sha_manager_;
   WavesVertexDeformShader *waves_shader_;
   NormalMappingShader *normal_map_shader_;
-  sz::PostProcess *post_processer_;
-  
+
   sz::Renderer *renderer_;
 
   // Size of the screen
@@ -73,6 +71,8 @@ private:
 
   // Used to count time
   float prev_time_;
+
+  bool show_debug_imgui_;
 };
 
 #endif

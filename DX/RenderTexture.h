@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <directxmath.h>
 #include <string>
+#include "abertay_framework.h"
 
 using namespace DirectX;
 
@@ -37,6 +38,12 @@ public:
   inline const std::string &name() const {
     return name_;
   }
+  inline UInt32 name_crc() const {
+    return name_crc_;
+  }
+  inline void SetNameCrc(UInt32 crc) {
+    name_crc_ = crc;
+  }
 
 private:
   int m_textureWidth, m_textureHeight;
@@ -51,6 +58,9 @@ private:
 
   // Name of the texture managed
   std::string name_;
+
+  // CRC version of the name of the texture
+  UInt32 name_crc_;
 };
 
 #endif

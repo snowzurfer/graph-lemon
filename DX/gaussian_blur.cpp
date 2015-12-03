@@ -101,11 +101,12 @@ void GaussBlur::DownSample(RenderTexture &target, D3D *direct3D,
   // Create a mock material
   sz::Material mock_material;
 
-  mock_material.diffuse_texname = target.name();
+  mock_material.diffuse_texname_crc = target.name_crc();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
   BaseShader *shader = sha_man_->GetShader("texture_shader");
   TextureShader *texture_shader = static_cast<TextureShader *>(shader);
   if (texture_shader != nullptr) {
+    shader->SetInputLayoutAndShaders(direct3D->GetDeviceContext());
     texture_shader->SetShaderParameters(direct3D->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material);
@@ -131,11 +132,12 @@ void GaussBlur::UpSample(RenderTexture &target, D3D *direct3D,
   // Create a mock material
   sz::Material mock_material;
 
-  mock_material.diffuse_texname = render_target_downsample0_->name();
+  mock_material.diffuse_texname_crc = render_target_downsample0_->name_crc();
   ortho_mesh_upsample_->SendData(direct3D->GetDeviceContext());
   BaseShader *shader = sha_man_->GetShader("texture_shader");
   TextureShader *texture_shader = static_cast<TextureShader *>(shader);
   if (texture_shader != nullptr) {
+    shader->SetInputLayoutAndShaders(direct3D->GetDeviceContext());
     texture_shader->SetShaderParameters(direct3D->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material);
@@ -160,11 +162,12 @@ void GaussBlur::HorizontalBlur(RenderTexture &target, D3D *direct3D,
   // Create a mock material
   sz::Material mock_material;
 
-  mock_material.diffuse_texname = render_target_downsample0_->name();
+  mock_material.diffuse_texname_crc = render_target_downsample0_->name_crc();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
   BaseShader *shader = sha_man_->GetShader("gauss_blur_h_shader");
   if (shader != nullptr) {
     GaussBlurHShader *gauss_shader = static_cast<GaussBlurHShader *>(shader);
+    shader->SetInputLayoutAndShaders(direct3D->GetDeviceContext());
     gauss_shader->SetShaderParameters(direct3D->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material, scr_width_ * 0.5f);
@@ -190,11 +193,12 @@ void GaussBlur::VerticalBlur(RenderTexture &target, D3D *direct3D,
   // Create a mock material
   sz::Material mock_material;
 
-  mock_material.diffuse_texname = render_target_downsample1_->name();
+  mock_material.diffuse_texname_crc = render_target_downsample1_->name_crc();
   ortho_mesh_downsample_->SendData(direct3D->GetDeviceContext());
   BaseShader *shader = sha_man_->GetShader("gauss_blur_v_shader");
   if (shader != nullptr) {
     GaussBlurVShader *gauss_shader = static_cast<GaussBlurVShader *>(shader);
+    shader->SetInputLayoutAndShaders(direct3D->GetDeviceContext());
     gauss_shader->SetShaderParameters(direct3D->GetDeviceContext(),
       world_matrix, base_view_matrix, ortho_matrix,
       mock_material, scr_height_ * 0.5f);

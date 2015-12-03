@@ -28,11 +28,11 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   sha_manager_(nullptr),
   prev_time_(0.f),
   normal_map_shader_(nullptr),
-  post_processer_(nullptr),
   renderer_(nullptr),
   screen_width_(screenWidth),
   screen_height_(screenHeight),
-  apply_post_processing_(false) {
+  apply_post_processing_(false),
+  show_debug_imgui_(true) {
   // Create Mesh object
   m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
   Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(),
@@ -147,18 +147,11 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   renderer_->AddMeshesAndMaterials(lights_pt_meshes_,
     lights_pt_meshes_materials_);
 
-  post_processer_ = new sz::GaussBlur(screenHeight, screenWidth,
-    SCREEN_DEPTH, SCREEN_NEAR, m_Direct3D->GetDevice(),
-    hwnd, *buf_manager_, sha_manager_);
 
 }
 
 
 Lab3::~Lab3() {
-  if (post_processer_ != nullptr) {
-    delete post_processer_;
-    post_processer_ = nullptr;
-  }
 
   if (renderer_ != nullptr) {
     delete renderer_;
@@ -217,12 +210,16 @@ Lab3::~Lab3() {
 
 
 bool Lab3::Frame() {
-  bool result;
-
-  result = BaseApplication::Frame();
+  bool result = BaseApplication::Frame();
   if (!result) {
     return false;
   }
+  
+  ImGui::SetNextWindowSize(ImVec2(400,200));
+  ImGui::Begin("Debug Tools", &show_debug_imgui_);
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+    1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
 
   // Update camera
   m_Camera->Update();
@@ -254,7 +251,6 @@ bool Lab3::Render() {
   renderer_->Render(m_Direct3D, m_Camera, &lights_);
   m_Direct3D->SetBackBufferRenderTarget();
 
-    
   //bool show_test_window = true;
   //  bool show_another_window = false;
   //  ImVec4 clear_col = ImColor(114, 144, 154);
@@ -268,10 +264,11 @@ bool Lab3::Render() {
   m_Direct3D->TurnZBufferOff();
 
 
+  ImGui::End();
   ImGui::Render();
 
   m_Direct3D->TurnZBufferOn();
-  m_Direct3D->TurnOnAlphaBlending();
+  m_Direct3D->TurnOffAlphaBlending();
   m_Direct3D->SetDefaultRasterizerState();
 
   // Present the rendered final frame to the screen.

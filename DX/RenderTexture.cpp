@@ -2,11 +2,16 @@
 // alternative render target
 #include "rendertexture.h"
 #include "Texture.h"
+#include "crc.h"
 
 RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, 
   int textureHeight,   float screenNear, float screenFar,
   const std::string &name) :
-    name_(name) {
+    name_(name),
+    name_crc_(0) {
+
+  name_crc_ = abfw::CRC::GetICRC(name.c_str());
+
   D3D11_TEXTURE2D_DESC textureDesc;
   HRESULT result;
   D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;

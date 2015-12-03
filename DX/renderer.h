@@ -23,6 +23,7 @@ class Model;
 namespace sz {
   class ConstBufManager;
   class ShaderManager;
+  class PostProcess;
 }
 
 namespace sz{
@@ -53,6 +54,10 @@ protected:
   typedef std::pair<const Material *, std::vector<BaseMesh *>>
     MatMeshPair;
   MeshesMatMap meshes_by_material_;
+
+  // Whether to apply post-processing to the final image
+  bool use_post_process_;
+  sz::PostProcess *post_processer_;
 
   // Models batch meshes by material internally
   std::vector<Model *> models_;
