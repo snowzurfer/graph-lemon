@@ -555,8 +555,11 @@ void D3D::ToggleWireFrame() {
   wireframe_enabled_ = !wireframe_enabled_;
 }
 
-void D3D::TurnOffWireframe()
-{
+void D3D::TurnOffWireframe() {
   // Now set the rasterizer state.
   m_deviceContext->RSSetState(m_rasterState);
+}
+
+void D3D::SetDefaultRasterizerState() {
+    m_deviceContext->RSSetState(m_rasterState);
 }

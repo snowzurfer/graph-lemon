@@ -43,18 +43,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
+    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExcludePath>$(ExcludePath)</ExcludePath>
-    <SourcePath>D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
+    <SourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
+    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExcludePath>$(ExcludePath)</ExcludePath>
-    <SourcePath>D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
+    <SourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,6 +99,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\external\imgui-master\imgui.cpp" />
+    <ClCompile Include="..\external\imgui-master\imgui_demo.cpp" />
+    <ClCompile Include="..\external\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="BaseMesh.cpp" />
     <ClCompile Include="BaseShader.cpp" />
@@ -162,6 +166,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.h" />
+    <ClInclude Include="..\external\imgui-master\imconfig.h" />
+    <ClInclude Include="..\external\imgui-master\imgui.h" />
+    <ClInclude Include="..\external\imgui-master\imgui_internal.h" />
+    <ClInclude Include="..\external\imgui-master\stb_rect_pack.h" />
+    <ClInclude Include="..\external\imgui-master\stb_textedit.h" />
+    <ClInclude Include="..\external\imgui-master\stb_truetype.h" />
     <ClInclude Include="abertay_framework.h" />
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="BaseMesh.h" />

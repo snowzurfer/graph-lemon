@@ -1,5 +1,7 @@
 //System.cpp
 #include "system.h"
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
 
 System::System()
 {
@@ -172,7 +174,7 @@ void System::InitializeWindows(int& screenWidth, int& screenHeight)
   SetFocus(m_hwnd);
 
   // Hide the mouse cursor.
-  ShowCursor(false);
+  ShowCursor(true);
 
   return;
 }
@@ -203,9 +205,11 @@ void System::ShutdownWindows()
   return;
 }
 
-
+extern LRESULT ImGui_ImplDX11_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK System::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
+
+  ImGui_ImplDX11_WndProcHandler(hwnd, umessage, wparam, lparam);
 
   switch (umessage)
   {

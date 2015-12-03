@@ -13,6 +13,8 @@
 #include "forward_renderer.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
 
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   Input *in) :
@@ -92,22 +94,23 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     }
     if (i == 1) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
-      lights_[i].SetPosition(-40.f, 20.f, -1.f, 0.f);
-      lights_[i].SetDiffuseColour(0.5f, 0.5f, 0.5f, 1.f);
-      lights_[i].SetDirection(0.f, -1.f, 0.f);
+      lights_[i].SetPosition(-60.f, 60.f, 10.f, 0.f);
+      lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
+      lights_[i].SetDirection(1.f, 0.f, 0.6f);
+      lights_[i].set_spot_cutoff(static_cast<float>(M_PI_4));
+      lights_[i].set_spot_exponent(30.f);
       lights_[i].set_active(true);
     }
     if (i == 2) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
-      lights_[i].SetPosition(-10.f, 50.f, 0.f, 0.f);
+      lights_[i].SetPosition(40.f, 50.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-      lights_[i].SetDirection(0.f, -1.f, 0.f);
-      //lights_[i].set_active(true);
+      lights_[i].set_active(true);
       lights_[i].SetAttenuation(0.5f, 0.03f, 0.f);
     }
     if (i == 3) {
       lights_[i].SetAmbientColour(0.5f, 0.5f, 0.5f, 1.f);
-      lights_[i].SetPosition(-10.f, -50.f, 0.f, 0.f);
+      lights_[i].SetPosition(0.f, 0.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
       //lights_[i].set_active(true);
@@ -166,14 +169,12 @@ Lab3::~Lab3() {
   BaseApplication::~BaseApplication();
 
   // Release the Direct3D object.
-  if (m_Mesh)
-  {
+  if (m_Mesh) {
     delete m_Mesh;
     m_Mesh = 0;
   }
 
-  if (m_Shader)
-  {
+  if (m_Shader) {
     delete m_Shader;
     m_Shader = 0;
   }
@@ -215,13 +216,11 @@ Lab3::~Lab3() {
 }
 
 
-bool Lab3::Frame()
-{
+bool Lab3::Frame() {
   bool result;
 
   result = BaseApplication::Frame();
-  if (!result)
-  {
+  if (!result) {
     return false;
   }
 
@@ -241,8 +240,7 @@ bool Lab3::Frame()
 
   // Render the graphics.
   result = Render();
-  if (!result)
-  {
+  if (!result) {
     return false;
   }
 
@@ -253,8 +251,31 @@ bool Lab3::Frame()
 }
 
 bool Lab3::Render() {
-
   renderer_->Render(m_Direct3D, m_Camera, &lights_);
+  m_Direct3D->SetBackBufferRenderTarget();
+
+    
+  //bool show_test_window = true;
+  //  bool show_another_window = false;
+  //  ImVec4 clear_col = ImColor(114, 144, 154);
+  //
+  //          static float f = 0.0f;
+  //          ImGui::Text("Hello, world!");
+  //          ImGui::ColorEdit3("clear color", (float*)&clear_col);
+  //          if (ImGui::Button("Test Window")) show_test_window ^= 1;
+  //          if (ImGui::Button("Another Window")) show_another_window ^= 1;
+  //          ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  m_Direct3D->TurnZBufferOff();
+
+
+  ImGui::Render();
+
+  m_Direct3D->TurnZBufferOn();
+  m_Direct3D->TurnOnAlphaBlending();
+  m_Direct3D->SetDefaultRasterizerState();
+
+  // Present the rendered final frame to the screen.
+  m_Direct3D->EndScene();
 
   return true;
 }

@@ -44,7 +44,7 @@ void ForwardRenderer::Render(D3D *d3d, Camera *cam,
   RenderToBackBuffer(*render_target_main_, d3d, base_view_matrix);
 
   // Present the rendered final frame to the screen.
-  d3d->EndScene();
+  //d3d->EndScene();
 }
 
 void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,

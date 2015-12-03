@@ -2,6 +2,8 @@
 // Base application functionality for inheritnace.
 #include "BaseApplication.h"
 #include "Texture.h"
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
 
 BaseApplication::BaseApplication(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in)
 {
@@ -24,6 +26,9 @@ BaseApplication::BaseApplication(HINSTANCE hinstance, HWND hwnd, int screenWidth
 
   // Create the timer object.
   m_Timer = new Timer();
+
+  // Setup ImGui binding
+  ImGui_ImplDX11_Init(hwnd, m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext());
 }
 
 
@@ -52,6 +57,9 @@ BaseApplication::~BaseApplication()
     delete m_Direct3D;
     m_Direct3D = 0;
   }
+
+  // Cleanup ImGui data
+  ImGui_ImplDX11_Shutdown();
 }
 
 bool BaseApplication::Frame()
@@ -67,6 +75,10 @@ bool BaseApplication::Frame()
 
   // Do the frame input processing.
   HandleInput(m_Timer->GetTime());
+
+  ImGui_ImplDX11_NewFrame();
+     
+            ImGui::Text("Hello, world!");
 
   return true;
 }

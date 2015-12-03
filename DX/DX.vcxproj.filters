@@ -34,6 +34,9 @@
     <Filter Include="Source Files\System\renderer">
       <UniqueIdentifier>{b92b1e43-eae2-4016-a940-68c51387da30}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System\imgui">
+      <UniqueIdentifier>{8c0fbeae-c566-4230-8577-694ef48e1655}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -174,6 +177,18 @@
     <ClCompile Include="GeometryShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\external\imgui-master\imgui.cpp">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui-master\imgui_demo.cpp">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui-master\imgui_draw.cpp">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.cpp">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -202,9 +217,6 @@
     </ClInclude>
     <ClInclude Include="TriangleMesh.h">
       <Filter>Source Files\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseApplication.h">
-      <Filter>Source Files\System</Filter>
     </ClInclude>
     <ClInclude Include="Lab1.h">
       <Filter>Source Files\Applications</Filter>
@@ -319,6 +331,30 @@
     </ClInclude>
     <ClInclude Include="GeometryShader.h">
       <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\imconfig.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\imgui.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\imgui_internal.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\stb_rect_pack.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\stb_textedit.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\stb_truetype.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.h">
+      <Filter>Source Files\System\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseApplication.h">
+      <Filter>Source Files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

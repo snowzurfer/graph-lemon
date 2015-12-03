@@ -48,6 +48,7 @@ public:
 
   void SetBackBufferRenderTarget();
   void ResetViewport();
+  void SetDefaultRasterizerState();
 
 private:
   bool m_vsync_enabled;
