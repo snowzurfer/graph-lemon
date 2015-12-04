@@ -7,7 +7,7 @@
 
 Texture2D texture_diffuse : register(t0);
 Texture2D texture_normal : register(t1);
-Texture2D texture_light_depth[L_NUM] : register(t2);
+Texture2D texture_light_depth[L_NUM] : register(t4);
 SamplerState SampleType : register(s0);
 
 

@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 #include "gaussian_blur.h"
+#include "Texture.h"
 
 namespace sz {
 
@@ -289,6 +290,13 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   bufferNumber = 0;
   deviceContext->PSSetConstantBuffers(bufferNumber, 1, &light_buff_);
   deviceContext->VSSetConstantBuffers(2, 1, &light_buff_);
+
+  // Set shader resources for shadow maps
+  for (size_t i = 0; i < kNumLights; ++i) {
+    ID3D11ShaderResourceView * texture = 
+      Texture::Inst()->GetTexture(render_targets_depth_[i]->name_crc());
+    deviceContext->PSSetShaderResources(4 + i, 1, &texture);
+  }
 
   // Send camera data to vertex shader
   result = deviceContext->Map(camera_buff_, 0, D3D11_MAP_WRITE_DISCARD, 0,

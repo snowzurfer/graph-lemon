@@ -8,7 +8,7 @@
 Texture2D texture_diff : register(t0);
 Texture2D texture_alpha: register(t1);
 Texture2D texture_spec: register(t2);
-Texture2D texture_light_depth[L_NUM] : register(t3);
+Texture2D texture_light_depth[L_NUM] : register(t4);
 SamplerState SampleType : register(s0);
 
 

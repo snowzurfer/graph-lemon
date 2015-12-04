@@ -144,7 +144,6 @@ void ImGui_ImplDX11_RenderDrawLists(ImDrawData* draw_data)
 
     // Setup render state
     const float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-    float blendFactor_local[4];
     g_pd3dDeviceContext->OMSetBlendState(g_pBlendState, blendFactor, 0xffffffff);
     g_pd3dDeviceContext->RSSetState(g_pRasterizerState);
 
