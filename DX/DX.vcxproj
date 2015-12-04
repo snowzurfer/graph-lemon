@@ -43,18 +43,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExcludePath>$(ExcludePath)</ExcludePath>
-    <SourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExcludePath>$(ExcludePath)</ExcludePath>
-    <SourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -64,12 +62,15 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0</AdditionalIncludeDirectories>
+      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</AdditionalSourcePath>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x86;C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -85,18 +86,18 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0</AdditionalIncludeDirectories>
+      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</AdditionalSourcePath>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x86;C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <FxCompile>
-      <ShaderModel>5.0</ShaderModel>
-    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.cpp" />

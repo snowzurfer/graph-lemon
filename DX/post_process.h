@@ -20,6 +20,15 @@ namespace sz {
 
 class PostProcess {
 public:
+  void* operator new(size_t i)
+  {
+    return _mm_malloc(i, 16);
+  }
+
+  void operator delete(void* p)
+  {
+    _mm_free(p);
+  }
   // Ctor
   PostProcess(const unsigned int scr_height, const unsigned int scr_width,
     const float scr_depth, const float scr_near) :

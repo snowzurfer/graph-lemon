@@ -19,19 +19,24 @@
 Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   Input *in) :
   BaseApplication(hinstance, hwnd, screenWidth, screenHeight, in),
+  m_Shader(nullptr),
   texture_shader_(nullptr),
   model_(nullptr),
+  m_Mesh(nullptr),
   cube_mesh_(nullptr),
   lights_pt_meshes_(),
   geometrybox_shader_(nullptr),
+  lights_pt_meshes_materials_(),
+  lights_(kNumLights),
   buf_manager_(nullptr),
   sha_manager_(nullptr),
-  prev_time_(0.f),
+  waves_shader_(nullptr),
   normal_map_shader_(nullptr),
   renderer_(nullptr),
   screen_width_(screenWidth),
   screen_height_(screenHeight),
   apply_post_processing_(false),
+  prev_time_(0.f),
   show_debug_imgui_(true) {
   // Create Mesh object
   m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
@@ -72,8 +77,8 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   lights_pt_meshes_materials_.push_back(lights_pt_meshes_material);
 
   // Setup lights
-  for (unsigned int i = 0; i < kNumLights; i++) {
-    lights_.push_back(Light());
+  for (size_t i = 0; i < kNumLights; i++) {
+    //lights_.push_back(Light());
     //lights_[i].SetPosition(0.f, 7.f, 0.f, 0.f);
     // Set the light values
     lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
@@ -82,6 +87,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     lights_[i].SetAttenuation(0.95f, 0.f, 0.f);
     lights_[i].SetRange(300.f);
     lights_[i].set_active(false);
+      lights_[i].SetDirection(1.f, -0.3f, -0.1f);
     // Set ambient for one light only 
     if (i == 0) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
@@ -110,7 +116,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     }
     if (i == 3) {
       lights_[i].SetAmbientColour(0.5f, 0.5f, 0.5f, 1.f);
-      lights_[i].SetPosition(0.f, 0.f, 0.f, 0.f);
+      //lights_[i].SetPosition(0.f, 0.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
       lights_[i].SetDirection(0.f, -1.f, 0.f);
       //lights_[i].set_active(true);
@@ -119,7 +125,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
 
     // Create the lights point meshes
     lights_pt_meshes_.push_back(new PointMesh(m_Direct3D->GetDevice()));
-    lights_pt_meshes_[i]->set_transform(XMMatrixTranslation(
+    lights_pt_meshes_[i]->set_transform(DirectX::XMMatrixTranslation(
       lights_[i].GetPosition3().x,
       lights_[i].GetPosition3().y,
       lights_[i].GetPosition3().z

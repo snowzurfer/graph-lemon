@@ -7,6 +7,16 @@
 RenderTexture::RenderTexture(ID3D11Device* device, int textureWidth, 
   int textureHeight,   float screenNear, float screenFar,
   const std::string &name) :
+    m_textureWidth(textureWidth),
+    m_textureHeight(textureHeight),
+    m_renderTargetTexture(nullptr),
+    m_renderTargetView(nullptr),
+    m_shaderResourceView(nullptr),
+    m_depthStencilBuffer(nullptr),
+    m_depthStencilView(nullptr),
+    m_viewport(),
+    m_projectionMatrix(),
+    m_orthoMatrix(),
     name_(name),
     name_crc_(0) {
 
@@ -137,11 +147,6 @@ RenderTexture::~RenderTexture()
     m_renderTargetView = 0;
   }
 
-  if (m_renderTargetTexture)
-  {
-    m_renderTargetTexture->Release();
-    m_renderTargetTexture = 0;
-  }
 }
 
 

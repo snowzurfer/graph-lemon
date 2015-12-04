@@ -46,12 +46,12 @@ struct MaterialType {
 };
 
 // Const buffer for lights
-cbuffer LightBuffer : register(cb0) {
+cbuffer LightBuffer : register(b0) {
   LightType lights[L_NUM];
 };
 
 // Const buffer for the material
-cbuffer MatBuffer : register(cb1) {
+cbuffer MatBuffer : register(b1) {
   MaterialType mat;
 };
 

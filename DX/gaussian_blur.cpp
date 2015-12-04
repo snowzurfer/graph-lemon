@@ -143,6 +143,7 @@ void GaussBlur::UpSample(RenderTexture &target, D3D *direct3D,
       mock_material);
     texture_shader->Render(direct3D->GetDeviceContext(),
       ortho_mesh_upsample_->GetIndexCount(), 0);
+    shader->CleanupTextures(direct3D->GetDeviceContext());
   }
 }
 
@@ -173,6 +174,7 @@ void GaussBlur::HorizontalBlur(RenderTexture &target, D3D *direct3D,
       mock_material, scr_width_ * 0.5f);
     gauss_shader->Render(direct3D->GetDeviceContext(),
       ortho_mesh_downsample_->GetIndexCount(), 0);
+    shader->CleanupTextures(direct3D->GetDeviceContext());
   }
 
 }
@@ -204,6 +206,7 @@ void GaussBlur::VerticalBlur(RenderTexture &target, D3D *direct3D,
       mock_material, scr_height_ * 0.5f);
     gauss_shader->Render(direct3D->GetDeviceContext(),
       ortho_mesh_downsample_->GetIndexCount(), 0);
+    shader->CleanupTextures(direct3D->GetDeviceContext());
   }
 
 }

@@ -6,8 +6,20 @@
 #include <math.h>
 
 Light::Light() :
-    spot_cutoff_(M_PI),
-    spot_exponent_(1.f) {
+  m_ambientColour(0.f, 0.f, 0.f, 0.f),
+  m_diffuseColour(0.f, 0.f, 0.f, 0.f),
+  m_direction(0.f, 0.f, 0.f),
+  m_specularColour(0.f, 0.f, 0.f, 0.f),
+  m_specularPower(0.f),
+  m_position(),
+  m_viewMatrix(XMMatrixIdentity()),
+  m_projectionMatrix(XMMatrixIdentity()),
+  m_lookAt(),
+  m_attenuation(0.f, 0.f, 0.f),
+  m_range(0.f),
+  active_(false),
+  spot_cutoff_(static_cast<float>(M_PI)),
+  spot_exponent_(1.f) {
 
 }
 

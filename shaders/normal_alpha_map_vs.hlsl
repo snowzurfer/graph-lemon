@@ -24,7 +24,7 @@ struct LightType {
   matrix proj_matrix;
 };
 
-cbuffer MatrixBuffer : register(cb0) {
+cbuffer MatrixBuffer : register(b0) {
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
@@ -32,13 +32,13 @@ cbuffer MatrixBuffer : register(cb0) {
     matrix lightProjMatrix[L_NUM];
 };
 
-cbuffer CamBuffer : register(cb1) {
+cbuffer CamBuffer : register(b1) {
   float3 cam_pos;
   float padding;
 };
 
 // Const buffer for lights
-cbuffer LightBuffer : register(cb2) {
+cbuffer LightBuffer : register(b2) {
   LightType lights[L_NUM];
 };
 
