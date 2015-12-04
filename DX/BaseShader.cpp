@@ -105,11 +105,13 @@ vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
   vertexShaderBuffer = 0;
 }
 
+#ifdef _DEBUG
 void SetDebugName(ID3D11DeviceChild* child, const std::string& name)
 {
   if (child != nullptr)
     child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 }
+#endif
 
 void BaseShader::loadPixelShader(WCHAR* filename)
 {
@@ -139,7 +141,11 @@ void BaseShader::loadPixelShader(WCHAR* filename)
   result = m_device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   std::string narrow = converter.to_bytes(filename);
+
+  #ifdef _DEBUG
   SetDebugName(m_pixelShader, narrow);
+  #endif
+  
   pixelShaderBuffer->Release();
   pixelShaderBuffer = 0;
 }
