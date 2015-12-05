@@ -9,8 +9,8 @@
 #include <string>
 #include <d3d11.h>
 
-BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
-{
+BaseShader::BaseShader(ID3D11Device* device, HWND hwnd) :
+  tessellate_(false) {
   m_device = device;
   m_hwnd = hwnd;
 }
@@ -55,6 +55,44 @@ BaseShader::~BaseShader()
   }
 }
 
+void BaseShader::loadVertexShader(WCHAR* filename, ID3D11VertexShader *shader) {
+  HRESULT result;
+  ID3DBlob* errorMessage;
+  ID3DBlob* vertexShaderBuffer;
+
+  // Initialize the pointers this function will use to null.
+  errorMessage = 0;
+  vertexShaderBuffer = 0;
+
+  // Compile the vertex shader code.
+  result = D3DCompileFromFile(filename, NULL, NULL, "main", "vs_5_0", D3DCOMPILE_ENABLE_STRICTNESS, 0, &vertexShaderBuffer, &errorMessage);
+  if (FAILED(result))
+  {
+    // If the shader failed to compile it should have writen something to the error message.
+    if (errorMessage)
+    {
+      OutputShaderErrorMessage(errorMessage, m_hwnd, filename);
+    }
+    // If there was nothing in the error message then it simply could not find the shader file itself.
+    else
+    {
+      MessageBox(m_hwnd, filename, L"Missing Shader File", MB_OK);
+    }
+    exit(0);
+  }
+
+  // Create the vertex shader from the buffer.
+  result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &shader);
+  if (FAILED(result))
+  {
+    int lol = 0;
+  }
+
+  // Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+  vertexShaderBuffer->Release();
+  vertexShaderBuffer = 0;
+
+}
 
 void BaseShader::loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout, 
   size_t num_elements, WCHAR* filename) {
@@ -84,11 +122,12 @@ void BaseShader::loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
   }
 
   // Create the vertex shader from the buffer.
-  result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
+  result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexshader_standard);
   if (FAILED(result))
   {
     int lol = 0;
   }
+  m_vertexShader = vertexshader_standard;
 
   
   // Create the vertex input layout.
@@ -208,7 +247,7 @@ void BaseShader::loadDomainShader(WCHAR* filename)
 
   // Create the domain shader from the buffer.
   result = m_device->CreateDomainShader(domainShaderBuffer->GetBufferPointer(), domainShaderBuffer->GetBufferSize(), NULL, &m_domainShader);
-  
+
   domainShaderBuffer->Release();
   domainShaderBuffer = 0;
 }
@@ -292,6 +331,19 @@ void BaseShader::CleanupTextures(ID3D11DeviceContext* deviceContext) {
     texture);
 }
 
+void BaseShader::ActivateTessellation(ID3D11DeviceContext* deviceContext) {
+  // Set new vertex shader and activate tessellation
+  m_vertexShader = vertexshader_tessellation;
+  
+  tessellate_ = true;
+}
+
+void BaseShader::DeactivateTessellation(ID3D11DeviceContext* deviceContext) {
+  // Set new vertex shader and deactivate tessellation
+  m_vertexShader = vertexshader_standard;
+  
+  tessellate_ = false;
+}
 
 void BaseShader::SetInputLayoutAndShaders(ID3D11DeviceContext* deviceContext) {
   // Set the vertex input layout.
@@ -302,7 +354,7 @@ void BaseShader::SetInputLayoutAndShaders(ID3D11DeviceContext* deviceContext) {
   deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
   // if Hull shader is not null then set HS and DS
-  if (m_hullShader) {
+  if (m_hullShader && tessellate_) {
     deviceContext->HSSetShader(m_hullShader, NULL, 0);
     deviceContext->DSSetShader(m_domainShader, NULL, 0);
   }

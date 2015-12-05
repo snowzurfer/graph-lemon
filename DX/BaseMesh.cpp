@@ -41,8 +41,7 @@ BaseMesh::~BaseMesh()
 //}
 
 
-void BaseMesh::SendData(ID3D11DeviceContext* deviceContext)
-{
+void BaseMesh::SendData(ID3D11DeviceContext* deviceContext) {
   unsigned int stride;
   unsigned int offset;
   

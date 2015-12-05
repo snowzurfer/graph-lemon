@@ -75,6 +75,9 @@ void NormalAlphaMapShader::InitShader(sz::ConstBufManager &buf_man,
 
   // Load (+ compile) shader files
   loadVertexShader(polygon_layout, 4, L"../shaders/normal_alpha_map_vs.hlsl");
+  loadVertexShader(L"../shaders/tessellation_vs.hlsl", vertexshader_tessellation);
+  loadDomainShader(L"../shaders/normal_map_ds.hlsl");
+  loadHullShader(L"../shaders/tessellation_hs.hlsl");
   loadPixelShader(L"../shaders/normal_alpha_map_ps.hlsl");
 
   // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
@@ -188,6 +191,7 @@ void NormalAlphaMapShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 
   // Now set the constant buffer in the vertex shader with the updated values.
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Assign the material data
   sz::MaterialBufferType *mat_buff_ptr;
@@ -272,6 +276,7 @@ void NormalAlphaMapShader::SetShaderFrameParameters(
   bufferNumber = 0;
   deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
   deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
+  deviceContext->DSSetConstantBuffers(2, 1, &m_camBuffer);
 
   // Send camera data to vertex shader
   result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
@@ -281,6 +286,7 @@ void NormalAlphaMapShader::SetShaderFrameParameters(
   deviceContext->Unmap(m_camBuffer, 0);
   bufferNumber = 1;
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
    
 }
 

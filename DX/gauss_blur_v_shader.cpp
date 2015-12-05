@@ -148,6 +148,7 @@ void GaussBlurVShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
   // Now set the constant buffer in the vertex shader with the updated values.
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Send size data
   deviceContext->Map(screensize_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
@@ -156,6 +157,7 @@ void GaussBlurVShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   screensize_ptr->screen_size = screensize;
   deviceContext->Unmap(screensize_buf_, 0);
   deviceContext->VSSetConstantBuffers(1, 1, &screensize_buf_);
+  deviceContext->DSSetConstantBuffers(1, 1, &screensize_buf_);
 
   ID3D11ShaderResourceView * texture = Texture::Inst()->GetTexture(mat.diffuse_texname_crc);
   // Set shader texture resource in the pixel shader.

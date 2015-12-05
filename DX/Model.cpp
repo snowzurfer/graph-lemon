@@ -287,7 +287,7 @@ void Model::InitBuffers(ID3D11Device* device,
   }
 }
 
-void Model::SendData(ID3D11DeviceContext* dev_context) {
+void Model::SendData(ID3D11DeviceContext* dev_context, bool tessellate) {
   unsigned int stride;
   unsigned int offset;
 
@@ -302,7 +302,12 @@ void Model::SendData(ID3D11DeviceContext* dev_context) {
   dev_context->IASetIndexBuffer(index_buf_, DXGI_FORMAT_R32_UINT, 0);
 
   // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-  dev_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  if (tessellate) {
+    dev_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+  }
+  else {
+    dev_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  }
 }
 
 void Model::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,

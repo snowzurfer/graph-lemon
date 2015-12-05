@@ -1,6 +1,8 @@
 // Main.cpp
 #include "system.h"
 
+// Necessary as otherwise, in release mode, the code would break;
+// the issue is with DirectxMath, since it uses SSE intrisics.
 void* operator new(size_t i)
   {
     return _mm_malloc(i, 16);

@@ -62,7 +62,7 @@ public:
   void InitBuffers(ID3D11Device* device, ID3D11DeviceContext *dev_context);
 
   // Set the vertex and index buffers
-  void SendData(ID3D11DeviceContext* dev_context);
+  void SendData(ID3D11DeviceContext* dev_context, bool tessellate = false);
 
   // List of mesh componing the model
   std::vector<BaseMesh> meshes_;

@@ -149,6 +149,7 @@ void TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
   // Now set the constant buffer in the vertex shader with the updated values.
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
   
   // Assign the material data
   sz::MaterialBufferType *mat_buff_ptr;

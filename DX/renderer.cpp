@@ -290,6 +290,7 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   bufferNumber = 0;
   deviceContext->PSSetConstantBuffers(bufferNumber, 1, &light_buff_);
   deviceContext->VSSetConstantBuffers(2, 1, &light_buff_);
+  deviceContext->DSSetConstantBuffers(2, 1, &light_buff_);
 
   // Set shader resources for shadow maps
   for (size_t i = 0; i < kNumLights; ++i) {
@@ -306,6 +307,7 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   deviceContext->Unmap(camera_buff_, 0);
   bufferNumber = 1;
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &camera_buff_);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &camera_buff_);
 
 }
 

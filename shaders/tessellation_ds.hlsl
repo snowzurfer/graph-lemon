@@ -25,19 +25,19 @@ struct LightType {
   matrix proj_matrix;
 };
 
-cbuffer MatrixBuffer : register(cb0) {
+cbuffer MatrixBuffer : register(b0) {
   matrix worldMatrix;
   matrix viewMatrix;
   matrix projectionMatrix;
 };
 
-cbuffer CamBuffer : register(cb1) {
+cbuffer CamBuffer : register(b1) {
   float3 cam_pos;
   float padding;
 };
 
 // Const buffer for lights
-cbuffer LightBuffer : register(cb2) {
+cbuffer LightBuffer : register(b2) {
   LightType lights[L_NUM];
 };
 
@@ -54,14 +54,14 @@ struct ConstantOutputType {
 };
 
 struct OutputType {
-  float4 position : SV_POSITION;
-  float2 tex : TEXCOORD0;
-  float3 normal : NORMAL;
-  float3 tangent : TANGENT;
-  float3 tangent_view_dir : TEXCOORD1;
-  float3 tangent_pixel_to_light_vec[L_NUM] : TEXCOORD2;
-  float3 pixel_to_light_vec[L_NUM] : TEXCOORD6;
-  float3 tangent_light_dir[L_NUM] : COLOR0;
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    // How does the suffix modify the type?
+    float3 viewDir: TEXCOORD1;
+    float4 world_pos : TEXCOORD2;
+    float3 pixel_to_light_vec[L_NUM] : TEXCOORD2;
+    float4 lightview_position[L_NUM] : TEXCOORD11;
 };
 
 
@@ -84,21 +84,47 @@ OutputType main(ConstantOutputType input, float3 uvwCoord : SV_DomainLocation,
   OutputType output;
  
   // Determine the position of the new vertex and the texture coordinates of it
-  output.position = interpolate3D(patch[0].position, patch[1].position,
-    patch[2].position, uvwCoord);
+  output.position = interpolate3D(patch[0].position.xyz, patch[1].position.xyz,
+    patch[2].position.xyz, uvwCoord);
   output.position.w = 1.f;
+  output.tex = interpolate2D(patch[0].tex, patch[1].tex,
+    patch[2].tex, uvwCoord);
+  output.normal = interpolate3D(patch[0].normal.xyz, patch[1].normal.xyz,
+    patch[2].normal.xyz, uvwCoord);
  
+  // Calculate the position of the vertex in world coordinates
+  float4 world_pos = mul(input.position, worldMatrix);
+
+  // Calculate the vector from the pixel in world coordinates to the lights
+  for (uint i = 0; i < L_NUM; ++i) {
+    output.pixel_to_light_vec[i] = lights[i].position.xyz - world_pos.xyz;
+    
+    // Calculate the position of the vertex as seen from the light
+    output.lightview_position[i] = mul(input.position, worldMatrix);
+    output.lightview_position[i] = mul(output.lightview_position[i], lights[i].view_matrix);
+    output.lightview_position[i] = mul(output.lightview_position[i], lights[i].proj_matrix);
+  }
+  
+  // Determine the viewing direction based on the position of the camera and
+  // the world position of the vertex, and then normalise it
+  output.viewDir = normalize(camPos.xyz - world_pos.xyz);
+  
   // Calculate the position of the vertex against the world, view, and projection matrices.
-  output.position = mul(output.position, worldMatrix);
+  output.position = mul(input.position, worldMatrix);
   output.position = mul(output.position, viewMatrix);
   output.position = mul(output.position, projectionMatrix);
+
+  output.world_pos = world_pos;
   
   // Store the texture coordinates for the pixel shader.
   output.tex = input.tex;
 
   // Calculate the normal vector against the world matrix only.
-  output.normal = normal_worldspace;
+  output.normal = mul(input.normal, (float3x3)worldMatrix);
 
+  // Normalize the normal vector.
+  output.normal = normalize(output.normal);
+  
   return output;
 }
 

@@ -8,7 +8,8 @@ LightAlphaSpecMapShader::LightAlphaSpecMapShader(ID3D11Device* device, HWND hwnd
   sz::ConstBufManager &buf_man, unsigned int lights_num) : 
     BaseShader(device, hwnd), material_buf_(nullptr) {
   InitShader(buf_man, L"../shaders/light_alpha_spec_map_vs.hlsl", 
-    L"../shaders/light_alpha_spec_map_ps.hlsl", lights_num);
+    L"../shaders/light_alpha_spec_map_ps.hlsl", L"../shaders/tessellation_hs.hlsl",
+    L"../shaders/light_ds.hlsl", lights_num);
 }
 
 
@@ -33,7 +34,8 @@ LightAlphaSpecMapShader::~LightAlphaSpecMapShader() {
 
 
 void LightAlphaSpecMapShader::InitShader(sz::ConstBufManager &buf_man, 
-  WCHAR* vsFilename, WCHAR* psFilename, unsigned int lights_num) {
+  WCHAR* vsFilename, WCHAR* psFilename, 
+  WCHAR *hsFilename, WCHAR *dsFilename, unsigned int lights_num) {
   D3D11_BUFFER_DESC matrixBufferDesc;
   D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC lightBufferDesc;
@@ -68,6 +70,9 @@ void LightAlphaSpecMapShader::InitShader(sz::ConstBufManager &buf_man,
 
   // Load (+ compile) shader files
   loadVertexShader(polygon_layout, 3, vsFilename);
+  loadVertexShader(L"../shaders/tessellation_vs.hlsl", vertexshader_tessellation);
+  loadDomainShader(dsFilename);
+  loadHullShader(hsFilename);
   loadPixelShader(psFilename);
 
   // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
@@ -182,6 +187,7 @@ void LightAlphaSpecMapShader::SetShaderParameters(ID3D11DeviceContext* deviceCon
 
   // Now set the constant buffer in the vertex shader with the updated values.
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Assign the material data
   sz::MaterialBufferType *mat_buff_ptr;
@@ -270,6 +276,7 @@ void LightAlphaSpecMapShader::SetShaderFrameParameters(ID3D11DeviceContext* devi
   bufferNumber = 0;
   deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
   deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
+  deviceContext->DSSetConstantBuffers(2, 1, &m_lightBuffer);
 
 
   // Send camera data to vertex shader
@@ -280,6 +287,7 @@ void LightAlphaSpecMapShader::SetShaderFrameParameters(ID3D11DeviceContext* devi
   deviceContext->Unmap(m_camBuffer, 0);
   bufferNumber = 1;
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
    
 }
 

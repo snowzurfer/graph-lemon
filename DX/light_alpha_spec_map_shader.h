@@ -38,8 +38,8 @@ public:
     size_t base_vertex = 0);
 
 private:
-  void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*, 
-    unsigned int lights_num);
+  void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*, WCHAR* = nullptr, WCHAR* = nullptr, 
+    unsigned int lights_num = 0);
 
 private:
   ID3D11Buffer* m_matrixBuffer;

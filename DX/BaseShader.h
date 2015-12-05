@@ -52,12 +52,17 @@ public:
 
   void CleanupTextures(ID3D11DeviceContext* deviceContext);
 
+  // Activate tessellation on this shader
+  void ActivateTessellation(ID3D11DeviceContext* deviceContext);
+  void DeactivateTessellation(ID3D11DeviceContext* deviceContext);
+
 protected:
   void InitShader(WCHAR*, WCHAR*) {};
   void ShutdownShader();
   void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
   void loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
     size_t num_elements, WCHAR* filename);
+  void loadVertexShader(WCHAR* filename, ID3D11VertexShader *shader);
   void loadHullShader(WCHAR* filename);
   void loadDomainShader(WCHAR* filename);
   void loadGeometryShader(WCHAR* filename);
@@ -68,6 +73,8 @@ protected:
   HWND m_hwnd;
 
   ID3D11VertexShader* m_vertexShader;
+  ID3D11VertexShader* vertexshader_standard;
+  ID3D11VertexShader* vertexshader_tessellation;
   ID3D11PixelShader* m_pixelShader;
   ID3D11HullShader* m_hullShader;
   ID3D11DomainShader* m_domainShader;
@@ -75,6 +82,8 @@ protected:
   ID3D11InputLayout* m_layout;
   ID3D11Buffer* m_matrixBuffer;
   ID3D11SamplerState* m_sampleState;
+
+  bool tessellate_;
   
  // ID3D11Buffer* m_matrixBuffer;
   //ID3D11SamplerState* m_sampleState;

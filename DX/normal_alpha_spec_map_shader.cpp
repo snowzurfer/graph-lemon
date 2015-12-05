@@ -75,6 +75,9 @@ void NormalAlphaSpecMapShader::InitShader(sz::ConstBufManager &buf_man,unsigned 
 
   // Load (+ compile) shader files
   loadVertexShader(polygon_layout, 4, L"../shaders/normal_alpha_spec_map_vs.hlsl");
+  loadVertexShader(L"../shaders/tessellation_vs.hlsl", vertexshader_tessellation);
+  loadDomainShader(L"../shaders/normal_map_ds.hlsl");
+  loadHullShader(L"../shaders/tessellation_hs.hlsl");
   loadPixelShader(L"../shaders/normal_alpha_spec_map_ps.hlsl");
 
   // Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
@@ -188,6 +191,7 @@ void NormalAlphaSpecMapShader::SetShaderParameters(ID3D11DeviceContext* deviceCo
 
   // Now set the constant buffer in the vertex shader with the updated values.
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
   // Assign the material data
   sz::MaterialBufferType *mat_buff_ptr;
