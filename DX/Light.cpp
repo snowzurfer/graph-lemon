@@ -12,8 +12,8 @@ Light::Light() :
   m_specularColour(0.f, 0.f, 0.f, 0.f),
   m_specularPower(0.f),
   m_position(),
-  m_viewMatrix(XMMatrixIdentity()),
-  m_projectionMatrix(XMMatrixIdentity()),
+  m_viewMatrix(),
+  m_projectionMatrix(),
   m_lookAt(),
   m_attenuation(0.f, 0.f, 0.f),
   m_range(0.f),
@@ -23,8 +23,7 @@ Light::Light() :
 
 }
 
-void Light::GenerateViewMatrix()
-{
+void Light::GenerateViewMatrix() {
   XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 
   //up = XMVectorSetX(up, 0.0f);
@@ -32,11 +31,13 @@ void Light::GenerateViewMatrix()
   //up = XMVectorSetZ(up, 0.0f);
 
   // Create the view matrix from the three vectors.
-  m_viewMatrix = XMMatrixLookAtLH(m_position, m_lookAt, up);
+  XMMATRIX view = XMMatrixLookAtLH(XMLoadFloat4A(&m_position),
+    XMLoadFloat4A(&m_lookAt), up);
+  XMStoreFloat4x4A(&m_viewMatrix, view);
+
 }
 
-void Light::GenerateViewMatrixFromDirection()
-{
+void Light::GenerateViewMatrixFromDirection() {
   XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 
   //up = XMVectorSetX(up, 0.0f);
@@ -48,7 +49,8 @@ void Light::GenerateViewMatrixFromDirection()
     1.f);
 
   // Create the view matrix from the three vectors.
-  m_viewMatrix = XMMatrixLookToLH(m_position, dir, up);
+  XMMATRIX view = XMMatrixLookToLH(XMLoadFloat4A(&m_position), dir, up);
+  XMStoreFloat4x4A(&m_viewMatrix, view);
 }
 
 void Light::GenerateProjectionMatrix(float screenNear, float screenFar)
@@ -60,30 +62,32 @@ void Light::GenerateProjectionMatrix(float screenNear, float screenFar)
   screenAspect = 1.0f;
 
   // Create the projection matrix for the light.
-  m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenFar);
+  XMMATRIX proj = XMMatrixPerspectiveFovLH(fieldOfView,
+    screenAspect, screenNear, screenFar);
+  XMStoreFloat4x4A(&m_projectionMatrix, proj);
 }
 
 void Light::SetAmbientColour(float red, float green, float blue, float alpha)
 {
-  m_ambientColour = XMFLOAT4(red, green, blue, alpha);
+  m_ambientColour = XMFLOAT4A(red, green, blue, alpha);
 }
 
 void Light::SetDiffuseColour(float red, float green, float blue, float alpha)
 {
-  m_diffuseColour = XMFLOAT4(red, green, blue, alpha);
+  m_diffuseColour = XMFLOAT4A(red, green, blue, alpha);
 }
 
 
 void Light::SetDirection(float x, float y, float z)
 {
   float magnitude = sqrtf(x * x + y * y + z * z);
-  m_direction = XMFLOAT3(x / magnitude,
+  m_direction = XMFLOAT3A(x / magnitude,
     y / magnitude, z / magnitude);
 }
 
 void Light::SetSpecularColour(float red, float green, float blue, float alpha)
 {
-  m_specularColour = XMFLOAT4(red, green, blue, alpha);
+  m_specularColour = XMFLOAT4A(red, green, blue, alpha);
 }
 
 
@@ -94,38 +98,38 @@ void Light::SetSpecularPower(float power)
 
 void Light::SetPosition(float x, float y, float z)
 {
-  m_position = XMVectorSet(x, y, z, 1.0f);
+  m_position = XMFLOAT4A(x, y, z, 1.0f);
 }
 
 void Light::SetPosition(float x, float y, float z, float w) {
-  m_position = XMVectorSet(x, y, z, w);
+  m_position = XMFLOAT4A(x, y, z, w);
 }
 
 void Light::SetAttenuation(float x, float y, float z) {
-  m_attenuation = XMFLOAT3(x, y, z);
+  m_attenuation = XMFLOAT3A(x, y, z);
 }
 
 void Light::SetRange(float x) {
   m_range = x;
 }
 
-XMFLOAT4 Light::GetAmbientColour()
+XMFLOAT4A Light::GetAmbientColour()
 {
   return m_ambientColour;
 }
 
-XMFLOAT4 Light::GetDiffuseColour()
+XMFLOAT4A Light::GetDiffuseColour()
 {
   return m_diffuseColour;
 }
 
 
-XMFLOAT3 Light::GetDirection()
+XMFLOAT3A Light::GetDirection()
 {
   return m_direction;
 }
 
-XMFLOAT4 Light::GetSpecularColour()
+XMFLOAT4A Light::GetSpecularColour()
 {
   return m_specularColour;
 }
@@ -136,38 +140,36 @@ float Light::GetSpecularPower()
   return m_specularPower;
 }
 
-XMFLOAT3 Light::GetPosition3()
+XMFLOAT3A Light::GetPosition3()const
 {
-  XMFLOAT3 temp(XMVectorGetX(m_position), XMVectorGetY(m_position), XMVectorGetZ(m_position));
+  XMFLOAT3A temp(m_position.x, m_position.y, m_position.z);
   return temp;
 }
 
-XMFLOAT4 Light::GetPosition4() {
-  XMFLOAT4 temp(XMVectorGetX(m_position), XMVectorGetY(m_position), 
-    XMVectorGetZ(m_position), XMVectorGetW(m_position));
-  return temp;
+const XMFLOAT4A &Light::GetPosition4() const {
+  return m_position;
 }
 
 void Light::SetLookAt(float x, float y, float z)
 {
-  m_lookAt = XMVectorSet(x, y, z, 1.0f);
+  m_lookAt = XMFLOAT4A(x, y, z, 1.0f);
 }
 
 XMMATRIX Light::GetViewMatrix()
 {
-  return m_viewMatrix;
+  return XMLoadFloat4x4A(&m_viewMatrix);
 }
 
 XMMATRIX Light::GetProjectionMatrix()
 {
-  return m_projectionMatrix;
+  return XMLoadFloat4x4A(&m_projectionMatrix);
 }
 
 XMVECTOR Light::GetPosVector() {
-  return m_position;
+  return XMLoadFloat4A(&m_position);
 }
 
-XMFLOAT3 Light::GetAttenuation() {
+const XMFLOAT3A &Light::GetAttenuation() const {
   return m_attenuation;
 }
 
@@ -200,3 +202,4 @@ void Light::set_spot_cutoff(float v) {
 void Light::set_spot_exponent(float v) {
   spot_exponent_ = v;
 }
+

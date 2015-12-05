@@ -9,7 +9,7 @@
 #include <glm/vec4.hpp>
 
 BaseMesh::BaseMesh() :
-  transform_(XMMatrixIdentity()),
+  transform_(),
   m_vertexBuffer(nullptr),
   m_indexBuffer(nullptr)
 {

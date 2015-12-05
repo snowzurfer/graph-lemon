@@ -43,17 +43,17 @@ public:
   void set_spot_exponent(float v);
 
   // Getters
-  XMFLOAT4 GetAmbientColour();
-  XMFLOAT4 GetDiffuseColour();
-  XMFLOAT3 GetDirection();
-  XMFLOAT4 GetSpecularColour();
+  XMFLOAT4A GetAmbientColour();
+  XMFLOAT4A GetDiffuseColour();
+  XMFLOAT3A GetDirection();
+  XMFLOAT4A GetSpecularColour();
   float GetSpecularPower();
-  XMFLOAT3 GetPosition3();
-  XMFLOAT4 GetPosition4();
+  XMFLOAT3A GetPosition3() const;
+  const XMFLOAT4A &GetPosition4() const;
   XMVECTOR GetPosVector();
   XMMATRIX GetViewMatrix();
   XMMATRIX GetProjectionMatrix();
-  XMFLOAT3 GetAttenuation();
+  const XMFLOAT3A &GetAttenuation() const;
   float GetRange();
 
   bool active() const;
@@ -61,16 +61,16 @@ public:
   float spot_exponent() const;
 
 protected:
-  XMFLOAT4 m_ambientColour;
-  XMFLOAT4 m_diffuseColour;
-  XMFLOAT3 m_direction;
-  XMFLOAT4 m_specularColour;
+  XMFLOAT4A m_ambientColour;
+  XMFLOAT4A m_diffuseColour;
+  XMFLOAT3A m_direction;
+  XMFLOAT4A m_specularColour;
   float m_specularPower;
-  XMVECTOR m_position;
-  XMMATRIX m_viewMatrix;
-  XMMATRIX m_projectionMatrix;
-  XMVECTOR m_lookAt;
-  XMFLOAT3 m_attenuation;
+  XMFLOAT4A m_position;
+  XMFLOAT4X4A m_viewMatrix;
+  XMFLOAT4X4A m_projectionMatrix;
+  XMFLOAT4A m_lookAt;
+  XMFLOAT3A m_attenuation;
   float m_range;
  
   // Whether the light is active or not

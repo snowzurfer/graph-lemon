@@ -62,15 +62,16 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0</AdditionalIncludeDirectories>
-      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</AdditionalSourcePath>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader</AdditionalIncludeDirectories>
+      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader;$(SourcePath)</AdditionalSourcePath>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x86;C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -86,9 +87,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0</AdditionalIncludeDirectories>
-      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SourcePath)</AdditionalSourcePath>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\glm-0.9.7.1\glm;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;C:\local\boost_1_59_0;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader</AdditionalIncludeDirectories>
+      <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader;$(SourcePath)</AdditionalSourcePath>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -96,7 +98,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x86;C:\local\boost_1_59_0\lib32-msvc-12.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxgi.lib;d3d11.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -104,6 +106,8 @@
     <ClCompile Include="..\external\imgui-master\imgui.cpp" />
     <ClCompile Include="..\external\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui-master\imgui_draw.cpp" />
+    <ClCompile Include="..\external\lodePNG\lodepng.cpp" />
+    <ClCompile Include="..\external\wictextureloader\WICTextureLoader.cpp" />
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="BaseMesh.cpp" />
     <ClCompile Include="BaseShader.cpp" />
@@ -174,6 +178,8 @@
     <ClInclude Include="..\external\imgui-master\stb_rect_pack.h" />
     <ClInclude Include="..\external\imgui-master\stb_textedit.h" />
     <ClInclude Include="..\external\imgui-master\stb_truetype.h" />
+    <ClInclude Include="..\external\lodePNG\lodepng.h" />
+    <ClInclude Include="..\external\wictextureloader\WICTextureLoader.h" />
     <ClInclude Include="abertay_framework.h" />
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="BaseMesh.h" />
@@ -293,6 +299,5 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtk_desktop_2013.2015.7.1.1\build\native\directxtk_desktop_2013.targets" Condition="Exists('..\packages\directxtk_desktop_2013.2015.7.1.1\build\native\directxtk_desktop_2013.targets')" />
   </ImportGroup>
 </Project>

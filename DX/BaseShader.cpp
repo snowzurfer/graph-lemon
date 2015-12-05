@@ -7,6 +7,7 @@
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <d3d11.h>
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd)
 {

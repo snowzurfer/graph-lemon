@@ -37,6 +37,12 @@
     <Filter Include="Source Files\System\imgui">
       <UniqueIdentifier>{8c0fbeae-c566-4230-8577-694ef48e1655}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System\lodepng">
+      <UniqueIdentifier>{440064bd-e779-4138-b641-aa219acec39b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System\wicdtextureloader">
+      <UniqueIdentifier>{96fa579e-e73e-4433-a620-0e9af211b927}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -188,6 +194,12 @@
     </ClCompile>
     <ClCompile Include="..\external\imgui-master\examples\directx11_example\imgui_impl_dx11.cpp">
       <Filter>Source Files\System\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\lodePNG\lodepng.cpp">
+      <Filter>Source Files\System\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\wictextureloader\WICTextureLoader.cpp">
+      <Filter>Source Files\System\wicdtextureloader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -355,6 +367,12 @@
     </ClInclude>
     <ClInclude Include="BaseApplication.h">
       <Filter>Source Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\lodePNG\lodepng.h">
+      <Filter>Source Files\System\lodepng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\wictextureloader\WICTextureLoader.h">
+      <Filter>Source Files\System\wicdtextureloader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

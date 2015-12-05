@@ -87,7 +87,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     lights_[i].SetAttenuation(0.95f, 0.f, 0.f);
     lights_[i].SetRange(300.f);
     lights_[i].set_active(false);
-      lights_[i].SetDirection(1.f, -0.3f, -0.1f);
+    lights_[i].SetDirection(1.f, -0.3f, -0.1f);
     // Set ambient for one light only 
     if (i == 0) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);

@@ -1,10 +1,11 @@
 // texture.cpp
 #include "texture.h"
 #include <algorithm>
-
+#include <lodepng.h>
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <cstdint>
 
 Texture *Texture::single_instance_ = nullptr;
 
@@ -109,27 +110,10 @@ std::wstring Texture::ConvertToWide(const std::string &x) {
 
 void Texture::LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context,
   const std::string &filename) {
-  HRESULT result;
+  HRESULT result = S_OK;
 
   // Convert name to uint
   UInt32 crc_val = abfw::CRC::GetICRC(filename.c_str());
-
-  // Convert to wide
-  std::wstring wide = ConvertToWide(filename);
-
-  // check if file exists
-  if (!wide.c_str())
-  {
-    wide = L"../res/DefaultDiffuse.png";
-    crc_val = abfw::CRC::GetICRC("../res/DefaultDiffuse.png");
-  }
-  // if not set default texture
-  if (!does_file_exist(wide.c_str()))
-  {
-    // change default texture
-    wide = L"../res/DefaultDiffuse.png";
-    crc_val = abfw::CRC::GetICRC("../res/DefaultDiffuse.png");
-  }
 
   // Check if this texture has already been loaded
   std::unordered_map<UInt32, ID3D11ShaderResourceView *>::const_iterator it =
@@ -139,45 +123,123 @@ void Texture::LoadTexture(ID3D11Device* device, ID3D11DeviceContext *dev_context
     return;
   }
 
+  // Use LodePNG to load the texture
+  std::vector<std::uint8_t> image; //the raw pixels
+  std::uint32_t width, height;
+  const size_t bytes_per_pixel = 4; // LodePNG outputs this type
+
+  // Decode the image using LodePNG
+  std::uint32_t error = lodepng::decode(image, width, height, filename);
+
+  //if there's an error, display it
+  if (error) {
+    std::cout << "decoder error " << error
+      << ": " << lodepng_error_text(error) << std::endl;
+  }
+
+  D3D11_TEXTURE2D_DESC TextureDescription;
+  ZeroMemory(&TextureDescription, sizeof(TextureDescription));
+  TextureDescription.Width = width;
+  TextureDescription.Height = height;
+  TextureDescription.ArraySize = 1;
+  TextureDescription.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  TextureDescription.Usage = D3D11_USAGE_DEFAULT;
+  TextureDescription.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+  TextureDescription.MipLevels = 3;
+  TextureDescription.SampleDesc.Count = 1;
+  TextureDescription.CPUAccessFlags = /*bAllowCpuWriteAccess ? D3D11_CPU_ACCESS_WRITE :*/ 0;
+
+  // We only support mipmaps for this kind of format.
+  //if (bGenerateMipmaps)
+  //{
+  TextureDescription.BindFlags |= D3D11_BIND_RENDER_TARGET;
+  TextureDescription.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+  //}
+
+  ID3D11Texture2D *texture_resource = nullptr;
+  result = device->CreateTexture2D(&TextureDescription, nullptr, &texture_resource);
+  if (FAILED(result)) {
+    MessageBox(NULL, L"Texture 2D creation error", L"ERROR", MB_OK);
+  }
+
+  dev_context->UpdateSubresource(texture_resource, 0, nullptr, image.data(),
+    bytes_per_pixel * width, bytes_per_pixel* width * height);
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC ViewDescription;
+  ZeroMemory(&ViewDescription, sizeof(ViewDescription));
+  ViewDescription.Texture2D.MipLevels = -1;
+  ViewDescription.Texture2D.MostDetailedMip = 0;  
+  ViewDescription.Format = TextureDescription.Format;
+  ViewDescription.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+  // Create a resource view
+  ID3D11ShaderResourceView * texture_resource_view = nullptr;
+
+  result = device->CreateShaderResourceView(texture_resource,
+    &ViewDescription, &texture_resource_view);
+  if (FAILED(result)) {
+    MessageBox(NULL, L"Texture Resource View creation error", L"ERROR", MB_OK);
+  }
+
+  dev_context->GenerateMips(texture_resource_view);
+
+
+  // Convert to wide
+  //std::wstring wide = ConvertToWide(filename);
+
+  // check if file exists
+  //if (!wide.c_str())
+  //{
+  //  wide = L"../res/DefaultDiffuse.png";
+  //  crc_val = abfw::CRC::GetICRC("../res/DefaultDiffuse.png");
+  //}
+  // if not set default texture
+  //if (!does_file_exist(wide.c_str()))
+  //{
+  //   change default texture
+  //  wide = L"../res/DefaultDiffuse.png";
+  //  crc_val = abfw::CRC::GetICRC("../res/DefaultDiffuse.png");
+  //}
+
+
 
   // check file extension for correct loading function.
-  std::wstring fn(wide.c_str());
-  std::string::size_type idx;
-  std::wstring extension;
+  //std::wstring fn(wide.c_str());
+  //std::string::size_type idx;
+  //std::wstring extension;
 
 
-  idx = fn.rfind('.');
+  //idx = fn.rfind('.');
 
-  if (idx != std::string::npos)
-  {
-    extension = fn.substr(idx + 1);
-  }
-  else
-  {
-    // No extension found
-  }
+  //if (idx != std::string::npos)
+  //{
+  //  extension = fn.substr(idx + 1);
+  //}
+  //else
+  //{
+  //   No extension found
+  //}
 
-  // Create a temporary descriptor
-  ID3D11ShaderResourceView * m_texture = nullptr;
 
   // Load the texture in.
-  if (extension == L"dds")
-  {
-    result = CreateDDSTextureFromFile(device, dev_context, wide.c_str(), NULL, &m_texture, 0, NULL);
-  }
-  else
-  {
-    result = CreateWICTextureFromFile(device, dev_context, wide.c_str(), NULL, &m_texture, 0);
-  }
+  //if (extension == L"dds")
+  //{
+  //  result = CreateDDSTextureFromFile(device, dev_context, wide.c_str(), NULL, &m_texture, 0, NULL);
+  //}
+  //else
+  //{
+  //  result = DirectX::CreateWICTextureFromFile(device, dev_context, wide.c_str(),
+  //    NULL, &texture_resource_view, 0);
+  //}
 
-  
-  if (FAILED(result))
-  {
-    MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
-  }
+  //
+  //if (FAILED(result))
+  //{
+  //  MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
+  //}
 
   // Add texture to the map
-  textures_[crc_val] = m_texture;
+  textures_[crc_val] = texture_resource_view;
 
 }
 

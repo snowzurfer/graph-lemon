@@ -74,8 +74,8 @@ public:
     std::vector<unsigned int> &indices);
   virtual void InitBuffers(ID3D11Device* device) {};
 
-  inline const XMMATRIX &transform() const {
-    return transform_;
+  inline XMMATRIX transform() const {
+    return XMLoadFloat4x4A(&transform_);
   }
 
   inline int mat_id() const {
@@ -83,7 +83,7 @@ public:
   }
 
   inline void set_transform(const XMMATRIX &v) {
-    transform_ = v;
+    XMStoreFloat4x4A(&transform_, v);
   }
 
   inline void set_mat_id(int id) {
@@ -122,7 +122,7 @@ protected:
   void LoadTexture(ID3D11Device*, WCHAR*);
 
   // World transformation matrix
-  XMMATRIX transform_;
+  XMFLOAT4X4A transform_;
   ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
   size_t m_indexCount, m_vertexCount;
 
