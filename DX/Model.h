@@ -24,7 +24,9 @@ namespace sz {
     MeshesMatMap;
   typedef std::pair<const sz::Material *, std::vector<BaseMesh *>>
     MatMeshPair;
+  class ShaderManager;
 }
+
 
 using namespace DirectX;
 
@@ -91,6 +93,9 @@ public:
   inline sz::MeshesMatMap &meshes_by_material() {
     return meshes_by_material_;
   }
+
+  // Used to set shaders to use tessellation
+  void SetTessellation(ID3D11DeviceContext* deviceContext, sz::ShaderManager *sha_man, bool tessellate);
 
 private:
   // Used to batch render by material

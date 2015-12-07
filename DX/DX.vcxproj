@@ -66,6 +66,7 @@
       <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader;$(SourcePath)</AdditionalSourcePath>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,6 +92,7 @@
       <AdditionalSourcePath>D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master;D:\uni\3rd_year\graphics_programming\framework\DX\external\imgui-master\examples\directx11_example;D:\data\software\libraries\boost_1_59_0\libs;$(SolutionDir)external\lodePNG;$(SolutionDir)external\wictextureloader;$(SourcePath)</AdditionalSourcePath>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +149,7 @@
     <ClCompile Include="normal_alpha_map_shader.cpp" />
     <ClCompile Include="normal_alpha_spec_map_shader.cpp" />
     <ClCompile Include="normal_mapping_shader.cpp" />
+    <ClCompile Include="normal_spec_map_shader.cpp" />
     <ClCompile Include="OrthoMesh.cpp" />
     <ClCompile Include="PlaneMesh.cpp" />
     <ClCompile Include="PointMesh.cpp" />
@@ -220,6 +223,7 @@
     <ClInclude Include="normal_alpha_map_shader.h" />
     <ClInclude Include="normal_alpha_spec_map_shader.h" />
     <ClInclude Include="normal_mapping_shader.h" />
+    <ClInclude Include="normal_spec_map_shader.h" />
     <ClInclude Include="OrthoMesh.h" />
     <ClInclude Include="PlaneMesh.h" />
     <ClInclude Include="PointMesh.h" />

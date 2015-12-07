@@ -62,7 +62,7 @@ protected:
   void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
   void loadVertexShader(const D3D11_INPUT_ELEMENT_DESC *layout,
     size_t num_elements, WCHAR* filename);
-  void loadVertexShader(WCHAR* filename, ID3D11VertexShader *shader);
+  void loadVertexShader(WCHAR* filename, ID3D11VertexShader **shader);
   void loadHullShader(WCHAR* filename);
   void loadDomainShader(WCHAR* filename);
   void loadGeometryShader(WCHAR* filename);

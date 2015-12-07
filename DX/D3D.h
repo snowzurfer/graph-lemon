@@ -29,6 +29,10 @@ public:
   void BeginScene(float, float, float, float);
   void EndScene();
 
+  inline bool wireframe_enabled() const {
+    return wireframe_enabled_;
+  }
+
   ID3D11Device* GetDevice();
   ID3D11DeviceContext* GetDeviceContext();
 

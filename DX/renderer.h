@@ -47,6 +47,16 @@ public:
     const std::vector<Material> &materials);
   virtual void Render(D3D *d3d, Camera *cam, std::vector<Light> *lights) = 0;
 
+  // Called when it's necessary to switch to using tessellation
+  virtual void UpdateTessellation(ID3D11DeviceContext* deviceContext) {};
+  inline bool IsChangeTessellationNecessary() const {
+    return prev_tessellate_check_value_ != tessellate_check_;
+  }
+
+
+  float tessellation_value;
+  float tessellation_distance;
+
 protected:
   // Used to batch render by material
   typedef std::map<UInt32, std::pair<const Material *, std::vector<BaseMesh *>>>
@@ -58,6 +68,11 @@ protected:
   // Whether to apply post-processing to the final image
   bool use_post_process_;
   sz::PostProcess *post_processer_;
+
+  // Whether to show tessellation
+  bool tessellate_check_;
+  bool prev_tessellate_check_value_;
+  bool tessellate_;
 
   // Models batch meshes by material internally
   std::vector<Model *> models_;
@@ -73,15 +88,16 @@ protected:
   // References to the shaders and buffers managers
   ShaderManager *sha_man_;
   ConstBufManager *buf_man_;
-  
+
   // Per-frame buffers
   ID3D11Buffer* light_buff_;
   ID3D11Buffer* camera_buff_;
-  
+  ID3D11Buffer* tessellation_buf_;
+
   // Render to the back buffer from a source render target
   void RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
     const XMMATRIX &base_view_matrix);
-  
+
   // Setup buffers used per-frame
   void SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
     size_t lights_num);

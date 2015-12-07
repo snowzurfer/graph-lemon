@@ -12,9 +12,12 @@
 #include "light_alpha_spec_map_shader.h"
 #include "normal_alpha_map_shader.h"
 #include "normal_alpha_spec_map_shader.h"
+#include "normal_spec_map_shader.h"
 #include "abertay_framework.h"
 #include "crc.h"
 #include "Material.h"
+#include "shader_resource_manager.h"
+#include <omp.h>
 
 Model::Model(const std::string &model_filename) :
   model_name_(model_filename) {
@@ -75,7 +78,8 @@ std::wstring ConvertToWide(const std::string &x) {
 void Model::LoadTextures_(ID3D11Device* device, 
   ID3D11DeviceContext *dev_context, HWND hwnd) {
   // For each material
-  for (unsigned int i = 0; i < materials_.size(); ++i) {
+  //#pragma omp parallel for
+  for (int i = 0; i < materials_.size(); ++i) {
     //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     //std::wstring full_path;
     //full_path = converter.from_bytes(model_name_);
@@ -181,6 +185,17 @@ void Model::LoadShaders_(ID3D11Device* device, HWND hwnd,
       }
 
       materials_[i].shader_name = "normal_alpha_map_shader";
+    }
+    else if (materials_[i].diffuse_texname != "" && materials_[i].bump_texname != "" &&
+      materials_[i].specular_texname != "") {
+      NormalSpecMapShader *shader =
+        new NormalSpecMapShader(device, hwnd, buf_man, lights_num);
+      if (!shad_man.AddShader("normal_spec_map_shader", shader)) {
+        delete shader;
+        shader = nullptr;
+      }
+
+      materials_[i].shader_name = "normal_spec_map_shader";
     }
     else if (materials_[i].diffuse_texname != "" && materials_[i].bump_texname != "") {
       NormalMappingShader *shader =
@@ -331,6 +346,24 @@ void Model::AddMeshesAndMaterials(std::vector<BaseMesh> &meshes,
       pair.second.push_back(&meshes[i]);
 
       meshes_by_material_[m_crc] = pair;
+    }
+  }
+}
+
+void Model::SetTessellation(ID3D11DeviceContext* deviceContext,
+  sz::ShaderManager *sha_man, bool tessellate) {
+  for (sz::Material &material : materials_) {
+    BaseShader *shader = sha_man->GetShader(
+      material.shader_name);
+    if (shader == nullptr) {
+      continue;
+    }
+
+    if (tessellate) {
+      shader->ActivateTessellation(deviceContext);
+    }
+    else {
+      shader->DeactivateTessellation(deviceContext);
     }
   }
 }

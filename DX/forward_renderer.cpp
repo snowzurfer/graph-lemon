@@ -40,6 +40,7 @@ void ForwardRenderer::Render(D3D *d3d, Camera *cam,
   RenderToTexture(*render_target_main_, d3d, cam, lights);
 
   ImGui::Checkbox("Apply post processing", &use_post_process_);
+  ImGui::Checkbox("Apply tessellation", &tessellate_check_);
 
   if (use_post_process_) {
     sha_man_->CleanupShaderResources(d3d->GetDeviceContext());
@@ -87,10 +88,11 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
     XMMatrixTranslation(10.f, -20.f, 0.f)*/;
   // Create a base shader
   BaseShader *shader = nullptr;
+  BaseShader *prev_shader = nullptr;
 
   // For all the models
   for (Model *model : models_) {
-    model->SendData(d3d->GetDeviceContext());
+    model->SendData(d3d->GetDeviceContext(), tessellate_);
 
     // For all the meshes in the model
     //std::stack<size_t> alpha_blended_meshes;
@@ -104,14 +106,16 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
       if (shader == nullptr) {
         continue;
       }
-
+      
+      if (shader != prev_shader) {
+        shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
+        shader->SetSamplers(d3d->GetDeviceContext());
+      }
       // Set the parameters for this shader
       shader->SetShaderParameters(d3d->GetDeviceContext(),
         model_transform, view_matrix, projection_matrix,
         *(pair.first));
       // Set DX shaders and input layout
-      shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
-      shader->SetSamplers(d3d->GetDeviceContext());
 
       // For all the meshes associated with it
       for (BaseMesh *mesh : pair.second) {
@@ -119,6 +123,8 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
           mesh->GetIndicesSize(), mesh->index_offset(),
           mesh->vertex_offset());
       }
+
+      prev_shader = shader;
     }
   }
 
@@ -154,6 +160,14 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
 
 }
 
+void ForwardRenderer::UpdateTessellation(ID3D11DeviceContext* deviceContext) {
+  if (prev_tessellate_check_value_ != tessellate_check_) {
+    tessellate_ = tessellate_check_;
+    prev_tessellate_check_value_ = tessellate_;
+
+    models_[0]->SetTessellation(deviceContext, sha_man_, tessellate_);
+  }
+}
 
 void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   Light *light) {

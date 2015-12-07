@@ -126,7 +126,7 @@ float4 main(InputType input) : SV_TARGET {
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
-      calc_light_dir = input.tangent_light_dir[i];
+      calc_light_dir = normalize(input.tangent_light_dir[i]);
       //calc_light_dir = lights[i].direction.xyz;
 
       // Calculate the amount of light on this pixel.
@@ -166,7 +166,7 @@ float4 main(InputType input) : SV_TARGET {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel, in tangent space
           float cos_directions = max(dot(calc_light_dir, 
-            input.tangent_light_dir[i]), 0);
+            normalize(input.tangent_light_dir[i])), 0);
 
 
 

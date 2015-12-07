@@ -28,7 +28,6 @@ cbuffer MatrixBuffer : register(b0) {
   matrix worldMatrix;
   matrix viewMatrix;
   matrix projectionMatrix;
-
 };
 
 cbuffer CamBuffer : register(b1) {
@@ -42,21 +41,21 @@ cbuffer LightBuffer : register(b2) {
 };
 
 struct InputType {
-    float4 position : POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
+  float4 position : POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float4 tangent : TANGENT;
 };
 
-struct OutputType
-{
-    float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
-    // How does the suffix modify the type?
-    float3 viewDir: TEXCOORD1;
-    float4 world_pos : TEXCOORD2;
-    float3 pixel_to_light_vec[L_NUM] : TEXCOORD3;
-    float4 lightview_position[L_NUM] : TEXCOORD11;
+struct OutputType {
+  float4 position : SV_POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  // How does the suffix modify the type?
+  float3 viewDir: TEXCOORD1;
+  float4 world_pos : TEXCOORD2;
+  float3 pixel_to_light_vec[L_NUM] : TEXCOORD3;
+  float4 lightview_position[L_NUM] : TEXCOORD11;
 };
 
 OutputType main(InputType input) {

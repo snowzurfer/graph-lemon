@@ -37,7 +37,9 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
   screen_height_(screenHeight),
   apply_post_processing_(false),
   prev_time_(0.f),
-  show_debug_imgui_(true) {
+  show_debug_imgui_(true),
+  use_wireframe_mode_(false),
+  prev_use_wireframe_mode_(false) {
   // Create Mesh object
   m_Mesh = new SphereMesh(m_Direct3D->GetDevice(), L"../res/DefaultDiffuse.png");
   Texture::Inst()->LoadTexture(m_Direct3D->GetDevice(),
@@ -91,9 +93,9 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
     // Set ambient for one light only 
     if (i == 0) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
-      lights_[i].SetPosition(-60.f, 70.f, 0.f, 0.f);
+      lights_[i].SetPosition(-60.f, 60.f, 0.f, 0.f);
       lights_[i].SetDiffuseColour(1.f, 1.f, 1.f, 1.f);
-      lights_[i].SetDirection(1.f, -0.3f, -0.1f);
+      lights_[i].SetDirection(1.f, 0.3f, -0.6f);
       lights_[i].set_spot_cutoff(static_cast<float>(M_PI_4));
       lights_[i].set_spot_exponent(30.f);
       lights_[i].set_active(true);
@@ -105,7 +107,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       lights_[i].SetDirection(1.f, 0.f, 0.6f);
       lights_[i].set_spot_cutoff(static_cast<float>(M_PI_4));
       lights_[i].set_spot_exponent(30.f);
-      lights_[i].set_active(true);
+      //lights_[i].set_active(true);
     }
     if (i == 2) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
@@ -197,7 +199,7 @@ Lab3::~Lab3() {
     delete buf_manager_;
     buf_manager_ = nullptr;
   }
-  
+
   if (waves_shader_ != nullptr) {
     delete waves_shader_;
     waves_shader_ = nullptr;
@@ -221,11 +223,20 @@ bool Lab3::Frame() {
     return false;
   }
   
-  ImGui::SetNextWindowSize(ImVec2(400,200));
+  ImGui::SetNextWindowSize(ImVec2(500,200));
   ImGui::Begin("Debug Tools", &show_debug_imgui_);
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
     1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  ImGui::Checkbox("Wireframe mode", &use_wireframe_mode_);
+  if (use_wireframe_mode_ != prev_use_wireframe_mode_) {
+    m_Direct3D->ToggleWireFrame();
 
+    prev_use_wireframe_mode_ = use_wireframe_mode_;
+  }
+  ImGui::SliderFloat("Tessellation factor", &renderer_->tessellation_value,
+    1.f, 10.f);
+  ImGui::SliderFloat("Tessellation distance", &renderer_->tessellation_distance,
+    1.f, 300.f);
 
   // Update camera
   m_Camera->Update();
@@ -241,12 +252,16 @@ bool Lab3::Frame() {
       ));
   }
 
+
   // Render the graphics.
   result = Render();
   if (!result) {
     return false;
   }
 
+  if(renderer_->IsChangeTessellationNecessary()) {
+    renderer_->UpdateTessellation(m_Direct3D->GetDeviceContext());
+  }
   // Increment the time counter
   prev_time_ += m_Timer->GetTime();
 

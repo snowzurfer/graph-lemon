@@ -561,5 +561,10 @@ void D3D::TurnOffWireframe() {
 }
 
 void D3D::SetDefaultRasterizerState() {
+  if (wireframe_enabled_) {
+    m_deviceContext->RSSetState(m_rasterStateWF);
+  }
+  else {
     m_deviceContext->RSSetState(m_rasterState);
+  }
 }

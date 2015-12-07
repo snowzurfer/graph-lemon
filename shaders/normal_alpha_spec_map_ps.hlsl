@@ -90,7 +90,6 @@ float4 main(InputType input) : SV_TARGET {
   float sampled_alpha = texture_alpha.Sample(SampleType, input.tex).x; 
   // Sample spec from spec map, where the w component is the shininess
   float4 sampled_spec = texture_spec.Sample(SampleType, input.tex); 
-
   // Calculate the global constant ambient contribution
   ambient_global_colour *= sampled_diffuse * mat.ambient;
 
@@ -130,7 +129,7 @@ float4 main(InputType input) : SV_TARGET {
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
-      calc_light_dir = input.tangent_light_dir[i];
+      calc_light_dir = normalize(input.tangent_light_dir[i]);
 
       // Calculate the amount of light on this pixel.
       light_intensity = saturate(dot(sampled_normal, -calc_light_dir));
@@ -169,7 +168,7 @@ float4 main(InputType input) : SV_TARGET {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel, in tangent space
           float cos_directions = max(dot(calc_light_dir, 
-            input.tangent_light_dir[i]), 0);
+            normalize(input.tangent_light_dir[i])), 0);
 
 
 
@@ -246,11 +245,11 @@ float4 main(InputType input) : SV_TARGET {
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
       float specular_intensity = pow(saturate(dot(reflection, 
-        input.tangent_view_dir)), mat.shininess * sampled_spec.w);
+        normalize(input.tangent_view_dir))), mat.shininess * sampled_spec.w);
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = saturate(specular_intensity * 
-        lights[i].specular * mat.specular * sampled_spec);
+        lights[i].specular * sampled_spec * sampled_diffuse);
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor
@@ -264,7 +263,7 @@ float4 main(InputType input) : SV_TARGET {
 
   // Add the ambient component to the diffuse to obtain the outpu colour
   colour = saturate(float4(ambient_global_colour.xyz + 
-     total_light_contribution.xyz, sampled_alpha));
+    total_light_contribution.xyz, sampled_alpha));
   //colour = float4(saturate((sampled_normal + 1 ) * 0.5), 1.f);
 
   return colour;

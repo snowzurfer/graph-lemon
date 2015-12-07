@@ -85,7 +85,6 @@ float4 main(InputType input) : SV_TARGET {
   // Sample normal from normal map
   float3 sampled_normal = (2.f * texture_normal.Sample(SampleType, input.tex).xyz) - 1.f;
   sampled_normal = normalize(sampled_normal);
-
   // Calculate the global constant ambient contribution
   ambient_global_colour *= sampled_diffuse * mat.ambient;
 
@@ -125,7 +124,7 @@ float4 main(InputType input) : SV_TARGET {
     // Determine the type of light
     if (lights[i].position.w > 0.f) { // Directional
       // Set the calculated light direction
-      calc_light_dir = input.tangent_light_dir[i];
+      calc_light_dir = normalize(input.tangent_light_dir[i]);
       //calc_light_dir = lights[i].direction.xyz;
 
       // Calculate the amount of light on this pixel.
@@ -167,7 +166,7 @@ float4 main(InputType input) : SV_TARGET {
           // Calculate the cosine of the angle between the direction of the light
           // and the vector from the light to the pixel, in tangent space
           float cos_directions = max(dot(calc_light_dir, 
-            input.tangent_light_dir[i]), 0);
+            normalize(input.tangent_light_dir[i])), 0);
 
 
 
@@ -237,7 +236,6 @@ float4 main(InputType input) : SV_TARGET {
       // Add the diffuse colour contribution
       final_diff_contribution = saturate(lights[i].diffuse * light_intensity *
         sampled_diffuse * mat.diffuse);
-
       // Calculate the reflection vector based on the light intensity, the
       // normal vector and the light direction
       float3 reflection = reflect(calc_light_dir.xyz, sampled_normal);
@@ -245,7 +243,7 @@ float4 main(InputType input) : SV_TARGET {
       // Determine the amount of specular light based on the reflection vector,
       // the viewing direction and the specular power
       float specular_intensity = pow(saturate(dot(reflection, 
-        input.tangent_view_dir)), mat.shininess);
+        normalize(input.tangent_view_dir))), mat.shininess);
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = saturate(specular_intensity * 

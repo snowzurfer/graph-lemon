@@ -55,7 +55,7 @@ BaseShader::~BaseShader()
   }
 }
 
-void BaseShader::loadVertexShader(WCHAR* filename, ID3D11VertexShader *shader) {
+void BaseShader::loadVertexShader(WCHAR* filename, ID3D11VertexShader **shader) {
   HRESULT result;
   ID3DBlob* errorMessage;
   ID3DBlob* vertexShaderBuffer;
@@ -82,7 +82,7 @@ void BaseShader::loadVertexShader(WCHAR* filename, ID3D11VertexShader *shader) {
   }
 
   // Create the vertex shader from the buffer.
-  result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &shader);
+  result = m_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &(*shader));
   if (FAILED(result))
   {
     int lol = 0;

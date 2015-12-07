@@ -24,28 +24,28 @@ struct LightType {
   matrix proj_matrix;
 };
 
-cbuffer MatrixBuffer : register(cb0) {
+cbuffer MatrixBuffer : register(b0) {
   matrix worldMatrix;
   matrix viewMatrix;
   matrix projectionMatrix;
 
 };
 
-cbuffer CamBuffer : register(cb1) {
+cbuffer CamBuffer : register(b1) {
   float3 camPos;
   float padding;
 };
 
 // Const buffer for lights
-cbuffer LightBuffer : register(cb2) {
+cbuffer LightBuffer : register(b2) {
   LightType lights[L_NUM];
 };
 
-struct InputType
-{
-    float4 position : POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
+struct InputType {
+  float4 position : POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float4 tangent : TANGENT;
 };
 
 struct OutputType

@@ -201,6 +201,9 @@
     <ClCompile Include="..\external\wictextureloader\WICTextureLoader.cpp">
       <Filter>Source Files\System\wicdtextureloader</Filter>
     </ClCompile>
+    <ClCompile Include="normal_spec_map_shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -373,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="..\external\wictextureloader\WICTextureLoader.h">
       <Filter>Source Files\System\wicdtextureloader</Filter>
+    </ClInclude>
+    <ClInclude Include="normal_spec_map_shader.h">
+      <Filter>Source Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

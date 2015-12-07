@@ -27,6 +27,8 @@ public:
 
   void Render(D3D *d3d, Camera *cam, std::vector<Light> *lights);
 
+  void UpdateTessellation(ID3D11DeviceContext* deviceContext);
+
 private:
 
   // Render the scene to a texture target

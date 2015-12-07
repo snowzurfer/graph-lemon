@@ -238,7 +238,7 @@ float4 main(InputType input) : SV_TARGET {
 
       // Calculate the colour of the specular, diminished by the falloff factor
       final_spec_contribution = saturate(specular_intensity * 
-        lights[i].specular * mat.specular * sampled_spec );
+        lights[i].specular * sampled_spec );
      
       // Add specular and diffuse to the total contribution of the light also
       // accounting for the falloff factor

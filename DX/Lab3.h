@@ -73,6 +73,9 @@ private:
   float prev_time_;
 
   bool show_debug_imgui_;
+
+  bool use_wireframe_mode_;
+  bool prev_use_wireframe_mode_;
 };
 
 #endif

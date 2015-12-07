@@ -70,11 +70,11 @@ struct OutputType {
 // UV space and therefore y is positive downward.
 // Alternatively you can set the output topology of the hull shader to cw instead of ccw (or vice versa).
 float2 interpolate2D(const float2 v0, const float2 v1, float2 v2, const float3 uvw) {
-  return float2(uvw.x * v0 + -uvw.y * v1 + -uvw.z * v2);
+  return float2(uvw.x * v0 + uvw.y * v1 + uvw.z * v2);
 }
 
 float3 interpolate3D(const float3 v0, const float3 v1, const float3 v2, const float3 uvw) {
-  return float3(uvw.x * v0 + -uvw.y * v1 + -uvw.z * v2);
+  return float3(uvw.x * v0 + uvw.y * v1 + uvw.z * v2);
 }
 
 
@@ -95,7 +95,7 @@ OutputType main(ConstantOutputType input_const, float3 uvwCoord : SV_DomainLocat
     patch[2].normal.xyz, uvwCoord);
   input.tangent.xyz = interpolate3D(patch[0].tangent.xyz, patch[1].tangent.xyz,
     patch[2].tangent.xyz, uvwCoord);
-  input.tangent.w = patch[0].tangent.w;
+  input.tangent.w = patch[1].tangent.w;
  
   output.tangent = normalize(input.tangent.xyz);
 

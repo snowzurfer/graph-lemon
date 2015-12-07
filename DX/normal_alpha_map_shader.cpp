@@ -75,7 +75,7 @@ void NormalAlphaMapShader::InitShader(sz::ConstBufManager &buf_man,
 
   // Load (+ compile) shader files
   loadVertexShader(polygon_layout, 4, L"../shaders/normal_alpha_map_vs.hlsl");
-  loadVertexShader(L"../shaders/tessellation_vs.hlsl", vertexshader_tessellation);
+  loadVertexShader(L"../shaders/tessellation_vs.hlsl", &vertexshader_tessellation);
   loadDomainShader(L"../shaders/normal_map_ds.hlsl");
   loadHullShader(L"../shaders/tessellation_hs.hlsl");
   loadPixelShader(L"../shaders/normal_alpha_map_ps.hlsl");
@@ -111,34 +111,6 @@ void NormalAlphaMapShader::InitShader(sz::ConstBufManager &buf_man,
   // Create the texture sampler state.
   m_device->CreateSamplerState(&samplerDesc, &m_sampleState);
 
-  // Setup light buffer
-  // Setup the description of the light dynamic constant buffer that is in the pixel shader.
-  // Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-  lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  lightBufferDesc.ByteWidth = sizeof(sz::LightBufferType) * lights_num;
-  lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  lightBufferDesc.MiscFlags = 0;
-  lightBufferDesc.StructureByteStride = 0;
-
-  // Create the constant buffer pointer so we can access the vertex shader constant 
-  // buffer from within this class.
-  m_lightBuffer = buf_man.CreateD3D11ConstBuffer("scene_lights_buffer",
-    lightBufferDesc, m_device);
-  assert(m_lightBuffer != nullptr);
-
-  // Setup cam buffer
-  camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  camBufferDesc.ByteWidth = sizeof(sz::CamBufferType);
-  camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  camBufferDesc.MiscFlags = 0;
-  camBufferDesc.StructureByteStride = 0;
-
-  // Create the constant buffer pointer so we can access the vertex shader constant 
-  // buffer from within this class.
-  m_camBuffer = buf_man.CreateD3D11ConstBuffer("scene_cam_buffer",
-    camBufferDesc, m_device);
-  assert(m_camBuffer != nullptr);
 
   // Create the constant buffer for materials
   D3D11_BUFFER_DESC mat_buff_desc;
@@ -278,16 +250,6 @@ void NormalAlphaMapShader::SetShaderFrameParameters(
   deviceContext->VSSetConstantBuffers(2, 1, &m_lightBuffer);
   deviceContext->DSSetConstantBuffers(2, 1, &m_camBuffer);
 
-  // Send camera data to vertex shader
-  result = deviceContext->Map(m_camBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,
-    &mapped_resource);
-  camPtr = (sz::CamBufferType*)mapped_resource.pData;
-  camPtr->camPos = cam->GetPosition();
-  deviceContext->Unmap(m_camBuffer, 0);
-  bufferNumber = 1;
-  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
-  deviceContext->DSSetConstantBuffers(bufferNumber, 1, &m_camBuffer);
-   
 }
 
   void NormalAlphaMapShader::Render(ID3D11DeviceContext* deviceContext,

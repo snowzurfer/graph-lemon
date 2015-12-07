@@ -41,11 +41,11 @@ cbuffer LightBuffer : register(b2) {
   LightType lights[L_NUM];
 };
 
-struct InputType
-{
-    float4 position : POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
+struct InputType {
+  float4 position : POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float4 tangent : TANGENT;
 };
 
 struct OutputType

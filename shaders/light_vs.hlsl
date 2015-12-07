@@ -32,7 +32,9 @@ cbuffer MatrixBuffer : register(b0) {
 };
 
 cbuffer CamBuffer : register(b1) {
-  float3 camPos;
+  float camPos_x;
+  float camPos_y;
+  float camPos_z;
   float padding;
 };
 
@@ -42,9 +44,10 @@ cbuffer LightBuffer : register(b2) {
 };
 
 struct InputType {
-    float4 position : POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
+  float4 position : POSITION;
+  float2 tex : TEXCOORD0;
+  float3 normal : NORMAL;
+  float4 tangent : TANGENT;
 };
 
 struct OutputType {
@@ -79,7 +82,7 @@ OutputType main(InputType input) {
     
     // Determine the viewing direction based on the position of the camera and
     // the world position of the vertex, and then normalise it
-    output.viewDir = normalize(camPos.xyz - world_pos.xyz);
+    output.viewDir = normalize(float3(camPos_x, camPos_y, camPos_z) - world_pos.xyz);
     
     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

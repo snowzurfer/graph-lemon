@@ -24,9 +24,14 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   const float scr_depth, const float scr_near, ID3D11Device* device,
   HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
   const size_t lights_num) :
+  tessellation_value(1.f),
+  tessellation_distance(100.f),
   meshes_by_material_(),
   use_post_process_(false),
   post_processer_(nullptr),
+  tessellate_check_(false),
+  prev_tessellate_check_value_(false),
+  tessellate_(false),
   models_(),
   render_target_main_(nullptr),
   render_target_depth_(nullptr),
@@ -38,7 +43,8 @@ Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
   sha_man_(sha_man),
   buf_man_(buf_man),
   light_buff_(nullptr),
-  camera_buff_(nullptr)
+  camera_buff_(nullptr),
+  tessellation_buf_(nullptr)
 {
   // Create render targets 
   render_target_main_ = new RenderTexture(device,
@@ -202,6 +208,11 @@ void Renderer::RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
 
   d3d->TurnZBufferOff();
 
+  bool wireframe_enabled = d3d->wireframe_enabled();
+  if (wireframe_enabled) {
+    d3d->ToggleWireFrame();
+  }
+
   render_target_main_mat_->diffuse_texname = source.name();
   render_target_main_mat_->diffuse_texname_crc =
     abfw::CRC::GetICRC(render_target_main_mat_->diffuse_texname.c_str());
@@ -218,6 +229,9 @@ void Renderer::RenderToBackBuffer(const RenderTexture &source, D3D *d3d,
   }
 
   d3d->TurnZBufferOn();
+  if (wireframe_enabled) {
+    d3d->ToggleWireFrame();
+  }
 
   texture_shader->CleanupTextures(d3d->GetDeviceContext());
 }
@@ -226,6 +240,7 @@ void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
     size_t lights_num) {
   D3D11_BUFFER_DESC lightBufferDesc;
   D3D11_BUFFER_DESC camBufferDesc;
+  D3D11_BUFFER_DESC tessellation_buffer_desc;
 
   // Setup light buffer
   // Setup the description of the light dynamic constant buffer that is in the pixel shader.
@@ -247,6 +262,7 @@ void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
   camBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
   camBufferDesc.ByteWidth = sizeof(sz::CamBufferType);
   camBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  camBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   camBufferDesc.MiscFlags = 0;
   camBufferDesc.StructureByteStride = 0;
 
@@ -256,6 +272,19 @@ void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
     camBufferDesc, dev);
   assert(camera_buff_ != nullptr);
 
+  // Setup tessellation buffer
+  tessellation_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+  tessellation_buffer_desc.ByteWidth = sizeof(sz::TessellationFactorBufferType);
+  tessellation_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  tessellation_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  tessellation_buffer_desc.MiscFlags = 0;
+  tessellation_buffer_desc.StructureByteStride = 0;
+
+  // Create the constant buffer pointer so we can access the vertex shader constant 
+  // buffer from within this class.
+  tessellation_buf_ = buf_man->CreateD3D11ConstBuffer("tessellation_buffer",
+    tessellation_buffer_desc, dev);
+  assert(tessellation_buf_ != nullptr);
 }
 
 void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
@@ -292,13 +321,16 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   deviceContext->VSSetConstantBuffers(2, 1, &light_buff_);
   deviceContext->DSSetConstantBuffers(2, 1, &light_buff_);
 
-  // Set shader resources for shadow maps
-  for (size_t i = 0; i < kNumLights; ++i) {
-    ID3D11ShaderResourceView * texture = 
-      Texture::Inst()->GetTexture(render_targets_depth_[i]->name_crc());
-    deviceContext->PSSetShaderResources(4 + i, 1, &texture);
-  }
 
+  // Tessellation buffer
+  result = deviceContext->Map(tessellation_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mapped_resource);
+  sz::TessellationFactorBufferType *tes_ptr =
+    (sz::TessellationFactorBufferType *)mapped_resource.pData;
+  tes_ptr->max_tessellation_factor = tessellation_value;
+  tes_ptr->tessellation_distance = tessellation_distance;
+  deviceContext->Unmap(tessellation_buf_, 0);
+  
   // Send camera data to vertex shader
   result = deviceContext->Map(camera_buff_, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
@@ -308,6 +340,15 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   bufferNumber = 1;
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &camera_buff_);
   deviceContext->DSSetConstantBuffers(bufferNumber, 1, &camera_buff_);
+  deviceContext->HSSetConstantBuffers(0, 1, &camera_buff_);
+  deviceContext->HSSetConstantBuffers(1, 1, &tessellation_buf_);
+
+  // Set shader resources for shadow maps
+  for (size_t i = 0; i < kNumLights; ++i) {
+    ID3D11ShaderResourceView * texture = 
+      Texture::Inst()->GetTexture(render_targets_depth_[i]->name_crc());
+    deviceContext->PSSetShaderResources(4 + i, 1, &texture);
+  }
 
 }
 

@@ -60,6 +60,12 @@ struct MaterialBufferType {
   int illum;
 };
 
+struct TessellationFactorBufferType {
+  float max_tessellation_factor;
+  float tessellation_distance;
+  XMFLOAT2 padding;
+};
+
 }
 
 #endif
