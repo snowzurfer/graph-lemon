@@ -7,7 +7,8 @@
 
 LightShader::LightShader(ID3D11Device* device, HWND hwnd, 
   sz::ConstBufManager &buf_man, unsigned int lights_num) : 
-    BaseShader(device, hwnd), material_buf_(nullptr) {
+    BaseShader(device, hwnd), material_buf_(nullptr),
+    vertexshader_waves_(nullptr) {
   InitShader(buf_man, L"../shaders/light_vs.hlsl", 
     L"../shaders/light_ps.hlsl", L"../shaders/tessellation_hs.hlsl",
     L"../shaders/light_ds.hlsl", lights_num);
@@ -30,10 +31,27 @@ LightShader::~LightShader()
     m_layout = 0;
   }
 
+  if (vertexshader_waves_ != nullptr) {
+    vertexshader_waves_->Release();
+    vertexshader_waves_ = nullptr;
+  }
+
   //Release base shader components
   BaseShader::~BaseShader();
 }
 
+void LightShader::ActivateWavesDeformation(ID3D11DeviceContext* deviceContext) {
+  // Set new vertex shader and activate tessellation
+  m_vertexShader = vertexshader_waves_;
+
+  // Also deactivate tessellation
+  tessellate_ = false;
+}
+
+void LightShader::DeactivateWavesDeformation(ID3D11DeviceContext* deviceContext) {
+  // Set new vertex shader and deactivate tessellation
+  m_vertexShader = vertexshader_standard;
+}
 
 void LightShader::InitShader(sz::ConstBufManager &buf_man, 
   WCHAR* vsFilename, WCHAR* psFilename, 
@@ -81,6 +99,7 @@ void LightShader::InitShader(sz::ConstBufManager &buf_man,
   // Load (+ compile) shader files
   loadVertexShader(polygon_layout, 4, vsFilename);
   loadVertexShader(L"../shaders/tessellation_vs.hlsl", &vertexshader_tessellation);
+  loadVertexShader(L"../shaders/light_wave_vs.hlsl", &vertexshader_waves_);
   loadDomainShader(dsFilename);
   loadHullShader(hsFilename);
   loadPixelShader(psFilename);

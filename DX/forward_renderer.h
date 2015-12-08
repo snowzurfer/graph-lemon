@@ -20,7 +20,7 @@ public:
   ForwardRenderer(const unsigned int scr_height, const unsigned int scr_width,
     const float scr_depth, const float scr_near, ID3D11Device* device,
     HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
-    const size_t lights_num);
+    const size_t lights_num, const class Timer &timer);
 
   // Dtor
   ~ForwardRenderer() {};
@@ -28,6 +28,7 @@ public:
   void Render(D3D *d3d, Camera *cam, std::vector<Light> *lights);
 
   void UpdateTessellation(ID3D11DeviceContext* deviceContext);
+  void UpdateVertexManipulation(ID3D11DeviceContext *deviceContext);
 
 private:
 

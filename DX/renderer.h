@@ -20,6 +20,7 @@ class Camera;
 struct ID3D11Device;
 class Light;
 class Model;
+class Timer;
 namespace sz {
   class ConstBufManager;
   class ShaderManager;
@@ -34,7 +35,7 @@ public:
   Renderer(const unsigned int scr_height, const unsigned int scr_width,
     const float scr_depth, const float scr_near, ID3D11Device* device,
     HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
-    const size_t lights_num);
+    const size_t lights_num, const Timer &timer);
 
   // Dtor
   virtual ~Renderer();
@@ -49,14 +50,19 @@ public:
 
   // Called when it's necessary to switch to using tessellation
   virtual void UpdateTessellation(ID3D11DeviceContext* deviceContext) {};
+  virtual void UpdateVertexManipulation(ID3D11DeviceContext *deviceContext) {};
   inline bool IsChangeTessellationNecessary() const {
     return prev_tessellate_check_value_ != tessellate_check_;
   }
+  inline bool IsChangeWavesNecessary() const {
+    return  prev_vertex_manip_check_value_ != vertex_manip_check_;
+  }
 
-
+  // Parameters which can be set by the user via ImGui
   float tessellation_value;
   float tessellation_distance;
-
+  float waves_amplitude;
+  float waves_frequency;
 protected:
   // Used to batch render by material
   typedef std::map<UInt32, std::pair<const Material *, std::vector<BaseMesh *>>>
@@ -73,6 +79,11 @@ protected:
   bool tessellate_check_;
   bool prev_tessellate_check_value_;
   bool tessellate_;
+
+  // Whether to show vertex manipulation 
+  bool vertex_manip_check_;
+  bool prev_vertex_manip_check_value_;
+  bool manip_vertices_;
 
   // Models batch meshes by material internally
   std::vector<Model *> models_;
@@ -93,6 +104,10 @@ protected:
   ID3D11Buffer* light_buff_;
   ID3D11Buffer* camera_buff_;
   ID3D11Buffer* tessellation_buf_;
+  ID3D11Buffer* time_buf_;
+
+  // Reference to the app timer
+  const Timer &timer_;
 
   // Render to the back buffer from a source render target
   void RenderToBackBuffer(const RenderTexture &source, D3D *d3d,

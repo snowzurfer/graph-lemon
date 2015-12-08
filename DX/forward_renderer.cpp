@@ -14,6 +14,7 @@
 #include <cassert>
 #include <imgui.h>
 #include "gaussian_blur.h"
+#include "Timer.h"
 
 namespace sz {
 
@@ -21,9 +22,9 @@ ForwardRenderer::ForwardRenderer(const unsigned int scr_height,
   const unsigned int scr_width,
   const float scr_depth, const float scr_near, ID3D11Device* device,
   HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
-  const size_t lights_num) :
+  const size_t lights_num, const Timer &timer) :
   Renderer(scr_height, scr_width, scr_depth, scr_near, device, hwnd, buf_man,
-  sha_man, lights_num)
+  sha_man, lights_num, timer)
 {
 }
 
@@ -40,6 +41,7 @@ void ForwardRenderer::Render(D3D *d3d, Camera *cam,
   RenderToTexture(*render_target_main_, d3d, cam, lights);
 
   ImGui::Checkbox("Apply post processing", &use_post_process_);
+  ImGui::Checkbox("Apply vertex manipulation", &vertex_manip_check_);
   ImGui::Checkbox("Apply tessellation", &tessellate_check_);
 
   if (use_post_process_) {
@@ -82,7 +84,6 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
   d3d->GetWorldMatrix(world_matrix);
   cam->GetViewMatrix(view_matrix);
   projection_matrix = target.GetProjectionMatrix();
-
 
   XMMATRIX model_transform = XMMatrixScaling(0.1f, 0.1f, 0.1f) /**
     XMMatrixTranslation(10.f, -20.f, 0.f)*/;
@@ -164,11 +165,31 @@ void ForwardRenderer::UpdateTessellation(ID3D11DeviceContext* deviceContext) {
   if (prev_tessellate_check_value_ != tessellate_check_) {
     tessellate_ = tessellate_check_;
     prev_tessellate_check_value_ = tessellate_;
+    if (tessellate_check_ == true) {
+      vertex_manip_check_ = false;
+      prev_vertex_manip_check_value_ = false;
+    }
 
     models_[0]->SetTessellation(deviceContext, sha_man_, tessellate_);
   }
 }
 
+void ForwardRenderer::UpdateVertexManipulation(ID3D11DeviceContext *deviceContext) {
+  if (prev_vertex_manip_check_value_ != vertex_manip_check_) {
+    manip_vertices_ = vertex_manip_check_;
+    prev_vertex_manip_check_value_ = manip_vertices_;
+    if (vertex_manip_check_ == true) {
+      tessellate_check_ = false;
+      prev_tessellate_check_value_ = false;
+      tessellate_ = false;
+    
+      models_[0]->SetTessellation(deviceContext, sha_man_, tessellate_);
+    }
+
+    sha_man_->SetVertexManipulation(deviceContext, manip_vertices_);
+  }
+
+}
 void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   Light *light) {
   target.SetRenderTarget(d3d->GetDeviceContext());

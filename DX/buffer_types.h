@@ -66,6 +66,13 @@ struct TessellationFactorBufferType {
   XMFLOAT2 padding;
 };
 
+struct TimeBufferType {
+  float time;
+  float amplitude;
+  float speed;
+  float padding;
+};
+
 }
 
 #endif

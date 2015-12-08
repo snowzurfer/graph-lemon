@@ -254,6 +254,7 @@ float4 main(InputType input) : SV_TARGET {
 
   // Add the ambient component to the diffuse to obtain the outpu colour
   colour = saturate(ambient_global_colour + total_light_contribution);
+  //colour = float4(1.f, 1.f, 0.f, 1.f);
 
   return colour;
 }

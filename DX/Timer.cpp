@@ -41,6 +41,14 @@ void Timer::Frame()
   return;
 }
 
+float Timer::GetCurrTime() const {
+  INT64 currentTime;
+
+  // Query the current time.
+  QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
+
+  return (float)currentTime;
+}
 
 float Timer::GetTime()
 {

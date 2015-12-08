@@ -10,6 +10,16 @@
 #include <d3d11.h>
 
 BaseShader::BaseShader(ID3D11Device* device, HWND hwnd) :
+  m_vertexShader(nullptr),
+  vertexshader_standard(nullptr),
+  vertexshader_tessellation(nullptr),
+  m_pixelShader(nullptr),
+  m_hullShader(nullptr),
+  m_domainShader(nullptr),
+  m_geometryShader(nullptr),
+  m_layout(nullptr),
+  m_matrixBuffer(nullptr),
+  m_sampleState(nullptr),
   tessellate_(false) {
   m_device = device;
   m_hwnd = hwnd;
@@ -27,10 +37,20 @@ BaseShader::~BaseShader()
   }
 
   // Release the vertex shader.
-  if (m_vertexShader)
+  //if (m_vertexShader)
+  //{
+  //  m_vertexShader->Release();
+  //  m_vertexShader = 0;
+  //}
+  if (vertexshader_standard)
   {
-    m_vertexShader->Release();
-    m_vertexShader = 0;
+    vertexshader_standard->Release();
+    vertexshader_standard = 0;
+  }
+  if (vertexshader_tessellation)
+  {
+    vertexshader_tessellation->Release();
+    vertexshader_tessellation = 0;
   }
 
   // Release the hull shader.
@@ -344,6 +364,7 @@ void BaseShader::DeactivateTessellation(ID3D11DeviceContext* deviceContext) {
   
   tessellate_ = false;
 }
+
 
 void BaseShader::SetInputLayoutAndShaders(ID3D11DeviceContext* deviceContext) {
   // Set the vertex input layout.

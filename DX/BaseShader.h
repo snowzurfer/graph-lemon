@@ -56,6 +56,10 @@ public:
   void ActivateTessellation(ID3D11DeviceContext* deviceContext);
   void DeactivateTessellation(ID3D11DeviceContext* deviceContext);
 
+  // Activate waves deformation on this shader
+  virtual void ActivateWavesDeformation(ID3D11DeviceContext* deviceContext) {};
+  virtual void DeactivateWavesDeformation(ID3D11DeviceContext* deviceContext) {};
+
 protected:
   void InitShader(WCHAR*, WCHAR*) {};
   void ShutdownShader();

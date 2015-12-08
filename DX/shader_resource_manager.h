@@ -41,6 +41,9 @@ public:
   BaseShader *GetShader(const std::string &name);
 
   void CleanupShaderResources(ID3D11DeviceContext* deviceContext);
+  void SetVertexManipulation(ID3D11DeviceContext* deviceContext, bool manipulate);
+
+
   
 }; // class ShaderManager
 

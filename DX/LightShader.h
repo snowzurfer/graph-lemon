@@ -38,6 +38,9 @@ public:
     size_t index_start = 0,
     size_t base_vertex = 0);
 
+  void ActivateWavesDeformation(ID3D11DeviceContext* deviceContext);
+  void DeactivateWavesDeformation(ID3D11DeviceContext* deviceContext);
+
 private:
   void InitShader(sz::ConstBufManager &buf_man, WCHAR*, WCHAR*, WCHAR* = nullptr, WCHAR* = nullptr, 
     unsigned int lights_num = 0);
@@ -48,6 +51,8 @@ private:
   ID3D11Buffer* m_lightBuffer;
   ID3D11Buffer* m_camBuffer;
   ID3D11Buffer* material_buf_;
+  ID3D11VertexShader *vertexshader_waves_;
+
 };
 
 #endif

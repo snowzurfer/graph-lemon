@@ -13,6 +13,8 @@ public:
   void Frame();
 
   float GetTime();
+  
+  float GetCurrTime() const;
 
 private:
   INT64 m_frequency;

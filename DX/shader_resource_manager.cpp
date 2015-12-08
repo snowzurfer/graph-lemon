@@ -18,6 +18,20 @@ ShaderManager::~ShaderManager() {
   });
 }
 
+void ShaderManager::SetVertexManipulation(ID3D11DeviceContext* deviceContext,
+  bool manipulate) {
+  std::for_each(shaders_.begin(), shaders_.end(),
+    [&](std::pair<const std::string, BaseShader *> &n) {
+    if (manipulate) {
+      n.second->ActivateWavesDeformation(deviceContext);
+    }
+    else {
+      n.second->DeactivateWavesDeformation(deviceContext);
+    }
+  });
+
+}
+
 bool ShaderManager::AddShader(const std::string &name, BaseShader *s) {
   // If the name passed is faulted
   if (name == "") {

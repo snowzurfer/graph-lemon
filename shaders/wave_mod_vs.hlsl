@@ -77,8 +77,8 @@ OutputType main(InputType input)
     // Offset y position of the vertex based on a sine function
     input.position.y = amplitude * sin(speed * (input.position.x + time));
     // Update the normal at this point
-    input.normal.x = 1 - cos(speed * (input.position.x + time));
-    input.normal.y = abs(cos(speed * (input.position.x + time)));
+    input.normal.x = amplitude * (1 - cos(speed * (input.position.x + time)));
+    input.normal.y = amplitude * (abs(cos(speed * (input.position.x + time))));
 
     // Calculate the position of the vertex in world coordinates
     output.worldPos = mul(input.position, worldMatrix);

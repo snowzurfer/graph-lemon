@@ -107,7 +107,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
       lights_[i].SetDirection(1.f, 0.f, 0.6f);
       lights_[i].set_spot_cutoff(static_cast<float>(M_PI_4));
       lights_[i].set_spot_exponent(30.f);
-      //lights_[i].set_active(true);
+      lights_[i].set_active(true);
     }
     if (i == 2) {
       lights_[i].SetAmbientColour(0.1f, 0.1f, 0.1f, 1.f);
@@ -149,7 +149,7 @@ Lab3::Lab3(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight,
 
   renderer_ = new sz::ForwardRenderer(screenHeight, screenWidth,
     SCREEN_DEPTH, SCREEN_NEAR, m_Direct3D->GetDevice(),
-    hwnd, buf_manager_, sha_manager_, kNumLights);
+    hwnd, buf_manager_, sha_manager_, kNumLights, *m_Timer);
   //renderer_->AddMeshesAndMaterials(model_->meshes_, model_->materials_);
   renderer_->AddModel(model_);
   renderer_->AddMeshesAndMaterials(lights_pt_meshes_,
@@ -223,7 +223,7 @@ bool Lab3::Frame() {
     return false;
   }
   
-  ImGui::SetNextWindowSize(ImVec2(500,200));
+  ImGui::SetNextWindowSize(ImVec2(500,230));
   ImGui::Begin("Debug Tools", &show_debug_imgui_);
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
     1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -253,14 +253,23 @@ bool Lab3::Frame() {
   }
 
 
+  ImGui::SliderFloat("Wave amplitude", &renderer_->waves_amplitude,
+    1.f, 100.f);
+  ImGui::SliderFloat("Wave frequency", &renderer_->waves_frequency,
+    0.f, 1.f);
+
   // Render the graphics.
   result = Render();
   if (!result) {
     return false;
   }
+  
 
   if(renderer_->IsChangeTessellationNecessary()) {
     renderer_->UpdateTessellation(m_Direct3D->GetDeviceContext());
+  }
+  if(renderer_->IsChangeWavesNecessary()) {
+    renderer_->UpdateVertexManipulation(m_Direct3D->GetDeviceContext());
   }
   // Increment the time counter
   prev_time_ += m_Timer->GetTime();

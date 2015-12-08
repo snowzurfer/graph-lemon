@@ -17,34 +17,42 @@
 #include <string>
 #include "gaussian_blur.h"
 #include "Texture.h"
+#include "Timer.h"
 
 namespace sz {
 
-Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
-  const float scr_depth, const float scr_near, ID3D11Device* device,
-  HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
-  const size_t lights_num) :
-  tessellation_value(1.f),
-  tessellation_distance(100.f),
-  meshes_by_material_(),
-  use_post_process_(false),
-  post_processer_(nullptr),
-  tessellate_check_(false),
-  prev_tessellate_check_value_(false),
-  tessellate_(false),
-  models_(),
-  render_target_main_(nullptr),
-  render_target_depth_(nullptr),
-  render_targets_depth_(lights_num),
-  depth_target_w_(1024),
-  depth_target_h_(1024),
-  ortho_mesh_screen_(nullptr),
-  render_target_main_mat_(nullptr),
-  sha_man_(sha_man),
-  buf_man_(buf_man),
-  light_buff_(nullptr),
-  camera_buff_(nullptr),
-  tessellation_buf_(nullptr)
+  Renderer::Renderer(const unsigned int scr_height, const unsigned int scr_width,
+    const float scr_depth, const float scr_near, ID3D11Device* device,
+    HWND hwnd, ConstBufManager *buf_man, ShaderManager *sha_man,
+    const size_t lights_num, const Timer &timer) :
+    tessellation_value(1.f),
+    tessellation_distance(100.f),
+    waves_amplitude(1.f),
+    waves_frequency(1.f),
+    meshes_by_material_(),
+    use_post_process_(false),
+    post_processer_(nullptr),
+    tessellate_check_(false),
+    prev_tessellate_check_value_(false),
+    tessellate_(false),
+    vertex_manip_check_(false),
+    prev_vertex_manip_check_value_(false),
+    manip_vertices_(false),
+    models_(),
+    render_target_main_(nullptr),
+    render_target_depth_(nullptr),
+    render_targets_depth_(lights_num),
+    depth_target_w_(1024),
+    depth_target_h_(1024),
+    ortho_mesh_screen_(nullptr),
+    render_target_main_mat_(nullptr),
+    sha_man_(sha_man),
+    buf_man_(buf_man),
+    light_buff_(nullptr),
+    camera_buff_(nullptr),
+    tessellation_buf_(nullptr),
+    time_buf_(nullptr),
+    timer_(timer)
 {
   // Create render targets 
   render_target_main_ = new RenderTexture(device,
@@ -241,6 +249,7 @@ void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
   D3D11_BUFFER_DESC lightBufferDesc;
   D3D11_BUFFER_DESC camBufferDesc;
   D3D11_BUFFER_DESC tessellation_buffer_desc;
+  D3D11_BUFFER_DESC time_buffer_desc;
 
   // Setup light buffer
   // Setup the description of the light dynamic constant buffer that is in the pixel shader.
@@ -285,6 +294,20 @@ void Renderer::SetupPerFrameBuffers(ID3D11Device *dev, ConstBufManager *buf_man,
   tessellation_buf_ = buf_man->CreateD3D11ConstBuffer("tessellation_buffer",
     tessellation_buffer_desc, dev);
   assert(tessellation_buf_ != nullptr);
+  
+  // Setup tessellation buffer
+  time_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+  time_buffer_desc.ByteWidth = sizeof(sz::TimeBufferType);
+  time_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  time_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  time_buffer_desc.MiscFlags = 0;
+  time_buffer_desc.StructureByteStride = 0;
+
+  // Create the constant buffer pointer so we can access the vertex shader constant 
+  // buffer from within this class.
+  time_buf_ = buf_man->CreateD3D11ConstBuffer("time_buffer",
+    time_buffer_desc, dev);
+  assert(time_buf_ != nullptr);
 }
 
 void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
@@ -331,7 +354,7 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   tes_ptr->tessellation_distance = tessellation_distance;
   deviceContext->Unmap(tessellation_buf_, 0);
   
-  // Send camera data to vertex shader
+  // Send camera data 
   result = deviceContext->Map(camera_buff_, 0, D3D11_MAP_WRITE_DISCARD, 0,
     &mapped_resource);
   camPtr = (sz::CamBufferType*)mapped_resource.pData;
@@ -343,13 +366,23 @@ void Renderer::SetFrameParameters(ID3D11DeviceContext* deviceContext,
   deviceContext->HSSetConstantBuffers(0, 1, &camera_buff_);
   deviceContext->HSSetConstantBuffers(1, 1, &tessellation_buf_);
 
+  // Time buffer
+  result = deviceContext->Map(time_buf_, 0, D3D11_MAP_WRITE_DISCARD, 0,
+    &mapped_resource);
+  sz::TimeBufferType  *time_ptr =
+    (sz::TimeBufferType*)mapped_resource.pData;
+  time_ptr->time = timer_.GetCurrTime() * 0.00001;
+  time_ptr->amplitude = waves_amplitude;
+  time_ptr->speed = waves_frequency;
+  deviceContext->Unmap(time_buf_, 0);
+  deviceContext->VSSetConstantBuffers(3, 1, &time_buf_);
+
   // Set shader resources for shadow maps
   for (size_t i = 0; i < kNumLights; ++i) {
     ID3D11ShaderResourceView * texture = 
       Texture::Inst()->GetTexture(render_targets_depth_[i]->name_crc());
     deviceContext->PSSetShaderResources(4 + i, 1, &texture);
   }
-
 }
 
 } // namespace sz
