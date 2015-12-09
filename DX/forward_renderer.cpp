@@ -15,6 +15,8 @@
 #include <imgui.h>
 #include "gaussian_blur.h"
 #include "Timer.h"
+#include <stack>
+#include <vector>
 
 namespace sz {
 
@@ -76,6 +78,7 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   XMMATRIX world_matrix, view_matrix, projection_matrix;
+  std::stack<size_t, std::vector<size_t>> alpha_blended_meshes;
 
   // Set per-frame shader paramters
   SetFrameParameters(d3d->GetDeviceContext(), *lights, cam);
@@ -101,13 +104,17 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
     for (auto map_pair : model->meshes_by_material()) {
       MatMeshPair &pair = map_pair.second;
 
+      if (pair.first->alpha_texname != "") {
+        continue;
+      }
+
       // Get the shader associated
       shader = sha_man_->GetShader(
         pair.first->shader_name);
       if (shader == nullptr) {
         continue;
       }
-      
+
       if (shader != prev_shader) {
         shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
         shader->SetSamplers(d3d->GetDeviceContext());
@@ -127,6 +134,42 @@ void ForwardRenderer::RenderToTexture(RenderTexture &target, D3D *d3d,
 
       prev_shader = shader;
     }
+    // Render alpha-mapped shapes
+    d3d->TurnOnAlphaBlending();
+    for (auto map_pair : model->meshes_by_material()) {
+      MatMeshPair &pair = map_pair.second;
+
+      if (pair.first->alpha_texname == "") {
+        continue;
+      }
+
+      // Get the shader associated
+      shader = sha_man_->GetShader(
+        pair.first->shader_name);
+      if (shader == nullptr) {
+        continue;
+      }
+
+      if (shader != prev_shader) {
+        shader->SetInputLayoutAndShaders(d3d->GetDeviceContext());
+        shader->SetSamplers(d3d->GetDeviceContext());
+      }
+      // Set the parameters for this shader
+      shader->SetShaderParameters(d3d->GetDeviceContext(),
+        model_transform, view_matrix, projection_matrix,
+        *(pair.first));
+      // Set DX shaders and input layout
+
+      // For all the meshes associated with it
+      for (BaseMesh *mesh : pair.second) {
+        shader->Render(d3d->GetDeviceContext(),
+          mesh->GetIndicesSize(), mesh->index_offset(),
+          mesh->vertex_offset());
+      }
+
+      prev_shader = shader;
+    }
+    d3d->TurnOffAlphaBlending();
   }
 
   // For all the meshes which do not belong to a model
@@ -224,8 +267,6 @@ void ForwardRenderer::RenderSceneDepthFromLight(RenderTexture &target, D3D *d3d,
   for (Model *model : models_) {
     model->SendData(d3d->GetDeviceContext());
 
-    // For all the meshes in the model
-    //std::stack<size_t> alpha_blended_meshes;
     // For all the entries in the map
     for (auto map_pair : model->meshes_by_material()) {
       MatMeshPair &pair = map_pair.second;

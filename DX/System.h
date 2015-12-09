@@ -6,7 +6,7 @@
 
 // INCLUDES 
 #include <windows.h>
-#include "Lab3.h"
+#include "MainApplication.h"
 #include "Input.h"
 
 class System
@@ -29,7 +29,7 @@ private:
   HINSTANCE m_hinstance;
   HWND m_hwnd;
   
-  Lab3* m_Application;
+  MainApplication* m_Application;
   Input m_Input;
 
 //Prototypes

@@ -24,7 +24,7 @@ System::System()
   InitializeWindows(screenWidth, screenHeight);
 
   // Create the application wrapper object.
-  m_Application = new Lab3(m_hinstance, m_hwnd, screenWidth, screenHeight, &m_Input);
+  m_Application = new MainApplication(m_hinstance, m_hwnd, screenWidth, screenHeight, &m_Input);
 
 }
 

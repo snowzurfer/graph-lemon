@@ -4,6 +4,8 @@
 #include "light.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <imgui.h>
+#include <cstdio>
 
 Light::Light() :
   m_ambientColour(0.f, 0.f, 0.f, 0.f),
@@ -21,6 +23,18 @@ Light::Light() :
   spot_cutoff_(static_cast<float>(M_PI)),
   spot_exponent_(1.f) {
 
+}
+
+void Light::UpdateFromGui(size_t light_num) {
+  char buf[25];
+  sprintf_s(buf, "Light number %d", light_num);
+  //if (ImGui::CollapsingHeader(buf)) {
+    //ImGui::SliderFloat("Light direction X", &this->m_direction.x);
+    //ImGui::SliderFloat("Light direction Y", &this->m_direction.y);
+    //ImGui::SliderFloat("Light direction Z", &this->m_direction.z);
+    ImGui::Checkbox("Light active", &this->active_);
+  
+  //}
 }
 
 void Light::GenerateViewMatrix() {

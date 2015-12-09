@@ -78,9 +78,6 @@
     <ClCompile Include="BaseApplication.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
-    <ClCompile Include="Lab1.cpp">
-      <Filter>Source Files\Applications</Filter>
-    </ClCompile>
     <ClCompile Include="ColourShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
@@ -119,12 +116,6 @@
     </ClCompile>
     <ClCompile Include="TextureShader.cpp">
       <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="Lab2.cpp">
-      <Filter>Source Files\Applications</Filter>
-    </ClCompile>
-    <ClCompile Include="Lab3.cpp">
-      <Filter>Source Files\Applications</Filter>
     </ClCompile>
     <ClCompile Include="LightShader.cpp">
       <Filter>Source Files\Shaders</Filter>
@@ -204,6 +195,9 @@
     <ClCompile Include="normal_spec_map_shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="MainApplication.cpp">
+      <Filter>Source Files\Applications</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -232,9 +226,6 @@
     </ClInclude>
     <ClInclude Include="TriangleMesh.h">
       <Filter>Source Files\Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Lab1.h">
-      <Filter>Source Files\Applications</Filter>
     </ClInclude>
     <ClInclude Include="ColourShader.h">
       <Filter>Source Files\Shaders</Filter>
@@ -274,12 +265,6 @@
     </ClInclude>
     <ClInclude Include="TextureShader.h">
       <Filter>Source Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Lab2.h">
-      <Filter>Source Files\Applications</Filter>
-    </ClInclude>
-    <ClInclude Include="Lab3.h">
-      <Filter>Source Files\Applications</Filter>
     </ClInclude>
     <ClInclude Include="LightShader.h">
       <Filter>Source Files\Shaders</Filter>
@@ -379,6 +364,9 @@
     </ClInclude>
     <ClInclude Include="normal_spec_map_shader.h">
       <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MainApplication.h">
+      <Filter>Source Files\Applications</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

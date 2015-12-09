@@ -25,6 +25,7 @@ public:
   void GenerateViewMatrix();
   void GenerateViewMatrixFromDirection();
   void GenerateProjectionMatrix(float, float);
+  void UpdateFromGui(size_t light_num);
 
   // Setters
   void SetAmbientColour(float, float, float, float);
