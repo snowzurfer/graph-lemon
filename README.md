@@ -35,3 +35,5 @@ Document explaining the software thoroughly [here]()
 * ImGui
 * Boost
 
+## Credits
+Many, many thanks to my dear friends and classmates Stefano Musumeci, Jiri Klic and Ade Ilori Cross and to my lecturer Paul Robertson.
