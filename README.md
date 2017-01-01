@@ -4,6 +4,8 @@ This software was developed as part of the coursework for the module
 _Graphics Programming with Shaders_ at the **University of Abertay Dundee**
 in my third year.
 
+Please visit http://albertotaiuti.com/graph_cw_dirx11.php for additional info on this project.
+
 ### Main Features
 * C++ 11
 * Use of DirectX 11.2
@@ -14,9 +16,6 @@ in my third year.
 * Shadow mapping
 * Normal, specular, and alpha mapping
 * Model loading from ad-hoc model format
-
-#### Screenshot
-![Screenshot software](http://url/screenshot-software.png "screenshot software")
 
 ## Installation
 1. Clone the repository
