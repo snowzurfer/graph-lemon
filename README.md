@@ -19,12 +19,9 @@ Please visit http://albertotaiuti.com/graph_cw_dirx11.php for additional info on
 
 ## Installation
 1. Clone the repository
-2. Download the textures and proprietary model file from [here]()
+2. Download the textures and proprietary model file from [here]() (*NOTE: Coming soon!*)
 3. Unzip the textures and model in the main folder of the solution
 4. Build and launch from VS2013
-
-## Documentation
-Document explaining the software thoroughly [here]()
 
 ## Third party libraries
 * DirectX 11
